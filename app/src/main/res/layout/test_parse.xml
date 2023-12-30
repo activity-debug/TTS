@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parser_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal">
+
+    <EditText
+        android:id="@+id/etParse"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:autofillHints="DATA"
+        android:ems="10"
+        android:hint="Parser"
+        android:inputType="text"
+        app:layout_constraintStart_toEndOf="@+id/etIdParse"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText,LabelFor" />
+
+    <Button
+        android:id="@+id/btnSetParse"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="SET"
+        app:layout_constraintStart_toEndOf="@+id/btnGetParse"
+        app:layout_constraintTop_toTopOf="@+id/btnGetParse"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btnGetParse"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etIdParse"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btnGenerate"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Generate"
+        app:layout_constraintStart_toEndOf="@+id/etParse"
+        app:layout_constraintTop_toTopOf="@+id/etParse"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/etIdParse"
+        android:layout_width="70sp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="ID"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
