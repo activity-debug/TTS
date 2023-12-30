@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/editContainer"
+    android:id="@+id/creator_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -24,8 +24,8 @@
         android:layout_marginTop="2dp"
         android:text="members"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/swDown"
-        app:layout_constraintTop_toTopOf="@+id/swDown" />
+        app:layout_constraintStart_toEndOf="@+id/swDown1"
+        app:layout_constraintTop_toTopOf="@+id/swDown1" />
 
     <TextView
         android:id="@+id/textView4"
@@ -61,7 +61,7 @@
         app:layout_constraintTop_toTopOf="@+id/etIdParser" />
 
     <EditText
-        android:id="@+id/etSoal"
+        android:id="@+id/etSoal1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -95,7 +95,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Switch
-        android:id="@+id/swRight"
+        android:id="@+id/swRight1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -105,12 +105,12 @@
         app:layout_constraintTop_toBottomOf="@+id/etIdSoal" />
 
     <Switch
-        android:id="@+id/swDown"
+        android:id="@+id/swDown1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Down"
-        app:layout_constraintStart_toEndOf="@+id/swRight"
-        app:layout_constraintTop_toTopOf="@+id/swRight" />
+        app:layout_constraintStart_toEndOf="@+id/swRight1"
+        app:layout_constraintTop_toTopOf="@+id/swRight1" />
 
     <Button
         android:id="@+id/btnSet"
@@ -122,7 +122,7 @@
         app:layout_constraintEnd_toStartOf="@+id/btnUnset"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/swRight" />
+        app:layout_constraintTop_toBottomOf="@+id/swRight1" />
 
     <TextView
         android:id="@+id/tvValueSet"

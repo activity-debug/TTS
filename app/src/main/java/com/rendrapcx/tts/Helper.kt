@@ -4,13 +4,12 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.Window
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.rendrapcx.tts.databinding.CustomDialog1Binding
 
 class Helper {
     fun Context.showToast(message: String? = null, short: Boolean = true) {
@@ -24,15 +23,13 @@ class Helper {
         ).show()
     }
 
-    fun Context.showSoftKeyboard(window: Window, view: View) {
-        if (view.requestFocus()) {
-            WindowCompat.getInsetsController(window, view).show(
-                WindowInsetsCompat.Type.ime()
-            )
-        }
+    fun showSoftKeyboard(window: Window, view: View) {
+        WindowCompat.getInsetsController(window, view).show(
+            WindowInsetsCompat.Type.ime()
+        )
     }
 
-    fun Context.alertDialog(context: Context, msg: String, title: String) {
+    fun alertDialog(context: Context, msg: String, title: String = "Information") {
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
             .setMessage(msg)
@@ -42,24 +39,21 @@ class Helper {
         dialog.show()
     }
 
-    fun Context.exitDialog(){
-        val builder = AlertDialog.Builder(this)
-        val customView = LayoutInflater.from(this).inflate(R.layout.custom_dialog_1, null)
-        builder.setView(customView)
+    fun Context.exitDialog(context: Context) {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = CustomDialog1Binding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
+
         dialog.setCancelable(false)
-        //dialog.window?.setBackgroundDrawable(ColorDrawable(Color.DKGRAY))
 
-        val btnOk = customView.findViewById<Button>(R.id.btnOK)
-        val btnCancel = customView.findViewById<Button>(R.id.btnCancel)
-
-        btnOk.setOnClickListener(){
-            Toast.makeText(this,"OKEH BYE!!", Toast.LENGTH_LONG).show()
+        binding.btnOK.setOnClickListener() {
+            Toast.makeText(this, "OKEH BYE!!", Toast.LENGTH_LONG).show()
             dialog.dismiss()
         }
 
-        btnCancel.setOnClickListener(){
-            Toast.makeText(this,"Nah gotu donk", Toast.LENGTH_LONG).show()
+        binding.btnCancel.setOnClickListener() {
+            Toast.makeText(this, "Nah gotu donk", Toast.LENGTH_LONG).show()
             dialog.dismiss()
         }
 

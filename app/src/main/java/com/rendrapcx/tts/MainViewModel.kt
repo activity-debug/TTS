@@ -10,10 +10,11 @@ data class Soal(var id : Int, var tanya: String, var jawab: String, var levelId:
 data class Part(var id: Int, var boxId: Int, var char: String, var direction: Track, var soalId: Int)
 
 class MainViewModel : ViewModel() {
-    var position = -1
-    private var selectedValue = MutableLiveData<String>()
+    var position = 0
+    var selectedValue = MutableLiveData<String>()
 
     var boxView = arrayListOf<TextView>()
+
 
     var level = Sample.levelList
     var soal = Sample.soalList
@@ -25,6 +26,12 @@ class MainViewModel : ViewModel() {
 
     fun currentValue(value: String){
         selectedValue.value = value
+    }
+
+    fun clearBoxViewValue(){
+        for (i in 0 until boxView.size){
+            boxView[i].text = ""
+        }
     }
 }
 
