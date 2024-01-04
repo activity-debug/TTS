@@ -1,67 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/inputSoalContainer"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    app:cardBackgroundColor="#F0F2F8"
+    app:cardCornerRadius="20dp">
 
-    <EditText
-        android:id="@+id/etIDSoal11"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:ems="10"
-        android:hint="ID"
-        android:inputType="text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/etTanya11"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="10dp"
-        android:ems="10"
-        android:hint="Tanya"
-        android:inputType="text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/etIDSoal11"
-        app:layout_constraintTop_toBottomOf="@+id/etIDSoal11" />
+        android:padding="10dp">
 
-    <EditText
-        android:id="@+id/etJawab11"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="10dp"
-        android:ems="10"
-        android:hint="Jawab"
-        android:inputType="text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/etTanya11"
-        app:layout_constraintTop_toBottomOf="@+id/etTanya11" />
+        <EditText
+            android:id="@+id/etNoInput"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:ems="10"
+            android:hint="NO"
+            android:inputType="number"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvIdInput" />
 
-    <Button
-        android:id="@+id/btnCancel11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Cancel"
-        app:layout_constraintEnd_toStartOf="@+id/btnOK11"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etJawab11" />
+        <EditText
+            android:id="@+id/etAskInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="10dp"
+            android:ems="10"
+            android:hint="Ask"
+            android:inputType="textAutoComplete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/etNoInput"
+            app:layout_constraintTop_toBottomOf="@+id/etNoInput" />
 
-    <Button
-        android:id="@+id/btnOK11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Update"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btnCancel11"
-        app:layout_constraintTop_toBottomOf="@+id/etJawab11" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <EditText
+            android:id="@+id/etAnswerInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="10dp"
+            android:ems="10"
+            android:hint="Answer"
+            android:inputType="textAutoComplete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/etAskInput"
+            app:layout_constraintTop_toBottomOf="@+id/etAskInput" />
+
+        <Button
+            android:id="@+id/btnCancelInput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Cancel"
+            app:layout_constraintEnd_toStartOf="@+id/btnUpdateInput"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/swAutoFill" />
+
+        <Button
+            android:id="@+id/btnUpdateInput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnCancelInput"
+            app:layout_constraintTop_toTopOf="@+id/btnCancelInput" />
+
+        <EditText
+            android:id="@+id/etDirectionInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:ems="10"
+            android:hint="HORIZONTAL"
+            android:inputType="text"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/etNoInput"
+            app:layout_constraintTop_toTopOf="@+id/etNoInput"
+            tools:ignore="HardcodedText" />
+
+        <Switch
+            android:id="@+id/swDirectionInput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toEndOf="@+id/etDirectionInput"
+            app:layout_constraintTop_toTopOf="@+id/etDirectionInput"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        <TextView
+            android:id="@+id/tvMemberInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="10dp"
+            android:text="tvAvailableMember"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/swAutoFill"
+            app:layout_constraintTop_toTopOf="@+id/swAutoFill" />
+
+        <Switch
+            android:id="@+id/swAutoFill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Auto Parts"
+            app:layout_constraintStart_toStartOf="@+id/etAnswerInput"
+            app:layout_constraintTop_toBottomOf="@+id/etAnswerInput" />
+
+        <TextView
+            android:id="@+id/tvIdInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="TextView"
+            android:textColor="#F8978E8E"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView16"
+            app:layout_constraintTop_toTopOf="@+id/textView16" />
+
+        <TextView
+            android:id="@+id/textView16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="ID: "
+            android:textColor="#F8978E8E"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

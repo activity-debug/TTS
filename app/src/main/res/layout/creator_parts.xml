@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8sp">
+
+
+    <TextView
+        android:id="@+id/panelQuestions"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:background="#3E8BC34A"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView12" />
+
+    <TextView
+        android:id="@+id/panelParts"
+        android:layout_width="match_parent"
+        android:layout_height="70sp"
+        android:background="#2A00BCD4"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView17" />
+
+    <TextView
+        android:id="@+id/tvDownAt"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:background="#03A9F4"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textView35"
+        app:layout_constraintTop_toBottomOf="@+id/textView35" />
+
+    <TextView
+        android:id="@+id/textView24"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:text="charAt"
+        app:layout_constraintStart_toStartOf="@+id/panelParts"
+        app:layout_constraintTop_toTopOf="@+id/panelParts" />
+
+    <TextView
+        android:id="@+id/textView22"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="char"
+        app:layout_constraintStart_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toTopOf="@+id/textView24" />
+
+    <TextView
+        android:id="@+id/textView26"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:text="Right"
+        app:layout_constraintStart_toEndOf="@+id/textView22"
+        app:layout_constraintTop_toTopOf="@+id/textView22" />
+
+    <Switch
+        android:id="@+id/swDOwn"
+        android:layout_width="wrap_content"
+        android:layout_height="40sp"
+        app:layout_constraintStart_toStartOf="@+id/textView28"
+        app:layout_constraintTop_toBottomOf="@+id/textView28"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <TextView
+        android:id="@+id/tvChar"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:background="#03A9F4"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textView22"
+        app:layout_constraintTop_toBottomOf="@+id/textView22"
+        tools:ignore="HardcodedText" />
+
+    <Switch
+        android:id="@+id/swRight"
+        android:layout_width="wrap_content"
+        android:layout_height="40sp"
+        android:checked="false"
+        app:layout_constraintStart_toStartOf="@+id/textView26"
+        app:layout_constraintTop_toBottomOf="@+id/textView26"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <TextView
+        android:id="@+id/tvRightAt"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:background="#03A9F4"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textView32"
+        app:layout_constraintTop_toBottomOf="@+id/textView32"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView32"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="idsAt"
+        app:layout_constraintStart_toEndOf="@+id/textView26"
+        app:layout_constraintTop_toTopOf="@+id/textView26"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView20"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:text="LevelAt: 1"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/panelParts"
+        app:layout_constraintTop_toTopOf="@+id/textView17" />
+
+    <TextView
+        android:id="@+id/textView28"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginStart="20dp"
+        android:text="Down"
+        app:layout_constraintStart_toEndOf="@+id/textView32"
+        app:layout_constraintTop_toTopOf="@+id/textView32"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/tvCharAt"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:background="#03A9F4"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textView24"
+        app:layout_constraintTop_toBottomOf="@+id/textView24"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView17"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Parts:"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/panelQuestions"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/etAnswer"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="1dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="5dp"
+        app:layout_constraintEnd_toEndOf="@+id/etAsk"
+        app:layout_constraintStart_toStartOf="@+id/etAsk"
+        app:layout_constraintTop_toBottomOf="@+id/etAsk"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Questions"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spItems"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/btnSwitchQuestion"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"
+        android:text="🔄"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@+id/panelQuestions"
+        app:layout_constraintTop_toTopOf="@+id/panelQuestions"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/etAsk"
+        android:layout_width="0dp"
+        android:layout_height="30sp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="10dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/etNo"
+        app:layout_constraintTop_toBottomOf="@+id/etDirection"
+        tools:ignore="HardcodedText" />
+
+
+    <TextView
+        android:id="@+id/panelInfo"
+        android:layout_width="match_parent"
+        android:layout_height="100sp"
+        android:background="#32FFEB3B"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="4dp"
+        android:text="INFO"
+        app:layout_constraintStart_toStartOf="@+id/panelInfo"
+        app:layout_constraintTop_toTopOf="@+id/panelInfo"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView34"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:gravity="end"
+        android:text="[ 1 ]"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/textView17"
+        app:layout_constraintTop_toTopOf="@+id/textView17"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView35"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="idsAt"
+        app:layout_constraintStart_toEndOf="@+id/textView28"
+        app:layout_constraintTop_toTopOf="@+id/textView28"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/tvLevelId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="0"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView12"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="Level ID: "
+        app:layout_constraintEnd_toStartOf="@+id/tvLevelId"
+        app:layout_constraintTop_toTopOf="@+id/tvLevelId"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/etDirection"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="1dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="5dp"
+        app:layout_constraintStart_toEndOf="@+id/etNo"
+        app:layout_constraintTop_toTopOf="@+id/etNo"
+        tools:ignore="HardcodedText" />
+
+    <Switch
+        android:id="@+id/swSoftKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Pads"
+        app:layout_constraintStart_toEndOf="@+id/btnResetInput"
+        app:layout_constraintTop_toTopOf="@+id/btnResetInput" />
+
+    <TextView
+        android:id="@+id/etNo"
+        android:layout_width="40sp"
+        android:layout_height="30sp"
+        android:layout_marginTop="8dp"
+        android:background="@color/white"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="@+id/etQuestId"
+        app:layout_constraintTop_toBottomOf="@+id/etQuestId" />
+
+    <TextView
+        android:id="@+id/etQuestId"
+        android:layout_width="0dp"
+        android:layout_height="30sp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="5dp"
+        app:layout_constraintEnd_toStartOf="@+id/btnNewQuest"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnNewQuest" />
+
+    <TextView
+        android:id="@+id/btnNewQuest"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"
+        android:text="📝"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toStartOf="@+id/btnSwitchQuestion"
+        app:layout_constraintTop_toTopOf="@+id/btnSwitchQuestion" />
+
+    <TextView
+        android:id="@+id/tvMember"
+        android:layout_width="0dp"
+        android:layout_height="30sp"
+        android:layout_marginTop="1dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="5dp"
+        app:layout_constraintEnd_toEndOf="@+id/etAnswer"
+        app:layout_constraintStart_toStartOf="@+id/etAnswer"
+        app:layout_constraintTop_toBottomOf="@+id/etAnswer" />
+
+    <Spinner
+        android:id="@+id/spItems"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/panelInfo"
+        app:layout_constraintStart_toStartOf="@+id/btnResetInput"
+        app:layout_constraintTop_toBottomOf="@+id/btnResetInput" />
+
+    <Button
+        android:id="@+id/btnResetInput"
+        style="@style/Widget.AppCompat.Button.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset"
+        app:layout_constraintStart_toStartOf="@+id/panelInfo"
+        app:layout_constraintTop_toBottomOf="@+id/panelInfo"
+        tools:ignore="MissingConstraints" />
+
+    <Switch
+        android:id="@+id/swInfoVisibility"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:checked="true"
+        android:text="Info"
+        app:layout_constraintStart_toEndOf="@+id/swSoftKey"
+        app:layout_constraintTop_toTopOf="@+id/swSoftKey" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

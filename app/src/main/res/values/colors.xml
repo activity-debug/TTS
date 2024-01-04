@@ -7,4 +7,6 @@
     <color name="disable">#A2A0A5</color>
     <color name="active">#3F51B5</color>
     <color name="warning">#FFFFFFFF</color>
+    <color name="button">#6750A3</color>
+    <color name="setted">#009688</color>
 </resources>

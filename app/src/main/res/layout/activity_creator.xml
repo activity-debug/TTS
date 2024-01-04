@@ -11,44 +11,65 @@
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            >
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center">
+                android:id="@+id/container1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                >
 
-                <include
-                    android:id="@+id/container1"
-                    layout="@layout/board_ten"
-                    android:layout_width="wrap_content"
-                    android:layout_height="396dp"
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="1.0">
 
-                <include
-                    android:id="@+id/container2"
-                    layout="@layout/creator_part_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/container1" />
+                    <androidx.core.widget.NestedScrollView
+                        android:id="@+id/board_ten"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent">
 
-
+                        <include
+                            android:id="@+id/included_1"
+                            layout="@layout/board_ten"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </androidx.core.widget.NestedScrollView>
+                </HorizontalScrollView>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/container2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:padding="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/container1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                >
+
+                <include
+                    android:id="@+id/included_2"
+                    layout="@layout/creator_parts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
