@@ -1,11 +1,7 @@
 package com.rendrapcx.tts
 
-
-
-
 class Data {
-    enum class Tracks { HORIZONTAL, VERTICAL }
-    enum class InputMode{ NEW, EDIT}
+
     data class Levels(var id: String? = null)
     data class Questions(
         var levelId: String? = null,

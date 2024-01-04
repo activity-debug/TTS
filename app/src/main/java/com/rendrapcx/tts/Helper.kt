@@ -15,10 +15,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.rendrapcx.tts.databinding.CustomDialog1Binding
 
-
-//➡⬇↔↕🔃  //↔
-//📍📌⬇️🔄➡  👉🏻
-//🗑️ 👉🏻 👇🏻↔️↕️🔄➡
 class Helper {
     fun Context.showToast(message: String? = null, short: Boolean = true) {
         Toast.makeText(

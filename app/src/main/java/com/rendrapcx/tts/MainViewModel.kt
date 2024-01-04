@@ -6,15 +6,16 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.asFlow
 import java.util.UUID
 
 
-class MainViewModel : ViewModel() {
+open class MainViewModel : ViewModel() {
     private var prevPos = -1
     var position = MutableLiveData<Int>()
     var boxView = arrayListOf<TextView>()
-    var char = ""
-    private var countSoalId = MutableLiveData<Int>()
+
+    //private var countSoalId = MutableLiveData<Int>()
 
     val xLen = 10
     val yLen = 10
@@ -27,7 +28,7 @@ class MainViewModel : ViewModel() {
 
     init {
         position.value = -1
-        countSoalId.value = 0
+        //countSoalId.value = 0
     }
 
     fun nextBoxExists(): List<Int> {
@@ -143,14 +144,14 @@ class MainViewModel : ViewModel() {
             }
 
             BoxSet.COLOR_UNSELECT -> {
-                if (prevPos in 0..boxView.size) boxView[prevPos].setBackgroundColor(unSelectColor)
+                //if (prevPos in 0..boxView.size) boxView[prevPos].setBackgroundColor(unSelectColor)
             }
 
             BoxSet.COLOR_SELECTED -> {
                 if (getCurrent() in 0..boxView.size) boxView[getCurrent()].setBackgroundColor(
                     selectedColor
                 )
-                setPrev(getCurrent())
+                //setPrev(getCurrent())
             }
             BoxSet.COLOR_RANGE_UNSELECT -> {
                 for (i in 0 until boxView.size){

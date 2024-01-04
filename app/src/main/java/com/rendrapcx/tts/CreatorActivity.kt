@@ -15,6 +15,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -137,11 +138,11 @@ class CreatorActivity : AppCompatActivity() {
                 initListItem(this@CreatorActivity)
             }
 
-            swInfoVisibility.setOnClickListener(){
+            swInfoVisibility.setOnClickListener() {
                 if (!swInfoVisibility.isChecked) {
                     tvInfo.visibility = View.GONE
                     panelInfo.visibility = View.GONE
-                } else{
+                } else {
                     tvInfo.visibility = View.VISIBLE
                     panelInfo.visibility = View.VISIBLE
                 }
@@ -302,26 +303,29 @@ class CreatorActivity : AppCompatActivity() {
         dialog.setCancelable(false)
 
 
-        val inputMode: Data.InputMode
-        var isNa = ""
-        Data.questionList.filter { it.levelId == vm.levelId }
-            .filter { it.id == bgQuestId.text.toString() && it.direction == bgDirection.text.toString() }
-            .map { it }.forEach() {
-                isNa = it.id.toString()
+        val inputMode : InputMode
+        var posAt = arrayListOf<String>()
+        Data.questionList.filter lif@ { it.levelId == vm.levelId }
+            .filter { it.id == bgQuestId.text.toString() }
+            .map { it }.forEach(){
+                it.members?.map { it }?.forEach(){
+                    posAt.add(it.charAt!!)
+                }
             }
-        inputMode = if (isNa == vm.getCurrent().toString()) Data.InputMode.EDIT
-        else Data.InputMode.NEW
 
-        if (inputMode == Data.InputMode.NEW) {
+        inputMode = if (posAt.contains(vm.getCurrent().toString())) InputMode.EDIT
+        else InputMode.NEW
+
+        Toast.makeText(this, "${inputMode.name} -> ${posAt}", Toast.LENGTH_SHORT).show()
+
+        if (inputMode == InputMode.NEW) {
             bdId.text = vm.getNewQuestionerID().toString()
             bdNo.setText(vm.getCurrent().toString())
             bdDirection.setText("HORIZONTAL")
             bdAnswer.setText("")
-            bdAnswer.hint = "${vm.getAvailableRight()} box available"
-            bdMembers.text = "${vm.nextBoxExists()}"
         }
 
-        if (inputMode == Data.InputMode.EDIT) {
+        if (inputMode == InputMode.EDIT) {
             bdDirection.setText(bgDirection.text)
             bdSwDirection.isChecked = bgDirection.text != "HORIZONTAL"
             bdId.text = bgQuestId.text
@@ -336,6 +340,8 @@ class CreatorActivity : AppCompatActivity() {
             bdNo.isEnabled = it
         }
         true.also { bdSwAutoFill.isChecked = it }
+        bdAnswer.hint = "${vm.getAvailableRight()} box available"
+        bdMembers.text = "${vm.nextBoxExists()}"
         bdAsk.requestFocus()
 
         bdSwDirection.setOnClickListener() {
@@ -354,16 +360,6 @@ class CreatorActivity : AppCompatActivity() {
 
         bdSwAutoFill.setOnClickListener() {
             bdAnswer.setText("")
-//            if (bdSwAutoFill.isChecked) {
-//                if (bdSwDirection.isChecked) {
-//                    bdAnswer.setText("")
-////                    bdAnswer.filters += InputFilter.LengthFilter(vm.getAvailableDown())
-//                }
-//                if (!bdSwDirection.isChecked) {
-//                    bdAnswer.text
-//                    //bdAnswer.filters += InputFilter.LengthFilter(vm.getAvailableRight())
-//                }
-//            }
         }
 
         bdAnswer.addTextChangedListener(object : TextWatcher {
@@ -395,6 +391,10 @@ class CreatorActivity : AppCompatActivity() {
             val str = bdAnswer.text.toString()
             val dir = bdDirection.text.toString()
             val box = if (dir == "HORIZONTAL") vm.nextBoxExists() else vm.downBoxExists()
+
+            //TODO: Remove Prev Data on Current Set
+
+            //Add Member
             val members = Data.partList
             if (bdSwAutoFill.isChecked) {
                 val row = if (dir == "HORIZONTAL") bdId.text else ""
@@ -419,9 +419,9 @@ class CreatorActivity : AppCompatActivity() {
 
 
             //--SAVE DATA
-            if (inputMode == Data.InputMode.NEW) {
+            if (inputMode == InputMode.NEW) {
                 saveQuestioner(
-                    Data.InputMode.NEW,
+                    InputMode.NEW,
                     vm.levelId,
                     bdId.text.toString(),
                     bdNo.text.toString(),
@@ -431,9 +431,9 @@ class CreatorActivity : AppCompatActivity() {
                     members
                 )
             }
-            if (inputMode == Data.InputMode.EDIT) {
+            if (inputMode == InputMode.EDIT) {
                 saveQuestioner(
-                    Data.InputMode.EDIT,
+                    InputMode.EDIT,
                     vm.levelId,
                     bdId.text.toString(),
                     bdNo.text.toString(),
@@ -455,7 +455,7 @@ class CreatorActivity : AppCompatActivity() {
     }
 
     private fun saveQuestioner(
-        mode: Data.InputMode,
+        mode: InputMode,
         levelId: String,
         id: String,
         no: String,
@@ -466,10 +466,10 @@ class CreatorActivity : AppCompatActivity() {
     ) {
         val data = Data.questionList
 
-        if (mode == Data.InputMode.NEW) {
+        if (mode == InputMode.NEW) {
             data.add(Data.Questions(levelId, id, no, ask, answer, direction, members))
         }
-        if (mode == Data.InputMode.EDIT) {
+        if (mode == InputMode.EDIT) {
             val sf =
                 data.filter { it.levelId == levelId && it.id == id && it.direction == direction }
             sf.map { it }.forEach() {
