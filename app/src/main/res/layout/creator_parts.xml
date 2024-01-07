@@ -5,7 +5,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8sp">
+    android:padding="2sp">
 
 
     <TextView
@@ -31,22 +31,23 @@
 
     <TextView
         android:id="@+id/tvDownAt"
-        android:layout_width="40sp"
+        android:layout_width="100sp"
         android:layout_height="40sp"
+        android:layout_marginStart="8dp"
         android:background="#03A9F4"
         android:gravity="center"
         android:text="0"
         android:textColor="@color/white"
-        android:textSize="24sp"
+        android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/textView35"
+        app:layout_constraintStart_toEndOf="@+id/tvRightAt"
         app:layout_constraintTop_toBottomOf="@+id/textView35" />
 
     <TextView
         android:id="@+id/textView24"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="5dp"
         android:text="charAt"
         app:layout_constraintStart_toStartOf="@+id/panelParts"
@@ -62,23 +63,6 @@
         app:layout_constraintTop_toTopOf="@+id/textView24" />
 
     <TextView
-        android:id="@+id/textView26"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="25dp"
-        android:text="Right"
-        app:layout_constraintStart_toEndOf="@+id/textView22"
-        app:layout_constraintTop_toTopOf="@+id/textView22" />
-
-    <Switch
-        android:id="@+id/swDOwn"
-        android:layout_width="wrap_content"
-        android:layout_height="40sp"
-        app:layout_constraintStart_toStartOf="@+id/textView28"
-        app:layout_constraintTop_toBottomOf="@+id/textView28"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-    <TextView
         android:id="@+id/tvChar"
         android:layout_width="40sp"
         android:layout_height="40sp"
@@ -92,26 +76,18 @@
         app:layout_constraintTop_toBottomOf="@+id/textView22"
         tools:ignore="HardcodedText" />
 
-    <Switch
-        android:id="@+id/swRight"
-        android:layout_width="wrap_content"
-        android:layout_height="40sp"
-        android:checked="false"
-        app:layout_constraintStart_toStartOf="@+id/textView26"
-        app:layout_constraintTop_toBottomOf="@+id/textView26"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
     <TextView
         android:id="@+id/tvRightAt"
-        android:layout_width="40sp"
+        android:layout_width="100sp"
         android:layout_height="40sp"
+        android:layout_marginStart="8dp"
         android:background="#03A9F4"
         android:gravity="center"
         android:text="0"
         android:textColor="@color/white"
-        android:textSize="24sp"
+        android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/textView32"
+        app:layout_constraintStart_toEndOf="@+id/tvChar"
         app:layout_constraintTop_toBottomOf="@+id/textView32"
         tools:ignore="HardcodedText" />
 
@@ -119,31 +95,22 @@
         android:id="@+id/textView32"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:text="idsAt"
-        app:layout_constraintStart_toEndOf="@+id/textView26"
-        app:layout_constraintTop_toTopOf="@+id/textView26"
+        android:layout_marginStart="24dp"
+        android:text="Row ID"
+        app:layout_constraintStart_toEndOf="@+id/textView22"
+        app:layout_constraintTop_toTopOf="@+id/textView22"
         tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/textView20"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="72dp"
         android:text="LevelAt: 1"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/panelParts"
         app:layout_constraintEnd_toEndOf="@+id/panelParts"
         app:layout_constraintTop_toTopOf="@+id/textView17" />
-
-    <TextView
-        android:id="@+id/textView28"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_marginStart="20dp"
-        android:text="Down"
-        app:layout_constraintStart_toEndOf="@+id/textView32"
-        app:layout_constraintTop_toTopOf="@+id/textView32"
-        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/tvCharAt"
@@ -188,7 +155,6 @@
         android:id="@+id/textView12"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:text="Questions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spItems"
@@ -196,16 +162,15 @@
 
     <TextView
         android:id="@+id/btnSwitchQuestion"
-        android:layout_width="40sp"
-        android:layout_height="40sp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="30sp"
+        android:layout_height="30sp"
+        android:layout_marginStart="8dp"
         android:gravity="center"
-        android:text="🔄"
+        android:text="➡️"
         android:textColor="@color/white"
         android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="@+id/panelQuestions"
-        app:layout_constraintTop_toTopOf="@+id/panelQuestions"
+        app:layout_constraintStart_toEndOf="@+id/btnNewQuest"
+        app:layout_constraintTop_toTopOf="@+id/swQuestionVisibility"
         tools:ignore="HardcodedText" />
 
     <TextView
@@ -246,7 +211,7 @@
         tools:ignore="HardcodedText" />
 
     <TextView
-        android:id="@+id/textView34"
+        android:id="@+id/tvPartId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -261,10 +226,10 @@
         android:id="@+id/textView35"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:text="idsAt"
-        app:layout_constraintStart_toEndOf="@+id/textView28"
-        app:layout_constraintTop_toTopOf="@+id/textView28"
+        android:layout_marginStart="1dp"
+        android:text="Column ID"
+        app:layout_constraintStart_toStartOf="@+id/tvDownAt"
+        app:layout_constraintTop_toTopOf="@+id/textView32"
         tools:ignore="HardcodedText" />
 
     <TextView
@@ -305,7 +270,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Pads"
+        android:text="P"
         app:layout_constraintStart_toEndOf="@+id/btnResetInput"
         app:layout_constraintTop_toTopOf="@+id/btnResetInput" />
 
@@ -321,28 +286,26 @@
 
     <TextView
         android:id="@+id/etQuestId"
-        android:layout_width="0dp"
+        android:layout_width="100sp"
         android:layout_height="30sp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:background="@color/white"
         android:gravity="center_vertical"
         android:paddingHorizontal="5dp"
-        app:layout_constraintEnd_toStartOf="@+id/btnNewQuest"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/btnNewQuest" />
+        app:layout_constraintTop_toTopOf="@+id/panelQuestions" />
 
     <TextView
         android:id="@+id/btnNewQuest"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="30sp"
+        android:layout_height="30sp"
+        android:layout_marginStart="8dp"
         android:gravity="center"
         android:text="📝"
         android:textSize="24sp"
-        app:layout_constraintEnd_toStartOf="@+id/btnSwitchQuestion"
-        app:layout_constraintTop_toTopOf="@+id/btnSwitchQuestion" />
+        app:layout_constraintStart_toEndOf="@+id/btnMoveRight"
+        app:layout_constraintTop_toTopOf="@+id/swQuestionVisibility" />
 
     <TextView
         android:id="@+id/tvMember"
@@ -370,7 +333,7 @@
         style="@style/Widget.AppCompat.Button.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reset"
+        android:text="R"
         app:layout_constraintStart_toStartOf="@+id/panelInfo"
         app:layout_constraintTop_toBottomOf="@+id/panelInfo"
         tools:ignore="MissingConstraints" />
@@ -379,10 +342,64 @@
         android:id="@+id/swInfoVisibility"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:checked="true"
-        android:text="Info"
+        android:checked="false"
+        android:text="I"
         app:layout_constraintStart_toEndOf="@+id/swSoftKey"
         app:layout_constraintTop_toTopOf="@+id/swSoftKey" />
+
+    <TextView
+        android:id="@+id/tvClip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#75FFEB3B"
+        android:gravity="center"
+        android:paddingHorizontal="10sp"
+        android:paddingVertical="2sp"
+        android:text="asd"
+        app:layout_constraintBottom_toTopOf="@+id/panelParts"
+        app:layout_constraintEnd_toStartOf="@+id/textView20"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/tvPartId" />
+
+    <Switch
+        android:id="@+id/swQuestionVisibility"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Q"
+        app:layout_constraintStart_toEndOf="@+id/swInfoVisibility"
+        app:layout_constraintTop_toTopOf="@+id/swInfoVisibility" />
+
+    <TextView
+        android:id="@+id/btnMoveDown"
+        android:layout_width="30sp"
+        android:layout_height="30sp"
+        android:layout_marginStart="8dp"
+        android:text="👇🏻"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/swQuestionVisibility"
+        app:layout_constraintTop_toTopOf="@+id/swQuestionVisibility" />
+
+    <TextView
+        android:id="@+id/btnMoveRight"
+        android:layout_width="30sp"
+        android:layout_height="30sp"
+        android:layout_marginStart="8dp"
+        android:text="👉🏻"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/btnMoveDown"
+        app:layout_constraintTop_toTopOf="@+id/btnMoveDown" />
+
+    <TextView
+        android:id="@+id/btnClearClip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:gravity="center"
+        android:paddingHorizontal="2sp"
+        android:paddingVertical="2sp"
+        android:text="🆓"
+        android:textSize="14sp"
+        app:layout_constraintStart_toEndOf="@+id/tvClip"
+        app:layout_constraintTop_toTopOf="@+id/tvClip" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

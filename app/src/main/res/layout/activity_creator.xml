@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CreatorActivity">
+    tools:context=".ui.CreatorActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             >
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/container1"
+                android:id="@+id/panel1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -53,15 +53,13 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/container2"
+                android:id="@+id/panel2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="10dp"
-                android:padding="10sp"
-                app:layout_constraintTop_toBottomOf="@+id/container1"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                >
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/panel1">
 
                 <include
                     android:id="@+id/included_2"

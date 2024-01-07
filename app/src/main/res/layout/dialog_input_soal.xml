@@ -47,9 +47,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="10dp"
+            android:capitalize="characters"
             android:ems="10"
             android:hint="Answer"
-            android:inputType="textAutoComplete"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/etAskInput"
             app:layout_constraintTop_toBottomOf="@+id/etAskInput" />
@@ -58,12 +58,12 @@
             android:id="@+id/btnCancelInput"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="Cancel"
             app:layout_constraintEnd_toStartOf="@+id/btnUpdateInput"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/swAutoFill" />
+            app:layout_constraintTop_toBottomOf="@+id/tvSlotPreview" />
 
         <Button
             android:id="@+id/btnUpdateInput"
@@ -89,32 +89,13 @@
             app:layout_constraintTop_toTopOf="@+id/etNoInput"
             tools:ignore="HardcodedText" />
 
-        <Switch
-            android:id="@+id/swDirectionInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintEnd_toEndOf="@+id/etDirectionInput"
-            app:layout_constraintTop_toTopOf="@+id/etDirectionInput"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-
         <TextView
-            android:id="@+id/tvMemberInput"
+            android:id="@+id/tvSlotPreview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="10dp"
-            android:text="tvAvailableMember"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/swAutoFill"
-            app:layout_constraintTop_toTopOf="@+id/swAutoFill" />
-
-        <Switch
-            android:id="@+id/swAutoFill"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Auto Parts"
+            android:text="[2] [3] [4]"
+            app:layout_constraintEnd_toEndOf="@+id/etAnswerInput"
             app:layout_constraintStart_toStartOf="@+id/etAnswerInput"
             app:layout_constraintTop_toBottomOf="@+id/etAnswerInput" />
 

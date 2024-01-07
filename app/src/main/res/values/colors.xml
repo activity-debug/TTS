@@ -2,11 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="selected">#8BC34A</color>
-    <color name="selected_range">#E4B7DC8C</color>
-    <color name="disable">#A2A0A5</color>
+    <color name="selected">#6750A3</color>
+    <color name="font_selected">#3949AB</color>
+    <color name="selected_range">#9FA8DA</color>
+    <color name="disable">#EDE7F6</color>
+    <color name="font_disable">#EDE7F6</color>
     <color name="active">#3F51B5</color>
+    <color name="font_active">#C4C9E4</color>
     <color name="warning">#FFFFFFFF</color>
     <color name="button">#6750A3</color>
-    <color name="setted">#009688</color>
+    <color name="background">#6A1B9A</color>
 </resources>

@@ -3,7 +3,7 @@ package com.rendrapcx.tts
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
+import com.rendrapcx.tts.ui.CreatorActivity
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
