@@ -8,9 +8,22 @@ enum class ColorAttr {
     COLOR_RANGE_SELECT,
 }
 
+enum class Visibility {
+    SHOW, HIDE
+}
+
+enum class SelectRequest{
+    NEXT, PREV
+}
+
+enum class GameState{
+    CREATOR, PLAY
+}
+
 enum class TextAttr {
     CLEAR_TEXT,
     FILL_TEXT,
+    FILL_TAG
 }
 
 enum class InputDirection {

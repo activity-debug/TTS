@@ -1,35 +1,39 @@
 package com.rendrapcx.tts.viewmodel
 
 import android.content.Context
+import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.ColorAttr
 import com.rendrapcx.tts.constant.Direction
+import com.rendrapcx.tts.constant.GameState
 import com.rendrapcx.tts.constant.InputDirection
 import com.rendrapcx.tts.constant.InputMode
+import com.rendrapcx.tts.constant.SelectRequest
 import com.rendrapcx.tts.constant.TextAttr
 import com.rendrapcx.tts.databinding.ActivityCreatorBinding
 import com.rendrapcx.tts.model.Data
+import java.util.UUID
 
 
 class BoardViewModel : ViewModel() {
     var position = MutableLiveData<Int>()
     var box = arrayListOf<TextView>()
 
+    var gameState = GameState.CREATOR
+
+    var sTemp = arrayListOf<Int>()
 
     private val xLen = 10
     private val yLen = 10
     private var countXY = (xLen * yLen)
 
-    private var questions = Data.listQuestion
-    private var partial = Data.listPartial
-
     var levelId = ""
 
-    //var idsAt = ""
     var direction = Direction.HORIZONTAL.name
     var inputMode = InputMode.NEW
     var inputDirection = InputDirection.UNKNOWN
@@ -37,7 +41,15 @@ class BoardViewModel : ViewModel() {
     private var tipTop = true
     private var clip = ""
 
+    var selectedQuestion = ""
+
     var currentRange = arrayListOf<Int>()
+
+    var currentQuestId = MutableLiveData<String>()
+    var currentIndex = MutableLiveData<Int>()
+
+    var pickByArrow = false
+
 
     init {
         position.value = 0
@@ -59,18 +71,11 @@ class BoardViewModel : ViewModel() {
         position.value = int
     }
 
-    fun setNewLevelId() {
-        if (questions.isNotEmpty()) {
-            val sf = questions.last().levelId
-            sf.map { it }.forEach() {
-                levelId = (it + 1).toString()
-            }
-        } else {
-            levelId = "1"
-        }
+    fun newLevelId() {
+        levelId = UUID.randomUUID().toString().substring(0,10)
     }
 
-    fun getQuestionId(): String {
+    fun getFlipQuestionId(): String {
         val pos = getCurrent()
         var partAt = ""
         Data.listPartial.filter { it.levelId == levelId }
@@ -89,6 +94,8 @@ class BoardViewModel : ViewModel() {
             .forEach {
                 rowId = it.rowQuestionId.ifEmpty { "" }
             }
+
+        setCurrentQuestId(rowId)
         return rowId
     }
 
@@ -100,19 +107,23 @@ class BoardViewModel : ViewModel() {
             .forEach {
                 colId = it.colQuestionId.ifEmpty { "" }
             }
+        setCurrentQuestId(colId)
         return colId
     }
 
     private fun setInputRangeDirection() {
-            if (getColumnId() != "" && getRowId() == "") InputDirection.COLUMN
-            else if (getRowId() != "" && getColumnId() == "") InputDirection.ROW
-            else if (getColumnId() == "" && getColumnId() == "") InputDirection.UNKNOWN
-            else { inputDirection =
-                    if (tipTop) InputDirection.COLUMN
-                    else InputDirection.ROW }
+        if (getColumnId() != "" && getRowId() == "") InputDirection.COLUMN
+        else if (getRowId() != "" && getColumnId() == "") InputDirection.ROW
+        else if (getColumnId() == "" && getColumnId() == "") InputDirection.UNKNOWN
+        else {
+            inputDirection =
+                if (tipTop) InputDirection.COLUMN
+                else InputDirection.ROW
+        }
     }
 
-    private fun getRowRange(): ArrayList<Int> {
+    fun getRowRange(): ArrayList<Int> {
+        sTemp.clear()
         var range = arrayListOf<Int>()
         Data.listQuestion.filter { it.levelId == levelId }
             .filter { it.id == getRowId() }
@@ -123,7 +134,7 @@ class BoardViewModel : ViewModel() {
         return range
     }
 
-    private fun getColumnRange(): ArrayList<Int> {
+    fun getColumnRange(): ArrayList<Int> {
         var range = arrayListOf<Int>()
         Data.listQuestion.filter { it.levelId == levelId }
             .filter { it.id == getColumnId() }
@@ -136,9 +147,11 @@ class BoardViewModel : ViewModel() {
 
 
     private fun colorizeRange(context: Context, pos: Int, range: ArrayList<Int>) {
+        val current = getCurrent()
         if (pos in range) {
             for (i in range.indices) {
                 val x = range[i]
+                if (x == current) continue
                 box[x].setBackgroundColor(
                     ContextCompat.getColor(
                         context,
@@ -209,20 +222,63 @@ class BoardViewModel : ViewModel() {
         return x != 0
     }
 
-    fun boxText(textAttr: TextAttr) {
-        when (textAttr) {
-            TextAttr.CLEAR_TEXT -> {
-                for (i in 0 until box.size) {
-                    box[i].text = ""
-                }
+
+    private fun getQuestion(): String {
+        var id = getRowId()
+        if (inputDirection == InputDirection.ROW) id = getRowId()
+        else if (inputDirection == InputDirection.COLUMN) id = getColumnId()
+
+        var result = ""
+        Data.listQuestion.filter { it.levelId == levelId }
+            .filter { it.id == id }
+            .map { it }.forEach() {
+                result = it.asking
+            }
+        return result
+    }
+
+    fun setCurrentQuestId(id: String) {
+        currentQuestId.value = id
+    }
+
+    fun getCurrentQuestId(): String {
+        return currentQuestId.value!!
+    }
+
+    fun getRequestQuestions(selectRequest: SelectRequest) {
+        val index = if (currentIndex.value!! < 0) {
+            Data.listQuestion.indexOfFirst { it.levelId == levelId && it.id == getCurrentQuestId() }
+        } else currentIndex.value
+
+        val count = Data.listQuestion.count() { it.levelId == levelId }
+
+        val req = if (selectRequest == SelectRequest.NEXT) {
+            if (index!! < count - 1) index + 1 else 0
+        } else {
+            if (index!! > 0) index - 1 else count - 1
+        }
+
+        currentIndex.value = req
+
+        val reqId = Data.listQuestion.filter { it.levelId == levelId }[req].id
+
+        var range = arrayListOf<Int>()
+        var dir = Direction.HORIZONTAL.name
+        Data.listQuestion.filter { it.levelId == levelId && it.id == reqId }
+            .map { it }.forEach() {
+                dir = it.direction
+                range = it.slot
             }
 
-            TextAttr.FILL_TEXT -> {
-                Data.listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
-                    box[it.charAt].text = it.char.uppercase()
-                }
-            }
-        }
+        setCurrentQuestId(reqId)
+
+        inputDirection = if (dir == Direction.HORIZONTAL.name) InputDirection.ROW
+        else InputDirection.COLUMN
+
+        currentRange = range
+
+        setCurrent(range[0])
+        pickByArrow = true
     }
 
 
@@ -230,9 +286,9 @@ class BoardViewModel : ViewModel() {
         when (colorAttr) {
             ColorAttr.COLOR_ACTIVE -> {
                 for (i in 0 until box.size) {
-                    if (box[i].text.isNotEmpty()) {
-                        box[i].setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+                    if (box[i].text.isNotEmpty() || box[i].tag !=0 ) {
                         box[i].setTextColor(ContextCompat.getColor(context, R.color.black))
+                        box[i].setBackgroundColor(ContextCompat.getColor(context, R.color.white))
                     }
                 }
             }
@@ -246,15 +302,18 @@ class BoardViewModel : ViewModel() {
 
             ColorAttr.COLOR_SELECTED -> {
                 val i = getCurrent()
-                box[i].setBackgroundColor(ContextCompat.getColor(context, R.color.selected))
                 box[i].setTextColor(ContextCompat.getColor(context, R.color.white))
+                box[i].setBackgroundColor(ContextCompat.getColor(context, R.color.selected))
             }
 
             ColorAttr.COLOR_RANGE_SELECT -> {
-                var range = arrayListOf<Int>()
-                tipTop = tipTop != true
-                setInputRangeDirection()
-//                if (range.isEmpty()) return
+
+                val range: ArrayList<Int>
+
+                if (!pickByArrow) {
+                    tipTop = tipTop != true
+                    setInputRangeDirection()
+                }
 
                 if (inputDirection == InputDirection.COLUMN) {
                     range = getColumnRange()
@@ -266,7 +325,8 @@ class BoardViewModel : ViewModel() {
                     currentRange = range
                 }
 
-
+                selectedQuestion = getQuestion()
+                pickByArrow = false
             }
 
             ColorAttr.COLOR_BACKGROUND -> {
@@ -277,21 +337,34 @@ class BoardViewModel : ViewModel() {
 
     }
 
+    fun boxText(textAttr: TextAttr) {
+        when (textAttr) {
+            TextAttr.CLEAR_TEXT -> {
+                for (i in 0 until box.size) {
+                    box[i].text = ""
+                }
+            }
 
+            TextAttr.FILL_TEXT -> {
+                Data.listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
+                    box[it.charAt].text = it.char.uppercase()
+                }
+            }
+
+            TextAttr.FILL_TAG -> {
+                for (i in 0 until box.size) box[i].tag = 0
+                Data.listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
+                    box[it.charAt].tag = it.char.uppercase()
+                }
+            }
+        }
+    }
+
+    fun boxVisibility() {
+        for (i in 0 until box.size) {
+            if (box[i].tag == 0) {
+                box[i].visibility = View.INVISIBLE
+            }
+        }
+    }
 }
-
-
-////////
-//val pos = getCurrent()
-//val range = itSLot
-//if (pos in range) {
-//    for (i in range.indices) {
-//        val x = range[i]
-//        box[x].setBackgroundColor(
-//            ContextCompat.getColor(
-//                context,
-//                R.color.selected_range
-//            )
-//        )
-//    }
-//}

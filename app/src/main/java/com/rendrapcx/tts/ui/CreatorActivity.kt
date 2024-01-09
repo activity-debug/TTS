@@ -1,6 +1,7 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
+import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -23,6 +24,7 @@ import com.rendrapcx.tts.constant.Constants
 import com.rendrapcx.tts.constant.Direction
 import com.rendrapcx.tts.constant.InputDirection
 import com.rendrapcx.tts.constant.InputMode
+import com.rendrapcx.tts.constant.SelectRequest
 import com.rendrapcx.tts.constant.TextAttr
 import com.rendrapcx.tts.databinding.ActivityCreatorBinding
 import com.rendrapcx.tts.databinding.DialogInputSoalBinding
@@ -38,6 +40,7 @@ class CreatorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreatorBinding
     private var vm = BoardViewModel()
 
+    @Suppress("DEPRECATION")
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,44 +50,28 @@ class CreatorActivity : AppCompatActivity() {
         vm = ViewModelProvider(this)[BoardViewModel::class.java]
 
         boxViewInit()
+        vm.newLevelId()
+        initComponents()
         vm.boxColor(this, binding, ColorAttr.COLOR_BACKGROUND)
         vm.boxColor(this, binding, ColorAttr.COLOR_DISABLE)
 
         vm.boxText(TextAttr.CLEAR_TEXT)
 
         vm.position.observe(this) {
+            binding.included2.tvLevelId.text = vm.levelId.toString()
             vm.boxColor(this, binding, ColorAttr.COLOR_DISABLE)
             vm.boxColor(this, binding, ColorAttr.COLOR_ACTIVE)
             vm.boxColor(this, binding, ColorAttr.COLOR_SELECTED)
-//            vm.boxColor(this, binding, ColorAttr.COLOR_RANGE_SELECT) //kalo pasang disini harus pake if lagi ke, kalo enggak tiptpnya gak bener
-
-            when (vm.inputDirection) {
-                InputDirection.ROW -> {
-                    binding.included2.btnMoveDown.visibility = View.INVISIBLE
-                    binding.included2.btnMoveRight.visibility = View.VISIBLE
-                }
-                InputDirection.COLUMN -> {
-                    binding.included2.btnMoveDown.visibility = View.VISIBLE
-                    binding.included2.btnMoveRight.visibility = View.INVISIBLE
-                }
-                InputDirection.UNKNOWN -> {
-                    binding.included2.btnMoveDown.visibility = View.INVISIBLE
-                    binding.included2.btnMoveRight.visibility = View.INVISIBLE
-                }
-                else -> {
-                    binding.included2.btnMoveDown.visibility = View.VISIBLE
-                    binding.included2.btnMoveRight.visibility = View.VISIBLE
-                }
-            }
 
             binding.included2.tvInfo.text =
-                "POSITION = ${vm.getCurrent()} | PREV = ${vm.prevPos} \n" +
-                        "${vm.inputDirection} | ${vm.currentRange} \n" +
-                        "${vm.selectNextRow()} | ${vm.selectNextColumn()}"
+                "${vm.sTemp} \n" +
+                "${vm.getRowId()} | ${vm.getColumnId()} | ${vm.getRowRange()} | ${vm.getColumnRange()}" +
+                    "\n POSITION = ${vm.getCurrent()} | PREV = ${vm.prevPos} \n" +
+                    "inputDirection: ${vm.inputDirection} | currentRange${vm.currentRange} \n" +
+                        "nextRow: ${vm.selectNextRow()} | NextColumn: ${vm.selectNextColumn()}"
         }
 
-        /* CREATE NEW levelId FOR  NEW QUESTION */
-        vm.setNewLevelId()
+
 
         /* --ONCLICK BOX-VIEW */
         binding.included1.apply {
@@ -98,20 +85,11 @@ class CreatorActivity : AppCompatActivity() {
                     else if (vm.getRowId() != "") vm.inputDirection = InputDirection.ROW
                     vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_RANGE_SELECT)
                     vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_SELECTED)
-
+                    binding.included3.tvSpanQuestion.text = vm.selectedQuestion
                 }
 
                 vm.box[i].setOnLongClickListener {
-//                    binding.included2.apply {
-//                        if (vm.clip.isEmpty()) {
-//                            vm.clip = vm.getQuestionId()
-//                            tvClip.text = vm.clip
-//                            tvClip.visibility = View.VISIBLE
-//                            btnClearClip.visibility = View.VISIBLE
-//                            Toast.makeText(this@CreatorActivity, "Copied", Toast.LENGTH_SHORT)
-//                                .show()
-//                        }
-//                    }
+                    // TODO:
                     return@setOnLongClickListener true
                 }
             }
@@ -120,28 +98,6 @@ class CreatorActivity : AppCompatActivity() {
         //-- INCLUDE2 CONTAINER
         binding.included2.apply {
 
-            /*INCLUDE_2 COMPONENT INITIAL*/
-            tvLevelId.text = vm.levelId
-            tvInfo.visibility = View.GONE
-            panelInfo.visibility = View.GONE
-            btnSwitchQuestion.text = Constants.strRight
-            tvClip.text = ""
-            tvClip.visibility = View.INVISIBLE
-            btnClearClip.visibility = View.INVISIBLE
-            textView12.visibility = View.GONE
-            panelQuestions.visibility = View.GONE
-            textView8.visibility = View.GONE
-            tvLevelId.visibility = View.GONE
-            etQuestId.visibility = View.GONE
-            etNo.visibility = View.GONE
-            etAsk.visibility = View.GONE
-            etAnswer.visibility = View.GONE
-            etDirection.visibility = View.GONE
-            tvMember.visibility = View.GONE
-            tvLevelId.visibility = View.GONE
-
-            btnMoveDown.visibility = View.INVISIBLE
-            btnMoveRight.visibility = View.INVISIBLE
 
             /*init or update spinner adapter view*/
             initOrUpdateSpItems()
@@ -175,6 +131,7 @@ class CreatorActivity : AppCompatActivity() {
                 Data.listPartial.removeIf { it.levelId == vm.levelId }
                 initOrUpdateSpItems()
                 clearQuestionFields()
+                vm.newLevelId()
                 vm.boxText(TextAttr.CLEAR_TEXT)
                 vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_DISABLE)
             }
@@ -263,24 +220,6 @@ class CreatorActivity : AppCompatActivity() {
                 }
             }
 
-            btnMoveRight.setOnClickListener() {
-                // if (vm.isRowOvers()) vm.setCurrent(vm.selectNextRow())
-                if (vm.inputDirection == InputDirection.ROW) {
-                    if (vm.isRowOvers()) {
-                        vm.setCurrent(vm.selectNextRow())
-                    }
-                }
-            }
-
-            btnMoveDown.setOnClickListener() {
-//                if (vm.isColumnOvers()) vm.setCurrent(vm.selectNextColumn())
-                if (vm.inputDirection == InputDirection.COLUMN) {
-                    if (vm.isColumnOvers()) {
-                        vm.setCurrent(vm.selectNextColumn())
-                    }
-                }
-            }
-
             tvRightAt.setOnClickListener() {
                 if (vm.getClip().isEmpty()) {
                     vm.setClip(tvRightAt.text.toString())
@@ -309,8 +248,71 @@ class CreatorActivity : AppCompatActivity() {
                 tvClip.visibility = View.INVISIBLE
             }
 
+            btnGetLevel.setOnClickListener(){
+                Toast.makeText(this@CreatorActivity, "${vm.levelId}", Toast.LENGTH_SHORT).show()
+                binding.included2.tvLevelId.text = "asdasdasdasd"
+                btnGetLevel.text = vm.levelId
+//                Data.listLevel.add(
+//                    Data.Level(id = vm.levelId, category = "Testing", dimension = "10x10")
+//                )
+//                textView.text=""
+//                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+//                cm.text = Data.listLevel.toString()
+            }
+            btnGetQuestion.setOnClickListener(){
+                textView.text=""
+                textView.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
+                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                cm.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
+            }
+            btnGetPartial.setOnClickListener(){
+                textView.text=""
+                textView.text = Data.listPartial.filter { it.levelId == vm.levelId }.toString()
+                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                cm.text = Data.listPartial.filter { it.levelId == vm.levelId }.toString()
+            }
+            btnLoadSoal.setOnClickListener(){
+                //boxViewInit()
+
+
+                vm.boxText(TextAttr.CLEAR_TEXT)
+
+//                vm.gameState = GameState.PLAY
+
+                vm.levelId = "1"
+                tvLevelId.text = vm.levelId
+
+                initOrUpdateSpItems()
+                loadPart()
+                clearQuestionFields()
+//                vm.boxText(TextAttr.FILL_TAG)
+//                vm.boxVisibility()
+                vm.boxText(TextAttr.FILL_TEXT)
+//                initComponents()
+                vm.setCurrent(0)
+                vm.currentIndex.value = 1
+                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_DISABLE)
+                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_ACTIVE)
+
+            }
+
 
         } //EndBinding Include2
+
+        binding.included3.apply {
+            btnNextQuestion.setOnClickListener() {
+                vm.getRequestQuestions(SelectRequest.NEXT)
+                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_RANGE_SELECT)
+                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_SELECTED)
+                binding.included3.tvSpanQuestion.text = vm.selectedQuestion
+            }
+            btnPrevQuestion.setOnClickListener() {
+                vm.getRequestQuestions(SelectRequest.PREV)
+                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_RANGE_SELECT)
+                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_SELECTED)
+                binding.included3.tvSpanQuestion.text = vm.selectedQuestion
+            }
+        } //end binding included3
 
     } //create
 
@@ -364,7 +366,6 @@ class CreatorActivity : AppCompatActivity() {
     private fun inputQuestioner(context: Context) {
         lifecycleScope.launch {
 
-
             val bind = DialogInputSoalBinding.inflate(layoutInflater)
             val builder = AlertDialog.Builder(context).setView(bind.root)
             val dialog = builder.create()
@@ -380,7 +381,7 @@ class CreatorActivity : AppCompatActivity() {
             val bdBtnCancel = bind.btnCancelInput
 
             /*INITIAL INPUT MODE*/
-            val partAt = vm.getQuestionId()
+            val partAt = vm.getFlipQuestionId()
             var cDir = ""
 
             Data.listQuestion.filter { it.levelId == vm.levelId }
@@ -481,11 +482,6 @@ class CreatorActivity : AppCompatActivity() {
 
                 addPartList(questionId = questionId, answerText = answerText)
 
-                //--ADD TO questions data class
-//                val partial = Data.listPartial.filter { it.levelId == vm.levelId }
-//                    .filter { it.colQuestionId == bdId.text || it.rowQuestionId == bdId.text }
-//                    .toMutableList()
-
                 if (vm.inputMode == InputMode.NEW) {
                     saveQuestioner(
                         levelId = vm.levelId,
@@ -506,9 +502,9 @@ class CreatorActivity : AppCompatActivity() {
                         direction = direction
                     )
                 }
-
                 vm.boxText(TextAttr.FILL_TEXT)
                 vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_ACTIVE)
+                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_SELECTED)
 
                 dialog.dismiss()
             }
@@ -522,7 +518,7 @@ class CreatorActivity : AppCompatActivity() {
     }
 
     private fun removePrevPart() {
-        val questionId = vm.getQuestionId()
+        val questionId = vm.getFlipQuestionId()
         Data.listPartial.removeIf {
             it.levelId == vm.levelId &&
                     it.rowQuestionId == questionId || it.colQuestionId == questionId
@@ -602,6 +598,8 @@ class CreatorActivity : AppCompatActivity() {
                     slot = slot
                 )
             )
+            vm.setCurrent(slot[0])
+            vm.currentIndex.value = Data.listQuestion.count(){it.levelId == levelId}
         }
         if (vm.inputMode == InputMode.EDIT) {
             val sf =
@@ -614,6 +612,7 @@ class CreatorActivity : AppCompatActivity() {
                 it.slot = slot
             }
         }
+
         initOrUpdateSpItems()
         loadPart()
     }
@@ -641,6 +640,34 @@ class CreatorActivity : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
+
+    private fun initComponents() {
+        binding.included2.apply {
+            tvInfo.visibility = View.GONE
+            panelInfo.visibility = View.GONE
+            btnSwitchQuestion.text = Constants.strRight
+            tvClip.text = ""
+            tvClip.visibility = View.INVISIBLE
+            btnClearClip.visibility = View.INVISIBLE
+            textView12.visibility = View.GONE
+            panelQuestions.visibility = View.GONE
+            textView8.visibility = View.GONE
+            tvLevelId.visibility = View.GONE
+            etQuestId.visibility = View.GONE
+            etNo.visibility = View.GONE
+            etAsk.visibility = View.GONE
+            etAnswer.visibility = View.GONE
+            etDirection.visibility = View.GONE
+            tvMember.visibility = View.GONE
+            tvLevelId.visibility = View.GONE
+
+            btnMoveDown.visibility = View.INVISIBLE
+            btnMoveRight.visibility = View.INVISIBLE
+        }
+        binding.included3.apply {
+            tvSpanQuestion.text = "TEST"
+        }
+    }
 
     private fun boxViewInit() {
         for (i in 0 until 100) {

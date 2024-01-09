@@ -247,7 +247,7 @@
         android:id="@+id/textView8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="4dp"
         android:text="Level ID: "
         app:layout_constraintEnd_toStartOf="@+id/tvLevelId"
         app:layout_constraintTop_toTopOf="@+id/tvLevelId"
@@ -401,5 +401,49 @@
         android:textSize="14sp"
         app:layout_constraintStart_toEndOf="@+id/tvClip"
         app:layout_constraintTop_toTopOf="@+id/tvClip" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGetLevel" />
+
+    <Button
+        android:id="@+id/btnGetLevel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Level"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/panelParts" />
+
+    <Button
+        android:id="@+id/btnGetQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Question"
+        app:layout_constraintStart_toEndOf="@+id/btnGetLevel"
+        app:layout_constraintTop_toTopOf="@+id/btnGetLevel" />
+
+    <Button
+        android:id="@+id/btnGetPartial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Partial"
+        app:layout_constraintStart_toEndOf="@+id/btnGetQuestion"
+        app:layout_constraintTop_toTopOf="@+id/btnGetQuestion" />
+
+    <Button
+        android:id="@+id/btnLoadSoal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Load"
+        app:layout_constraintStart_toEndOf="@+id/btnGetPartial"
+        app:layout_constraintTop_toTopOf="@+id/btnGetPartial" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
