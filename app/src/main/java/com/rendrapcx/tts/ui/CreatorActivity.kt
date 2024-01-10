@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.rendrapcx.tts.constant.ColorAttr
@@ -29,6 +30,7 @@ import com.rendrapcx.tts.constant.TextAttr
 import com.rendrapcx.tts.databinding.ActivityCreatorBinding
 import com.rendrapcx.tts.databinding.DialogInputSoalBinding
 import com.rendrapcx.tts.helper.Keypad
+import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.viewmodel.BoardViewModel
 import kotlinx.coroutines.launch
@@ -46,7 +48,6 @@ class CreatorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCreatorBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         vm = ViewModelProvider(this)[BoardViewModel::class.java]
 
         boxViewInit()
@@ -65,12 +66,11 @@ class CreatorActivity : AppCompatActivity() {
 
             binding.included2.tvInfo.text =
                 "${vm.sTemp} \n" +
-                "${vm.getRowId()} | ${vm.getColumnId()} | ${vm.getRowRange()} | ${vm.getColumnRange()}" +
-                    "\n POSITION = ${vm.getCurrent()} | PREV = ${vm.prevPos} \n" +
-                    "inputDirection: ${vm.inputDirection} | currentRange${vm.currentRange} \n" +
+                        "${vm.getRowId()} | ${vm.getColumnId()} | ${vm.getRowRange()} | ${vm.getColumnRange()}" +
+                        "\n POSITION = ${vm.getCurrent()} | PREV = ${vm.prevPos} \n" +
+                        "inputDirection: ${vm.inputDirection} | currentRange${vm.currentRange} \n" +
                         "nextRow: ${vm.selectNextRow()} | NextColumn: ${vm.selectNextColumn()}"
         }
-
 
 
         /* --ONCLICK BOX-VIEW */
@@ -248,30 +248,55 @@ class CreatorActivity : AppCompatActivity() {
                 tvClip.visibility = View.INVISIBLE
             }
 
-            btnGetLevel.setOnClickListener(){
-                Toast.makeText(this@CreatorActivity, "${vm.levelId}", Toast.LENGTH_SHORT).show()
-                binding.included2.tvLevelId.text = "asdasdasdasd"
-                btnGetLevel.text = vm.levelId
-//                Data.listLevel.add(
-//                    Data.Level(id = vm.levelId, category = "Testing", dimension = "10x10")
-//                )
+            btnGetLevel.setOnClickListener() {
+//                Toast.makeText(this@CreatorActivity, "${vm.levelId}", Toast.LENGTH_SHORT).show()
+//                binding.included2.tvLevelId.text = "asdasdasdasd"
+//                btnGetLevel.text = vm.levelId
+
 //                textView.text=""
 //                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 //                cm.text = Data.listLevel.toString()
+//                    Data.listLevel.add(
+//                        Data.Level(id = vm.levelId, category = "Testing", dimension = "10x10")
+//                    )
+                lifecycleScope.launch {
+                    val level = DB.getInstance(applicationContext).level()
+                    level.insertLevel(
+                        level = Data.Level(
+                            id = vm.levelId,
+                            category = "testing",
+                            dimension = "10x10"
+                        )
+                    )
+                }
+
+                textView.text = ""
+                lifecycleScope.launch {
+                    DB.getInstance(applicationContext).level().getAllLevel()
+                        .observe(this@CreatorActivity, Observer { it ->
+                            textView.text = it.first(){it.id == vm.levelId}.toString()
+                        })
+                }
+
             }
-            btnGetQuestion.setOnClickListener(){
-                textView.text=""
-                textView.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
-                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                cm.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
+            btnGetQuestion.setOnClickListener() {
+                textView.text = ""
+//                textView.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
+//                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+//                cm.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
+
+                    DB.getInstance(applicationContext).question().getAllQuestion().observe(this@CreatorActivity, Observer{
+                        textView.text = it.toString()
+                    })
+
             }
-            btnGetPartial.setOnClickListener(){
-                textView.text=""
+            btnGetPartial.setOnClickListener() {
+                textView.text = ""
                 textView.text = Data.listPartial.filter { it.levelId == vm.levelId }.toString()
                 val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 cm.text = Data.listPartial.filter { it.levelId == vm.levelId }.toString()
             }
-            btnLoadSoal.setOnClickListener(){
+            btnLoadSoal.setOnClickListener() {
                 //boxViewInit()
 
 
@@ -562,6 +587,18 @@ class CreatorActivity : AppCompatActivity() {
                     colQuestionId = if (vm.direction == Direction.VERTICAL.name) questionId else "",
                 )
             )
+            lifecycleScope.launch {
+                DB.getInstance(applicationContext).partial().insertPartial(
+                    Data.Partial(
+                        levelId = vm.levelId,
+                        id = UUID.randomUUID().toString().substring(0, 10),
+                        charAt = boxAvailable[i],
+                        char = answerText[i].toString(),
+                        rowQuestionId = if (vm.direction == Direction.HORIZONTAL.name) questionId else "",
+                        colQuestionId = if (vm.direction == Direction.VERTICAL.name) questionId else "",
+                    )
+                )
+            }
         }
     }
 
@@ -587,6 +624,7 @@ class CreatorActivity : AppCompatActivity() {
 
         //Toast.makeText(this, "${vm.itSLot}", Toast.LENGTH_SHORT).show()
         if (vm.inputMode == InputMode.NEW) {
+
             data.add(
                 Data.Question(
                     levelId = levelId,
@@ -598,8 +636,21 @@ class CreatorActivity : AppCompatActivity() {
                     slot = slot
                 )
             )
+            lifecycleScope.launch {
+                DB.getInstance(applicationContext).question().insertQuestion(
+                    Data.Question(
+                        levelId = levelId,
+                        id = id,
+                        number = number,
+                        direction = direction,
+                        asking = asking,
+                        answer = answer,
+                        slot = slot
+                    )
+                )
+            }
             vm.setCurrent(slot[0])
-            vm.currentIndex.value = Data.listQuestion.count(){it.levelId == levelId}
+            vm.currentIndex.value = Data.listQuestion.count() { it.levelId == levelId }
         }
         if (vm.inputMode == InputMode.EDIT) {
             val sf =

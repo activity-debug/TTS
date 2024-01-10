@@ -3,7 +3,6 @@ package com.rendrapcx.tts.viewmodel
 import android.content.Context
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,7 +19,9 @@ import com.rendrapcx.tts.model.Data
 import java.util.UUID
 
 
-class BoardViewModel : ViewModel() {
+class BoardViewModel(
+) : ViewModel() {
+
     var position = MutableLiveData<Int>()
     var box = arrayListOf<TextView>()
 
