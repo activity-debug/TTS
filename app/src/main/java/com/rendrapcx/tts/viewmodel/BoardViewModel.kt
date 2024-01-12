@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.ColorAttr
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Direction
 import com.rendrapcx.tts.constant.GameState
 import com.rendrapcx.tts.constant.InputDirection
@@ -24,10 +25,6 @@ class BoardViewModel(
 
     var position = MutableLiveData<Int>()
     var box = arrayListOf<TextView>()
-
-    var gameState = GameState.CREATOR
-
-    var sTemp = arrayListOf<Int>()
 
     private val xLen = 10
     private val yLen = 10
@@ -73,7 +70,7 @@ class BoardViewModel(
     }
 
     fun newLevelId() {
-        levelId = UUID.randomUUID().toString().substring(0,10)
+        levelId = UUID.randomUUID().toString().substring(0, 10)
     }
 
     fun getFlipQuestionId(): String {
@@ -124,7 +121,6 @@ class BoardViewModel(
     }
 
     fun getRowRange(): ArrayList<Int> {
-        sTemp.clear()
         var range = arrayListOf<Int>()
         Data.listQuestion.filter { it.levelId == levelId }
             .filter { it.id == getRowId() }
@@ -287,10 +283,8 @@ class BoardViewModel(
         when (colorAttr) {
             ColorAttr.COLOR_ACTIVE -> {
                 for (i in 0 until box.size) {
-                    if (box[i].text.isNotEmpty() || box[i].tag !=0 ) {
-                        box[i].setTextColor(ContextCompat.getColor(context, R.color.black))
-                        box[i].setBackgroundColor(ContextCompat.getColor(context, R.color.white))
-                    }
+                    box[i].setTextColor(ContextCompat.getColor(context, R.color.black))
+                    box[i].setBackgroundColor(ContextCompat.getColor(context, R.color.white))
                 }
             }
 
@@ -340,32 +334,28 @@ class BoardViewModel(
 
     fun boxText(textAttr: TextAttr) {
         when (textAttr) {
+            TextAttr.FILL_TEXT -> {
+                Data.listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
+                    box[it.charAt].text = it.charStr.uppercase()
+                    box[it.charAt].tag = it.charStr.uppercase()
+
+                }
+            }
+
             TextAttr.CLEAR_TEXT -> {
                 for (i in 0 until box.size) {
                     box[i].text = ""
                 }
             }
 
-            TextAttr.FILL_TEXT -> {
-                Data.listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
-                    box[it.charAt].text = it.char.uppercase()
-                }
-            }
-
-            TextAttr.FILL_TAG -> {
-                for (i in 0 until box.size) box[i].tag = 0
-                Data.listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
-                    box[it.charAt].tag = it.char.uppercase()
-                }
-            }
         }
     }
 
-    fun boxVisibility() {
-        for (i in 0 until box.size) {
-            if (box[i].tag == 0) {
-                box[i].visibility = View.INVISIBLE
-            }
-        }
-    }
+//    fun boxVisibility() {
+//        for (i in 0 until box.size) {
+//            if (box[i].tag == 0) {
+//                box[i].visibility = View.INVISIBLE
+//            }
+//        }
+//    }
 }

@@ -21,8 +21,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.rendrapcx.tts.constant.ColorAttr
-import com.rendrapcx.tts.constant.Constants
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Direction
+import com.rendrapcx.tts.constant.GameState
 import com.rendrapcx.tts.constant.InputDirection
 import com.rendrapcx.tts.constant.InputMode
 import com.rendrapcx.tts.constant.SelectRequest
@@ -41,6 +42,7 @@ class CreatorActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCreatorBinding
     private var vm = BoardViewModel()
+    var arr = arrayListOf<Int>()
 
     @Suppress("DEPRECATION")
     @SuppressLint("SetTextI18n")
@@ -51,27 +53,40 @@ class CreatorActivity : AppCompatActivity() {
         vm = ViewModelProvider(this)[BoardViewModel::class.java]
 
         boxViewInit()
-        vm.newLevelId()
+
+        if (Const.gameState == GameState.CREATOR) {
+            vm.newLevelId()
+        } else {
+            loadGameAtLevel()
+            initOrUpdateSpItems()
+            loadPart()
+            vm.setCurrent(0)
+            vm.currentIndex.value = 1
+
+        }
+
+
         initComponents()
+
+
         vm.boxColor(this, binding, ColorAttr.COLOR_BACKGROUND)
         vm.boxColor(this, binding, ColorAttr.COLOR_DISABLE)
 
         vm.boxText(TextAttr.CLEAR_TEXT)
 
         vm.position.observe(this) {
-            binding.included2.tvLevelId.text = vm.levelId.toString()
+            binding.included2.tvLevelId.text = vm.levelId
             vm.boxColor(this, binding, ColorAttr.COLOR_DISABLE)
             vm.boxColor(this, binding, ColorAttr.COLOR_ACTIVE)
             vm.boxColor(this, binding, ColorAttr.COLOR_SELECTED)
 
             binding.included2.tvInfo.text =
-                "${vm.sTemp} \n" +
+                "${vm.box[vm.getCurrent()].tag}  | ${vm.levelId} \n" +
                         "${vm.getRowId()} | ${vm.getColumnId()} | ${vm.getRowRange()} | ${vm.getColumnRange()}" +
                         "\n POSITION = ${vm.getCurrent()} | PREV = ${vm.prevPos} \n" +
                         "inputDirection: ${vm.inputDirection} | currentRange${vm.currentRange} \n" +
                         "nextRow: ${vm.selectNextRow()} | NextColumn: ${vm.selectNextColumn()}"
         }
-
 
         /* --ONCLICK BOX-VIEW */
         binding.included1.apply {
@@ -137,11 +152,11 @@ class CreatorActivity : AppCompatActivity() {
             }
 
             btnSwitchQuestion.setOnClickListener {
-                if (btnSwitchQuestion.text == Constants.strRight) {
-                    btnSwitchQuestion.text = Constants.strDown
+                if (btnSwitchQuestion.text == Const.strRight) {
+                    btnSwitchQuestion.text = Const.strDown
                     vm.direction = Direction.VERTICAL.name
                 } else {
-                    btnSwitchQuestion.text = Constants.strRight
+                    btnSwitchQuestion.text = Const.strRight
                     vm.direction = Direction.HORIZONTAL.name
                 }
             }
@@ -163,6 +178,11 @@ class CreatorActivity : AppCompatActivity() {
                             .map {
                                 it.rowQuestionId = tvRightAt.text.toString()
                             }
+                        lifecycleScope.launch {
+                            val id = tvPartId.text.toString()
+                            val rowId = tvRightAt.text.toString()
+                            DB.getInstance(applicationContext).partial().updateRowId(id, rowId)
+                        }
                         initOrUpdateSpItems()
                         loadPart()
                     }
@@ -176,6 +196,15 @@ class CreatorActivity : AppCompatActivity() {
                             .map {
                                 it.colQuestionId = tvDownAt.text.toString()
                             }
+                        lifecycleScope.launch {
+                            val id = tvPartId.text.toString()
+                            val colId = tvDownAt.text.toString()
+                            DB.getInstance(applicationContext).partial().updateColId(
+                                id = id,
+                                colId = colId
+                            )
+                        }
+
                         initOrUpdateSpItems()
                         loadPart()
                     }
@@ -272,22 +301,18 @@ class CreatorActivity : AppCompatActivity() {
 
                 textView.text = ""
                 lifecycleScope.launch {
-                    DB.getInstance(applicationContext).level().getAllLevel()
-                        .observe(this@CreatorActivity, Observer { it ->
-                            textView.text = it.first(){it.id == vm.levelId}.toString()
-                        })
+                    textView.text =DB.getInstance(applicationContext).level().getAllLevel().first(){it.id == vm.levelId}.toString()
                 }
 
             }
             btnGetQuestion.setOnClickListener() {
                 textView.text = ""
-//                textView.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
-//                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-//                cm.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
-
-                    DB.getInstance(applicationContext).question().getAllQuestion().observe(this@CreatorActivity, Observer{
+                DB.getInstance(applicationContext).question().getAllQuestion()
+                    .observe(this@CreatorActivity, Observer {
                         textView.text = it.toString()
                     })
+                val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                cm.text = Data.listQuestion.filter { it.levelId == vm.levelId }.toString()
 
             }
             btnGetPartial.setOnClickListener() {
@@ -296,31 +321,10 @@ class CreatorActivity : AppCompatActivity() {
                 val cm = applicationContext.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 cm.text = Data.listPartial.filter { it.levelId == vm.levelId }.toString()
             }
+
             btnLoadSoal.setOnClickListener() {
-                //boxViewInit()
-
-
-                vm.boxText(TextAttr.CLEAR_TEXT)
-
-//                vm.gameState = GameState.PLAY
-
-                vm.levelId = "1"
-                tvLevelId.text = vm.levelId
-
-                initOrUpdateSpItems()
-                loadPart()
-                clearQuestionFields()
-//                vm.boxText(TextAttr.FILL_TAG)
-//                vm.boxVisibility()
-                vm.boxText(TextAttr.FILL_TEXT)
-//                initComponents()
-                vm.setCurrent(0)
-                vm.currentIndex.value = 1
-                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_DISABLE)
-                vm.boxColor(this@CreatorActivity, binding, ColorAttr.COLOR_ACTIVE)
-
+                saveAllData()
             }
-
 
         } //EndBinding Include2
 
@@ -341,6 +345,70 @@ class CreatorActivity : AppCompatActivity() {
 
     } //create
 
+    private fun loadGameAtLevel() {
+        vm.levelId = intent.getStringExtra("level").toString()
+        binding.included2.tvLevelId.text = vm.levelId
+        binding.headerPlay.tvLabelTop.text = vm.levelId
+
+        DB.getInstance(applicationContext).question().getAllQuestion().observe(this, Observer {
+            Data.listQuestion = it.toMutableList()
+        })
+
+
+        DB.getInstance(applicationContext).partial().getAllPartial().observe(this, Observer {
+            Data.listPartial = it.toMutableList()
+            it.forEach() {
+                arr.add(it.charAt)
+            }
+        })
+
+    }
+
+
+    private fun saveAllData() {
+        lifecycleScope.launch {
+            val level = DB.getInstance(applicationContext).level()
+            level.insertLevel(
+                level = Data.Level(
+                    id = vm.levelId,
+                    category = "testing baru",
+                    dimension = "15x15"
+                )
+            )
+        }
+
+        lifecycleScope.launch {
+            Data.listQuestion.filter { it.levelId == vm.levelId }.map { it }.forEach() {
+                DB.getInstance(applicationContext).question().insertQuestion(
+                    Data.Question(
+                        levelId = it.levelId,
+                        id = it.id,
+                        number = it.number,
+                        direction = it.direction,
+                        asking = it.asking,
+                        answer = it.answer,
+                        slot = it.slot
+                    )
+                )
+            }
+        }
+
+        lifecycleScope.launch {
+            Data.listPartial.filter { it.levelId == vm.levelId }.map { it }.forEach() {
+                DB.getInstance(applicationContext).partial().insertPartial(
+                    Data.Partial(
+                        id = it.id,
+                        charAt = it.charAt,
+                        charStr = it.charStr,
+                        rowQuestionId = it.rowQuestionId,
+                        colQuestionId = it.colQuestionId,
+                        levelId = vm.levelId,
+                    )
+                )
+            }
+        }
+    }
+
     private fun loadPart() {
         binding.included2.apply {
             tvPartId.text = ""
@@ -354,7 +422,7 @@ class CreatorActivity : AppCompatActivity() {
                 .map { it }.forEach {
                     tvPartId.text = it.id
                     tvCharAt.text = it.charAt.toString()
-                    tvChar.text = it.char
+                    tvChar.text = it.charStr
                     tvRightAt.text = it.rowQuestionId
                     tvDownAt.text = it.colQuestionId
                 }
@@ -582,23 +650,11 @@ class CreatorActivity : AppCompatActivity() {
                     levelId = vm.levelId,
                     id = UUID.randomUUID().toString().substring(0, 10),
                     charAt = boxAvailable[i],
-                    char = answerText[i].toString(),
+                    charStr = answerText[i].toString(),
                     rowQuestionId = if (vm.direction == Direction.HORIZONTAL.name) questionId else "",
                     colQuestionId = if (vm.direction == Direction.VERTICAL.name) questionId else "",
                 )
             )
-            lifecycleScope.launch {
-                DB.getInstance(applicationContext).partial().insertPartial(
-                    Data.Partial(
-                        levelId = vm.levelId,
-                        id = UUID.randomUUID().toString().substring(0, 10),
-                        charAt = boxAvailable[i],
-                        char = answerText[i].toString(),
-                        rowQuestionId = if (vm.direction == Direction.HORIZONTAL.name) questionId else "",
-                        colQuestionId = if (vm.direction == Direction.VERTICAL.name) questionId else "",
-                    )
-                )
-            }
         }
     }
 
@@ -636,19 +692,6 @@ class CreatorActivity : AppCompatActivity() {
                     slot = slot
                 )
             )
-            lifecycleScope.launch {
-                DB.getInstance(applicationContext).question().insertQuestion(
-                    Data.Question(
-                        levelId = levelId,
-                        id = id,
-                        number = number,
-                        direction = direction,
-                        asking = asking,
-                        answer = answer,
-                        slot = slot
-                    )
-                )
-            }
             vm.setCurrent(slot[0])
             vm.currentIndex.value = Data.listQuestion.count() { it.levelId == levelId }
         }
@@ -696,7 +739,7 @@ class CreatorActivity : AppCompatActivity() {
         binding.included2.apply {
             tvInfo.visibility = View.GONE
             panelInfo.visibility = View.GONE
-            btnSwitchQuestion.text = Constants.strRight
+            btnSwitchQuestion.text = Const.strRight
             tvClip.text = ""
             tvClip.visibility = View.INVISIBLE
             btnClearClip.visibility = View.INVISIBLE
@@ -721,7 +764,8 @@ class CreatorActivity : AppCompatActivity() {
     }
 
     private fun boxViewInit() {
-        for (i in 0 until 100) {
+        val count = binding.included1.boardTen.childCount
+        for (i in 0 until count) {
             val child = binding.included1.boardTen.getChildAt(i)
             if (child is TextView) vm.box.add(child)
         }

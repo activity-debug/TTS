@@ -13,10 +13,13 @@ import androidx.room.TypeConverters
 )
 @TypeConverters(Converters::class)
 abstract class DB : RoomDatabase() {
-    abstract fun level() : Level
-    abstract fun question() : Question
-    abstract fun partial() : Partial
+    abstract fun level(): Dao.Level
+    abstract fun question(): Dao.Question
+    abstract fun partial(): Dao.Partial
 
+    //    Room.databaseBuilder(appContext, AppDatabase::class.java, "Sample.db")
+//    .createFromAsset("database/myapp.db")
+//    .build()
     companion object {
         @Volatile
         private var INSTANCE: DB? = null
@@ -28,7 +31,9 @@ abstract class DB : RoomDatabase() {
                         context.applicationContext,
                         DB::class.java,
                         "tts-db"
-                    ).build()
+                    )
+                        .createFromAsset("database/tts-db")
+                        .build()
                 }
                 return instance
             }

@@ -2,15 +2,19 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="selected">#6750A3</color>
-    <color name="font_selected">#3949AB</color>
-    <color name="selected_range">#9FA8DA</color>
+    <color name="selected">#9575CD</color>
+    <color name="font_selected">@color/font_active</color>
+    <color name="selected_range">#D1C4E9</color>
     <color name="disable">#EDE7F6</color>
     <color name="font_disable">#EDE7F6</color>
     <color name="active">#3F51B5</color>
     <color name="font_active">#C4C9E4</color>
     <color name="warning">#FFFFFFFF</color>
     <color name="button">#6750A3</color>
-    <color name="background">#6A1B9A</color>
+    <color name="background">#5F0E91</color>
     <color name="button_text">#FAF8FB</color>
+    <color name="pass">#81C784</color>
+    <color name="not_pass">#FFF176</color>
+    <color name="button2_color">#5D5EA9</color>
+    <color name="button2_text">#EFE1EE</color>
 </resources>

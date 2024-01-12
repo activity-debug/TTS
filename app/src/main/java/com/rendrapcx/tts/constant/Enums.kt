@@ -23,7 +23,6 @@ enum class GameState{
 enum class TextAttr {
     CLEAR_TEXT,
     FILL_TEXT,
-    FILL_TAG
 }
 
 enum class InputDirection {

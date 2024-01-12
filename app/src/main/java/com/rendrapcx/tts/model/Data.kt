@@ -33,13 +33,31 @@ class Data {
         @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "id") var id: String,
         @ColumnInfo(name = "char_at") var charAt: Int,
-        @ColumnInfo(name = "char") var char: String,
+        @ColumnInfo(name = "char_str") var charStr: String,
         @ColumnInfo(name = "row_question_id") var rowQuestionId: String,
         @ColumnInfo(name = "col_question_id") var colQuestionId: String,
         @ColumnInfo(name = "level_id") var levelId: String,
-    ){
+)
+    {
         constructor() : this("",0,"","","","")
     }
+
+    @Entity(tableName = "User")
+    data class User(
+        @PrimaryKey(autoGenerate = true)
+        @ColumnInfo(name = "id") var id : Int,
+        @ColumnInfo(name = "name") var name : String,
+    )
+
+    @Entity(tableName = "user_answer")
+    data class UserAnswer(
+        @PrimaryKey(autoGenerate = true)
+        @ColumnInfo(name = "id") var id : Int,
+        @ColumnInfo(name = "user_id") var userId: Int?=-1,
+        @ColumnInfo(name = "level_id") var levelId: String?=null,
+        @ColumnInfo(name = "answer") var answer: String? =null,
+        @ColumnInfo(name = "status") var status: Int? = 0,
+    )
 
     companion object {
         var listLevel = mutableListOf<Level>()
