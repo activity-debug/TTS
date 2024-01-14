@@ -26,12 +26,13 @@
 
     <Button
         android:id="@+id/btnGoCreator"
-        style="@style/Widget.Material3.Button.OutlinedButton.Icon"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="250dp"
+        android:layout_height="64dp"
         android:layout_marginTop="268dp"
-        android:text="Creator1"
-        app:icon="@drawable/table_cells_solid"
+        android:text="EDITOR"
+        android:textColor="@color/button"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.452"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,15 +40,54 @@
 
     <Button
         android:id="@+id/btnGoListQuestion"
-        style="@style/Widget.Material3.Button.OutlinedButton"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="4dp"
-        android:text="Question List"
-        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        android:text="QUESTION"
+        android:textColor="@color/button"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@+id/btnGoCreator"
         app:layout_constraintHorizontal_bias="0.452"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/btnGoCreator"
         app:layout_constraintTop_toBottomOf="@+id/btnGoCreator" />
+
+    <Button
+        android:id="@+id/btnGoTTS"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        android:text="TTS"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@+id/btnGoListQuestion"
+        app:layout_constraintHorizontal_bias="0.225"
+        app:layout_constraintStart_toStartOf="@+id/btnGoListQuestion"
+        app:layout_constraintTop_toBottomOf="@+id/btnGoListQuestion" />
+
+    <Button
+        android:id="@+id/btnGoTBK"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        android:text="TBK"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@+id/btnGoTTS"
+        app:layout_constraintStart_toStartOf="@+id/btnGoListQuestion"
+        app:layout_constraintTop_toBottomOf="@+id/btnGoTTS" />
+
+    <Button
+        android:id="@+id/btnGoWiw"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        android:text="WIW"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="@+id/btnGoTBK"
+        app:layout_constraintStart_toStartOf="@+id/btnGoTBK"
+        app:layout_constraintTop_toBottomOf="@+id/btnGoTBK" />
 
     <Button
         android:id="@+id/btnTrophy"
@@ -82,6 +122,16 @@
         app:icon="@drawable/user_secret_solid"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnLogin"
+        style="@style/Widget.Material3.Button.IconButton.Outlined"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Login"
+        app:layout_constraintEnd_toStartOf="@+id/btnSettingMain"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnSettingMain"

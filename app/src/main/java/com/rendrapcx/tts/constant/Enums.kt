@@ -13,7 +13,7 @@ enum class Visibility {
 }
 
 enum class SelectRequest{
-    NEXT, PREV
+    NEXT, PREV, CURRENT
 }
 
 enum class GameState{

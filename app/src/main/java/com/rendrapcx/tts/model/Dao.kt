@@ -1,6 +1,7 @@
 package com.rendrapcx.tts.model
 
 import androidx.lifecycle.LiveData
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -29,7 +30,7 @@ class Dao {
         @Query("select * from level")
         suspend fun getAllLevel(): MutableList<Data.Level>
 
-        @Query("SELECT * FROM level WHERE id = :id;")
+        @Query("SELECT * FROM level WHERE `id` = :id;")
         suspend fun getLevel(id: String): MutableList<Data.Level>
 
     }
@@ -83,4 +84,57 @@ class Dao {
 
     }
 
+
+    @Dao
+    interface User {
+        @Insert(onConflict = OnConflictStrategy.REPLACE)
+        fun insertUser(user: Data.User)
+
+        @Query("SELECT * FROM user")
+        suspend fun getAllUser(): MutableList<Data.User>
+
+        @Query("SELECT * FROM user WHERE username = :username")
+        suspend fun getCurrentUser(username : String): MutableList<Data.User>
+
+    }
+
+    @Dao
+    interface UserAnswer {
+        @Insert(onConflict = OnConflictStrategy.REPLACE)
+        fun insertUserAnswer(userAnswer: Data.UserAnswer)
+
+        @Update
+        fun updateUserAnswer(userAnswer: Data.UserAnswer)
+
+        @Query("SELECT * FROM user_answer")
+        suspend fun getAllUserAnswer(): MutableList<Data.UserAnswer>
+
+        @Query("SELECT * FROM user_answer WHERE level_id=:levelId")
+        suspend fun getLevelAnswer(levelId: String) : MutableList<Data.UserAnswer>
+    }
+
+    @Dao
+    interface UserPreferences{
+
+        @Insert(onConflict = OnConflictStrategy.REPLACE)
+        suspend fun insertUserPref(userPreferences: Data.UserPreferences)
+
+        @Query("SELECT * FROM user_preferences")
+        suspend fun getAllUserPreferences(): MutableList<Data.UserPreferences>
+
+        @Query("UPDATE user_preferences " +
+                "   SET show_finished = :showFinished " +
+                "   WHERE `id` = :id;")
+        suspend fun updateShowFinished(id: String, showFinished: Boolean)
+
+        @Query("UPDATE user_preferences " +
+                "   SET sort_order_by_author = :sortOrderByAuthor " +
+                "   WHERE `id` = :id;")
+        suspend fun updateSortOrderByAuthor(id: String, sortOrderByAuthor: Boolean)
+
+        @Query("UPDATE user_preferences " +
+                "   SET integrated_keyboard = :integratedKeyboard " +
+                "   WHERE `id` = :id;")
+        suspend fun updateIntegratedKeyboard(id: String, integratedKeyboard: Boolean)
+    }
 }

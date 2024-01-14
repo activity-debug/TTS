@@ -1,43 +1,45 @@
 package com.rendrapcx.tts.ui
 
-import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.databinding.ActivityRegisterBinding
-import kotlinx.coroutines.flow.first
+import com.rendrapcx.tts.helper.Helper
 import kotlinx.coroutines.launch
+import java.util.UUID
 
-enum class TabReg { MASUK, REGISTER, INFORMATION }
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-    private val login_username = stringPreferencesKey("login_username")
-    private val login_password = stringPreferencesKey("login_password")
-    private val isRemember = booleanPreferencesKey("isRemember")
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Helper().apply { hideSystemUI() }
+
         tabLoginView()
-        loadUserPref()
 
 
+        binding.apply {
+            btnSignIn.setOnClickListener() {
+                gotoMain()
+            }
+            btnSignAsGuest.setOnClickListener() {
+                // TODO: Generate Guest User dulu
+                gotoMain()
+            }
+        }
 
         binding.apply {
             tabLogin.setOnClickListener() {
@@ -51,36 +53,8 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
 
-        binding.apply {
-            lifecycleScope.launch {
-                applicationContext.dataStore.edit { settings ->
-                    settings[login_username] = binding.edUIDLogin.text.toString()
-                    settings[login_password] = binding.edPasswordLogin.text.toString()
-                }
-            }
-        }
 
-        binding.apply {
-            btnSignIn.setOnClickListener() {
-                // TODO: Cek dulu datanya di DB 
-                saveUserLogin()
-                gotoMain()
-            }
-            btnSignAsGuest.setOnClickListener() {
-                // TODO: Generate Guest User dulu 
-                saveUserLogin()
-                gotoMain()
-            }
-        }
 
-    }
-
-    private fun loadUserPref() {
-        lifecycleScope.launch {
-            val data = applicationContext.dataStore.data.first()
-            binding.edUIDLogin.setText(data[login_username].toString())
-            binding.edPasswordLogin.setText(data[login_password].toString())
-        }
     }
 
     private fun tabInformationView() {
@@ -141,16 +115,4 @@ class RegisterActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun saveUserLogin() {
-        // TODO: SAVE JUGA KE DATABASE
-        binding.apply {
-            lifecycleScope.launch {
-                applicationContext.dataStore.edit { settings ->
-                    settings[login_username] = binding.edUIDLogin.text.toString()
-                    settings[login_password] = binding.edPasswordLogin.text.toString()
-                    settings[isRemember] = binding.ckRememberMe.isChecked
-                }
-            }
-        }
-    }
 }

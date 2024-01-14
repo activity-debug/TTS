@@ -119,9 +119,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
                     android:text="Sign In"
                     app:layout_constraintStart_toStartOf="@+id/edPasswordLogin"
-                    app:layout_constraintTop_toBottomOf="@+id/ckRememberMe" />
+                    app:layout_constraintTop_toBottomOf="@+id/edPasswordLogin" />
 
                 <Button
                     android:id="@+id/btnSignAsGuest"
@@ -133,14 +134,6 @@
                     app:icon="@drawable/user_secret_solid"
                     app:layout_constraintEnd_toEndOf="@+id/edPasswordLogin"
                     app:layout_constraintTop_toTopOf="@+id/btnSignIn" />
-
-                <CheckBox
-                    android:id="@+id/ckRememberMe"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Remember me"
-                    app:layout_constraintStart_toStartOf="@+id/edPasswordLogin"
-                    app:layout_constraintTop_toBottomOf="@+id/edPasswordLogin" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

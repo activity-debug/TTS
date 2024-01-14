@@ -178,11 +178,11 @@ class CreatorActivity : AppCompatActivity() {
                             .map {
                                 it.rowQuestionId = tvRightAt.text.toString()
                             }
-                        lifecycleScope.launch {
-                            val id = tvPartId.text.toString()
-                            val rowId = tvRightAt.text.toString()
-                            DB.getInstance(applicationContext).partial().updateRowId(id, rowId)
-                        }
+//                        lifecycleScope.launch {
+//                            val id = tvPartId.text.toString()
+//                            val rowId = tvRightAt.text.toString()
+//                            DB.getInstance(applicationContext).partial().updateRowId(id, rowId)
+//                        }
                         initOrUpdateSpItems()
                         loadPart()
                     }
@@ -196,14 +196,14 @@ class CreatorActivity : AppCompatActivity() {
                             .map {
                                 it.colQuestionId = tvDownAt.text.toString()
                             }
-                        lifecycleScope.launch {
-                            val id = tvPartId.text.toString()
-                            val colId = tvDownAt.text.toString()
-                            DB.getInstance(applicationContext).partial().updateColId(
-                                id = id,
-                                colId = colId
-                            )
-                        }
+//                        lifecycleScope.launch {
+//                            val id = tvPartId.text.toString()
+//                            val colId = tvDownAt.text.toString()
+//                            DB.getInstance(applicationContext).partial().updateColId(
+//                                id = id,
+//                                colId = colId
+//                            )
+//                        }
 
                         initOrUpdateSpItems()
                         loadPart()
@@ -574,7 +574,6 @@ class CreatorActivity : AppCompatActivity() {
 //                if (vm.inputMode == InputMode.EDIT) removePrevPart()
 
                 addPartList(questionId = questionId, answerText = answerText)
-
                 if (vm.inputMode == InputMode.NEW) {
                     saveQuestioner(
                         levelId = vm.levelId,
