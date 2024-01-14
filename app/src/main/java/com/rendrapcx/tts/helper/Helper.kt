@@ -19,6 +19,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.rendrapcx.tts.databinding.CustomDialog1Binding
+import com.rendrapcx.tts.databinding.DialogSettingBinding
 
 class Helper {
 
@@ -54,33 +55,14 @@ class Helper {
         builder
             .setMessage(msg)
             .setTitle(title)
-            .setNegativeButton("Negative") { dialog, which ->
-//                showToast("you select negatif")
-            }
-            .setItems(arrayOf("Item One", "Item Two", "Item Three")) { _, _ ->
-//                showToast("You select on items")
-            }
+//            .setNegativeButton("Negative") { dialog, which ->
+////                showToast("you select negatif")
+//            }
+//            .setItems(arrayOf("Item One", "Item Two", "Item Three")) { _, _ ->
+////                showToast("You select on items")
+//            }
         val dialog: AlertDialog = builder.create()
         dialog.show()
-    }
-
-    fun inputLevel(context: Context, title: String = "Title", msg: String = "Message") {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-        val input = EditText(context)
-        input.requestFocus()
-        builder
-            .setCancelable(false)
-            .setTitle(title)
-            .setMessage(msg)
-            .setView(input)
-            .setPositiveButton("OK",
-                DialogInterface.OnClickListener { dialog, whichButton ->
-//                    val value: Editable = input.text
-//                    binding.container2.inc tvLevelId1.text = value
-                }).setNegativeButton("Cancel",
-                DialogInterface.OnClickListener { dialog, whichButton ->
-                    dialog.dismiss()
-                }).show()
     }
 
 }

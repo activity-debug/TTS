@@ -44,6 +44,7 @@ import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -82,44 +83,62 @@ class BoardActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
+        binding.loading.visibility = View.VISIBLE
         initBoardChild()
         initIntKeyChild()
 
-        if (boardSet == BoardSet.EDITOR) {
-            initLayoutEditor()
-            currentLevel = UUID.randomUUID().toString().substring(0, 20)
-            binding.includeHeader.tvLabelTop.text = currentLevel
-            setBoxTagText()
-            position = 0
-            listLevel.add(
-                Data.Level(currentLevel, "New Testing", "Kecil saja")
-            )
-            setOnSelectedColor()
-        } else {
-            initLayoutPlay()
-            setBoxTagText()
+        when (boardSet) {
+            BoardSet.EDITOR_NEW -> {
+                initLayoutEditor()
+                currentLevel = UUID.randomUUID().toString().substring(0, 20)
+                binding.includeHeader.tvLabelTop.text = currentLevel
+                setBoxTagText()
+                position = 0
+                listLevel.add(
+                    Data.Level(currentLevel, "New Testing", "10x10")
+                )
+                setOnSelectedColor()
+            }
 
-            position = listPartial.first { it.levelId == currentLevel }.charAt
+            BoardSet.EDITOR_EDIT -> {
+                initLayoutEditor()
+                setBoxTagText()
 
-            getInputAnswerDirection()
-            onClickBox()
+                position = listPartial.first { it.levelId == currentLevel }.charAt
+
+                getInputAnswerDirection()
+                onClickBox()
+            }
+
+            else -> {
+                initLayoutPlay()
+                setBoxTagText()
+
+                position = listPartial.first { it.levelId == currentLevel }.charAt
+
+                getInputAnswerDirection()
+                onClickBox()
+            }
         }
+        binding.loading.visibility = View.INVISIBLE
 
         /* TODO: HEADER ACTIONS*/
         binding.includeHeader.apply {
             btnBack.setOnClickListener() {
                 when (boardSet) {
-                    BoardSet.PLAY -> {
+                    BoardSet.PLAY, BoardSet.EDITOR_EDIT -> {
                         val i = Intent(this@BoardActivity, QuestionActivity::class.java)
                         startActivity(i)
                         finish()
                     }
 
-                    BoardSet.EDITOR -> {
+                    BoardSet.EDITOR_NEW -> {
                         val i = Intent(this@BoardActivity, MainActivity::class.java)
                         startActivity(i)
                         finish()
                     }
+
+                    else -> {}
                 }
             }
             btnSettingPlay.setOnClickListener() {
@@ -135,21 +154,28 @@ class BoardActivity : AppCompatActivity() {
                     position = i
                     getInputAnswerDirection()
                     onClickBox()
-                    // if setting true show it
                     when (boardSet) {
-                        BoardSet.EDITOR -> {
+                        BoardSet.EDITOR_NEW, BoardSet.EDITOR_EDIT -> {
                             if (clip.isNotEmpty()) pasteId()
                         }
+
                         BoardSet.PLAY -> {
-                            //Tambahin if lagi kalo setingan aktif
                             Keypad().showSoftKeyboard(window, it)
                         }
+
+                        else -> {}
                     }
                 }
 
-                box[i].setOnLongClickListener(){
+                box[i].setOnLongClickListener() {
                     if (clip.isEmpty()) {
-                        clip = if (curRowId.isNotEmpty()) curRowId else curColId
+                        clip = curRowId.ifEmpty { curColId }
+                        Helper().apply {
+                            alertDialog(
+                                this@BoardActivity,
+                                "Select box to paste"
+                            )
+                        }
                     }
                     return@setOnLongClickListener true
                 }
@@ -160,13 +186,13 @@ class BoardActivity : AppCompatActivity() {
         binding.includeQuestionSpan.apply {
             btnNextQuestion.setOnClickListener() {
                 resetBoxColor()
-                if (boardSet == BoardSet.EDITOR) fillText()
+                if (boardSet != BoardSet.PLAY) fillText()
                 getRequestQuestions(SelectRequest.NEXT)
                 onClickBox()
             }
             btnPrevQuestion.setOnClickListener() {
                 resetBoxColor()
-                if (boardSet == BoardSet.EDITOR) fillText()
+                if (boardSet != BoardSet.PLAY) fillText()
                 getRequestQuestions(SelectRequest.PREV)
                 onClickBox()
             }
@@ -181,7 +207,11 @@ class BoardActivity : AppCompatActivity() {
             // TODO:
 
             btnSave.setOnClickListener() {
-                saveAndApply()
+                if (listQuestion.isEmpty()) {
+                    Helper().apply { alertDialog(this@BoardActivity, "Data masih kosong") }
+                } else {
+                    saveAndApply()
+                }
             }
 
             btnAdd.setOnClickListener() {
@@ -201,31 +231,11 @@ class BoardActivity : AppCompatActivity() {
                 Toast.makeText(this@BoardActivity, "Apa yang mau di edit coba?", Toast.LENGTH_SHORT)
                     .show()
             }
-
-            textRowId.setOnClickListener() {
-                if (clip.isEmpty()) {
-                    clip = textRowId.text.toString()
-                } else Toast.makeText(
-                    this@BoardActivity,
-                    "clip not empty, do paste or clear clip by long press paste button",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            textColId.setOnClickListener() {
-                if (clip.isEmpty()) {
-                    clip = textRowId.text.toString()
-                } else Toast.makeText(
-                    this@BoardActivity,
-                    "clip not empty, do paste or clear clip by long press paste button",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
         }
 
     }
 
-    private fun pasteId(){
+    private fun pasteId() {
         if (curRowId.isEmpty()) {
             listPartial.filter { it.levelId == currentLevel }
                 .filter { it.id == curPartId }
@@ -242,6 +252,7 @@ class BoardActivity : AppCompatActivity() {
         }
         fillText()
         clip = ""
+        Toast.makeText(this, "ID Copied, Clip cleared", Toast.LENGTH_SHORT).show()
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -265,7 +276,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     fun Context.onClickBox() {
-        if (boardSet == BoardSet.EDITOR) fillText()
+        if (boardSet != BoardSet.PLAY) fillText()
 
         setOnSelectedColor()
         setOnRangeColor()
@@ -274,6 +285,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun saveAndApply() {
+        binding.loading.visibility = View.VISIBLE
         val levelId = Const.currentLevel
         lifecycle.coroutineScope.launch {
             val level = DB.getInstance(applicationContext).level()
@@ -284,6 +296,7 @@ class BoardActivity : AppCompatActivity() {
                     dimension = "15x15"
                 )
             )
+            delay(1000L)
         }
 
         lifecycle.coroutineScope.launch {
@@ -300,6 +313,7 @@ class BoardActivity : AppCompatActivity() {
                     )
                 )
             }
+            delay(1000L)
         }
 
         lifecycle.coroutineScope.launch {
@@ -315,7 +329,10 @@ class BoardActivity : AppCompatActivity() {
                     )
                 )
             }
+            delay(1000L)
         }
+        binding.loading.visibility = View.INVISIBLE
+        Helper().apply { alertDialog(this@BoardActivity, "Data berhasil disimpan") }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -379,7 +396,7 @@ class BoardActivity : AppCompatActivity() {
     /* TODO: CHECK WIN*/
     @RequiresApi(Build.VERSION_CODES.R)
     private fun checkWinCondition(color: Boolean = true) {
-        if (boardSet == BoardSet.EDITOR) return
+        if (boardSet != BoardSet.PLAY) return
         var pass = true
         for (i in tag) {
 //            if (box[i].text == box[i].tag) {
@@ -392,9 +409,7 @@ class BoardActivity : AppCompatActivity() {
             }
         }
         if (pass) {
-            Helper().alertDialog(this, "HOREEE", "YOU WIN")
             // TODO: 1. win dialog, 2. next question or back to list, 3. update score 4. update user data level finished
-
             Dialog().apply { winDialog(this@BoardActivity, binding) }
 
         }
@@ -597,20 +612,11 @@ class BoardActivity : AppCompatActivity() {
 
     private fun showPartInfo() {
         binding.includeEditor.apply {
-//            textCharAt.text = ""
-//            textCharStr.text = ""
-//            textRowId.text = ""
-//            textColId.text = ""
-
             listPartial.filter { it.levelId == currentLevel && it.charAt == position }.forEach() {
                 curPartId = it.id
-//                textCharAt.text = it.charAt.toString()
                 curCharAt = it.charAt
-//                textCharStr.text = it.charStr
                 curCharStr = it.charStr
-//                textRowId.text = it.rowQuestionId
                 curRowId = it.rowQuestionId
-//                textColId.text = it.colQuestionId
                 curColId = it.colQuestionId
             }
         }
@@ -618,9 +624,24 @@ class BoardActivity : AppCompatActivity() {
 
     private fun setBoxTagText() {
         when (boardSet) {
-            BoardSet.EDITOR -> {
+            BoardSet.EDITOR_NEW -> {
                 for (i in 0 until box.size) {
                     box[i].text = ""
+                }
+                resetBoxColor()
+            }
+
+            BoardSet.EDITOR_EDIT -> {
+                tag.clear()
+                listPartial.filter { it.levelId == currentLevel }.forEach() {
+                    for (i in 0 until box.size) {
+                        if (i == it.charAt) {
+                            box[i].text = it.charStr
+                            box[i].tag = it.charStr
+                            tag.add(it.charAt)
+                            tagMap.put(it.charAt, it.charStr)
+                        }
+                    }
                 }
                 resetBoxColor()
             }
@@ -638,6 +659,8 @@ class BoardActivity : AppCompatActivity() {
                 }
                 resetBoxColor()
             }
+
+            else -> {}
         }
     }
 
@@ -724,7 +747,8 @@ class BoardActivity : AppCompatActivity() {
 
         binding.includeBoard.boardTen.setBackgroundColor(getColor(this, R.color.background))
 
-        binding.includeEditor.containerQuestion.visibility = View.GONE  //<-- Ini hapus komponen aja, cek dulu tapi
+        binding.includeEditor.containerQuestion.visibility =
+            View.GONE  //<-- TODO: HAPUS Ini hapus komponen aja, cek dulu tapi
 
         binding.includeEditor.containerInfo.visibility = View.GONE
         binding.includeEditor.containerPartial.visibility = View.GONE

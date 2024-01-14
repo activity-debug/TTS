@@ -21,7 +21,7 @@ class Dao {
         @Update
         suspend fun updateLevel(level: Data.Level)
 
-        @Delete
+        @Delete()
         suspend fun deleteLevel(level: Data.Level)
 
 //        @Query("select * from level")
@@ -33,6 +33,9 @@ class Dao {
         @Query("SELECT * FROM level WHERE `id` = :id;")
         suspend fun getLevel(id: String): MutableList<Data.Level>
 
+        @Query("DELETE FROM level WHERE `id` = :id;")
+        suspend fun deleteLevelById(id: String)
+
     }
 
     @Dao
@@ -40,17 +43,14 @@ class Dao {
         @Insert(onConflict = OnConflictStrategy.REPLACE)
         suspend fun insertQuestion(question: Data.Question)
 
-        @Update(onConflict = OnConflictStrategy.REPLACE)
-        suspend fun updateQuestion(question: Data.Question)
-
-        @Delete
-        suspend fun deleteQuestion(question: Data.Question)
-
         @Query("select * from question")
         fun getAllQuestion(): LiveData<List<Data.Question>>
 
         @Query("SELECT * FROM question WHERE level_id = :levelId;")
         suspend fun getQuestion(levelId: String): MutableList<Data.Question>
+
+        @Query("DELETE FROM question WHERE level_id = :levelId;")
+        suspend fun deleteQuestionByLevelId(levelId: String)
 
     }
 
@@ -58,12 +58,6 @@ class Dao {
     interface Partial {
         @Insert(onConflict = OnConflictStrategy.REPLACE)
         suspend fun insertPartial(partial: Data.Partial)
-
-        @Update(onConflict = OnConflictStrategy.REPLACE)
-        suspend fun updatePartial(partial: Data.Partial)
-
-        @Delete
-        suspend fun deletePartial(partial: Data.Partial)
 
         @Query("select * from partial")
         fun getAllPartial(): LiveData<List<Data.Partial>>
@@ -81,6 +75,9 @@ class Dao {
                         "   SET col_question_id =:colId " +
                         "       WHERE id = :id;")
         suspend fun updateColId(id: String, colId: String)
+
+        @Query("DELETE FROM partial WHERE level_id = :levelId;")
+        suspend fun deletePartialByLevelId(levelId: String)
 
     }
 

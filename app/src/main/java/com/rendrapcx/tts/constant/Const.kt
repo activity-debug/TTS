@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 
 class Const {
-    enum class BoardSet { EDITOR, PLAY }
+    enum class BoardSet { PLAY, PLAY_NEXT, EDITOR_NEW, EDITOR_EDIT }
     enum class InputQuestionDirection { HORIZONTAL, VERTICAL }
     enum class InputAnswerDirection { ROW, COLUMN }
 
@@ -17,7 +17,7 @@ class Const {
         var currentUserId = "JACK"
 
         var gameState = GameState.CREATOR
-        var boardSet = BoardSet.EDITOR
+        var boardSet = BoardSet.EDITOR_NEW
 
         var position = 0
         var currentIndex = 0

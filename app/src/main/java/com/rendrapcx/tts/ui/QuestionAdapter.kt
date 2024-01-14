@@ -19,6 +19,8 @@ class QuestionAdapter(
     private var listLevel = mutableListOf<Data.Level>()
     private var onClickView: ((Data.Level) -> Unit)? = null
     private var onClickEdit: ((Data.Level) -> Unit)? = null
+    private var onClickDelete: ((Data.Level) -> Unit)? = null
+
     fun setListItem(level: MutableList<Data.Level>) {
         this.listLevel = level
         this.notifyItemChanged(level.size)
@@ -30,6 +32,10 @@ class QuestionAdapter(
 
     fun setOnClickEdit(callback: (Data.Level) -> Unit ){
         this.onClickEdit = callback
+    }
+
+    fun setOnClickDelete(callback: (Data.Level) -> Unit ){
+        this.onClickDelete = callback
     }
 
 
@@ -65,8 +71,12 @@ class QuestionAdapter(
             onClickView?.invoke(level)
         }
 
-        holder.binding.btnITemEdit.setOnClickListener(){
+        holder.binding.btnItemEdit.setOnClickListener(){
             onClickEdit?.invoke(level)
+        }
+
+        holder.binding.btnItemDelete.setOnClickListener(){
+            onClickDelete?.invoke(level)
         }
     }
 

@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.apply {
             btnGoCreator.setOnClickListener() {
-                boardSet = BoardSet.EDITOR
+                boardSet = BoardSet.EDITOR_NEW
                 val i = Intent(this@MainActivity, BoardActivity::class.java)
                 startActivity(i)
             }
