@@ -98,6 +98,7 @@ class BoardActivity : AppCompatActivity() {
                 listLevel.add(
                     Data.Level(currentLevel, "2024", "Title", "Admin")
                 )
+                fillTextDescription()
                 setOnSelectedColor()
             }
 
@@ -106,6 +107,8 @@ class BoardActivity : AppCompatActivity() {
                 setBoxTagText()
 
                 position = listPartial.first { it.levelId == currentLevel }.charAt
+
+                fillTextDescription()
 
                 getInputAnswerDirection()
                 onClickBox()
@@ -223,6 +226,17 @@ class BoardActivity : AppCompatActivity() {
 
     }
 
+    private fun fillTextDescription(){
+        listLevel.filter { it.id == Const.currentLevel }.forEach() {
+            binding.includeEditor.apply {
+                textLevelId.text = it.id
+                textCategory.text = it.category
+                textTitle.text = it.title
+                textCreator.text = it.userId
+            }
+        }
+    }
+
     private fun pasteId() {
         if (curRowId.isEmpty()) {
             listPartial.filter { it.levelId == currentLevel }
@@ -243,12 +257,12 @@ class BoardActivity : AppCompatActivity() {
         Toast.makeText(this, "ID Copied, Clip cleared", Toast.LENGTH_SHORT).show()
     }
 
-    fun Context.getInputAnswerDirection() {
+    private fun getInputAnswerDirection() {
         if (getColumnId() != "") inputAnswerDirection = InputAnswerDirection.COLUMN
         else if (getRowId() != "") inputAnswerDirection = InputAnswerDirection.ROW
     }
 
-    fun Context.onClickBox() {
+    private fun onClickBox() {
         if (boardSet != BoardSet.PLAY) fillText()
 
         setOnSelectedColor()

@@ -17,7 +17,6 @@ import com.rendrapcx.tts.databinding.ActivityQuestionBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class QuestionActivity : AppCompatActivity() {
@@ -37,7 +36,7 @@ class QuestionActivity : AppCompatActivity() {
         initRecyclerView()
 
 
-        binding.btnNewLevel.setOnClickListener(){
+        binding.btnNewLevel.setOnClickListener() {
             boardSet = BoardSet.EDITOR_NEW
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
@@ -61,12 +60,13 @@ class QuestionActivity : AppCompatActivity() {
             Data.listLevel.clear()
             lifecycleScope.launch {
                 try {
-                    Data.listLevel = DB.getInstance(applicationContext).level().getAllLevel().ifEmpty { return@launch }
+                    Data.listLevel = DB.getInstance(applicationContext).level().getAllLevel()
+                        .ifEmpty { return@launch }
                 } finally {
                     binding.etSearch.hint = "Data Kosong"
                 }
-                    adapter.setListItem(Data.listLevel)
-                    binding.etSearch.hint = adapter.itemCount.toString()
+                adapter.setListItem(Data.listLevel)
+                binding.etSearch.hint = adapter.itemCount.toString()
             }
 
             adapter.setOnClickView { it ->
@@ -95,16 +95,19 @@ class QuestionActivity : AppCompatActivity() {
                         DB.getInstance(applicationContext).level().deleteLevelById(levelId)
                     }
                     lifecycleScope.launch {
-                        DB.getInstance(applicationContext).question().deleteQuestionByLevelId(levelId)
+                        DB.getInstance(applicationContext).question()
+                            .deleteQuestionByLevelId(levelId)
                     }
                     lifecycleScope.launch {
                         DB.getInstance(applicationContext).partial().deletePartialByLevelId(levelId)
                     }
                     lifecycleScope.launch {
-                        adapter.setListItem(DB.getInstance(applicationContext).level().getAllLevel())
+                        Data.listLevel.clear()
+                        Data.listLevel = DB.getInstance(applicationContext).level().getAllLevel()
+                        adapter.setListItem(Data.listLevel)
                         adapter.notifyDataSetChanged()
+                        binding.etSearch.hint = adapter.itemCount.toString()
                     }
-                    delay(2000L)
                     binding.progressBar2.visibility = View.GONE
                     Toast.makeText(this@QuestionActivity, "Deleted", Toast.LENGTH_SHORT).show()
                 }
