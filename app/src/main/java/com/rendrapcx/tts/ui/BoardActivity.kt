@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.text.InputFilter
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -134,11 +135,20 @@ class BoardActivity : AppCompatActivity() {
             }
             //KEYBOARD PRESS
             for (i in 0 until intKey.size) {
-                intKey[i].setOnClickListener() {
-                    box[position].text = intKey[i].text
-                    onPressAbjabMove()
-                    checkWinCondition(false)
-                }
+                intKey[i].setOnTouchListener(View.OnTouchListener() { _, motionEvent ->
+                    when (motionEvent.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            box[position].text = intKey[i].text
+                            onPressAbjabMove()
+                            checkWinCondition(false)
+                            intKey[i].setBackgroundColor(getColor(this@BoardActivity, R.color.selected))
+                        }
+                        MotionEvent.ACTION_UP -> {
+                            intKey[i].setBackgroundColor(getColor(this@BoardActivity, R.color.button))
+                        }
+                    }
+                    return@OnTouchListener true
+                })
             }
         }
 
@@ -233,6 +243,7 @@ class BoardActivity : AppCompatActivity() {
                 )
             }
 
+            //EDIT DESCRIPTION
             btnEdit.setOnClickListener() {
                 Dialog().apply { inputDescription(binding) }
             }

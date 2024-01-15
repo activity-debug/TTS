@@ -149,8 +149,8 @@
         android:textColor="@color/button_text"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@+id/key08"
         app:layout_constraintStart_toEndOf="@+id/key08"
+        app:layout_constraintTop_toTopOf="@+id/key08"
         tools:ignore="HardcodedText" />
 
     <TextView
@@ -165,8 +165,8 @@
         android:textColor="@color/button_text"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@+id/key09"
         app:layout_constraintStart_toEndOf="@+id/key09"
+        app:layout_constraintTop_toTopOf="@+id/key09"
         tools:ignore="HardcodedText" />
 
     <TextView
@@ -181,8 +181,8 @@
         android:textColor="@color/button_text"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@+id/key10"
         app:layout_constraintStart_toEndOf="@+id/key10"
+        app:layout_constraintTop_toTopOf="@+id/key10"
         tools:ignore="HardcodedText" />
 
     <TextView
@@ -197,8 +197,8 @@
         android:textColor="@color/button_text"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@+id/key11"
         app:layout_constraintStart_toEndOf="@+id/key11"
+        app:layout_constraintTop_toTopOf="@+id/key11"
         tools:ignore="HardcodedText" />
 
     <TextView
@@ -213,8 +213,8 @@
         android:textColor="@color/button_text"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@+id/key12"
         app:layout_constraintStart_toEndOf="@+id/key12"
+        app:layout_constraintTop_toTopOf="@+id/key12"
         tools:ignore="HardcodedText" />
 
     <TextView
