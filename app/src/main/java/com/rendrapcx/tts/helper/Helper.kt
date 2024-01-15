@@ -23,6 +23,15 @@ import com.rendrapcx.tts.databinding.DialogSettingBinding
 
 class Helper {
 
+    fun abjadKapital():List<String>{
+        var c : Char = 'A'
+        var abjad = arrayListOf<String>()
+        while (c <= 'Z') {
+            abjad.add(c.toString())
+            c++
+        }
+        return abjad
+    }
     @RequiresApi(Build.VERSION_CODES.R)
     fun Activity.hideSystemUI() {
         val windowInsetsController =

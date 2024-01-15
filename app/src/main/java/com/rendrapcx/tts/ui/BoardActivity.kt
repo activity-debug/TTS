@@ -1,5 +1,6 @@
 package com.rendrapcx.tts.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -74,8 +75,7 @@ class BoardActivity : AppCompatActivity() {
     private var curCharAt = 0
     private var curCharStr = ""
 
-    private var curQuestion = ""
-
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,16 +125,19 @@ class BoardActivity : AppCompatActivity() {
         }
 
         binding.includeKeyboard.apply {
-            btnBackSpace.setOnClickListener(){
-                Toast.makeText(this@BoardActivity, "BACKSPACE", Toast.LENGTH_SHORT).show()
+            btnBackSpace.setOnClickListener() {
+                box[position].text = ""
+                onPressBackSpace()
             }
-            btnShuffle.setOnClickListener(){
-                Toast.makeText(this@BoardActivity, "SHUFFLE", Toast.LENGTH_SHORT).show()
+            btnShuffle.setOnClickListener() {
+                showAnswerKeypad()
             }
             //KEYBOARD PRESS
-            for (i in 0 until intKey.size){
-                intKey[i].setOnClickListener(){
-                    Toast.makeText(this@BoardActivity, "${i}", Toast.LENGTH_SHORT).show()
+            for (i in 0 until intKey.size) {
+                intKey[i].setOnClickListener() {
+                    box[position].text = intKey[i].text
+                    onPressAbjabMove()
+                    checkWinCondition(false)
                 }
             }
         }
@@ -236,10 +239,9 @@ class BoardActivity : AppCompatActivity() {
         }
 
 
-
     }
 
-    private fun fillTextDescription(){
+    private fun fillTextDescription() {
         listLevel.filter { it.id == Const.currentLevel }.forEach() {
             binding.includeEditor.apply {
                 textLevelId.text = it.id
@@ -346,9 +348,10 @@ class BoardActivity : AppCompatActivity() {
             }
 
             67 -> {
-                val s = event?.displayLabel
-                box[x].text = s.toString()
-                onPressBackSpace()
+                if (box[x].isFocused) {
+                    box[x].text = ""
+                    onPressBackSpace()
+                }
             }
 
             else -> return false
@@ -536,6 +539,20 @@ class BoardActivity : AppCompatActivity() {
     }
 
 
+    private fun getAnswer(): String {
+        var id = getRowId()
+        if (inputAnswerDirection == InputAnswerDirection.ROW) id = getRowId()
+        else if (inputAnswerDirection == InputAnswerDirection.COLUMN) id = getColumnId()
+
+        var result = ""
+        listQuestion.filter { it.levelId == currentLevel }
+            .filter { it.id == id }
+            .map { it }.forEach() {
+                result = it.answer
+            }
+        return result
+    }
+
     private fun getQuestion(): String {
         var id = getRowId()
         if (inputAnswerDirection == InputAnswerDirection.ROW) id = getRowId()
@@ -590,17 +607,28 @@ class BoardActivity : AppCompatActivity() {
 
     private fun showAnswerKeypad() {
         binding.includeEditor.apply {
-            listQuestion.filter { it.levelId == currentLevel }
-                .forEach() {
-                    curQuestion = it.answer
+
+            binding.includeHeader.tvLabelTop.text = getAnswer()
+
+            val abjad = Helper().abjadKapital()
+            val jawab = getAnswer()
+            val charArr = jawab.toSortedSet()
+            val size = 14
+            val kurang = size - charArr.size
+
+            if (kurang > 0) {
+                while (charArr.size < 14) {
+                    val s = abjad.random()
+                    if (!jawab.contains(s)) {
+                        charArr.add(s[0])
+                    }
                 }
-            binding.includeHeader.tvLabelTop.text = curQuestion
+            }
 
-
-
+            val keyJawab = charArr.toCharArray()
 
             for (i in 0 until intKey.size) {
-
+                intKey[i].text = keyJawab[i].toString()
             }
 
 
