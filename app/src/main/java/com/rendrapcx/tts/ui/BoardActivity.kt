@@ -583,6 +583,7 @@ class BoardActivity : AppCompatActivity() {
                 .forEach() {
                     curQuestion = it.answer
                 }
+            binding.includeHeader.tvLabelTop.text = curQuestion
         }
     }
 
