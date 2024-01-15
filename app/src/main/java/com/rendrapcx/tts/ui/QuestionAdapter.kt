@@ -1,18 +1,10 @@
 package com.rendrapcx.tts.ui
 
-import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
-import com.rendrapcx.tts.constant.Const
-import com.rendrapcx.tts.constant.GameState
-import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.QuestionListItemBinding
-import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
-import com.rendrapcx.tts.viewmodel.BoardViewModel
 
 class QuestionAdapter(
 ) : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>() {

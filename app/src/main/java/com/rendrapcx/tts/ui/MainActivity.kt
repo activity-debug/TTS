@@ -52,10 +52,6 @@ class MainActivity : AppCompatActivity() {
             btnLogin.setOnClickListener(){
                 Dialog().apply { loginDialog(this@MainActivity) }
             }
-            btnGoTTS.setOnClickListener(){
-                val i = Intent(this@MainActivity, CreatorActivity::class.java)
-                startActivity(i)
-            }
         }
     }
 
