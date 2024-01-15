@@ -114,16 +114,20 @@ class BoardActivity : AppCompatActivity() {
                 onClickBox()
             }
 
-            else -> {
+            BoardSet.PLAY, BoardSet.PLAY_USER -> {
+                position = listPartial.first { it.levelId == currentLevel }.charAt
                 initLayoutPlay()
                 setBoxTagText()
-
-                position = listPartial.first { it.levelId == currentLevel }.charAt
-
                 getInputAnswerDirection()
                 onClickBox()
             }
+
+            BoardSet.PLAY_NEXT -> {
+                // TODO: KALO PAS WIN PILIH LANJUT
+            }
         }
+
+        Toast.makeText(this, "${boardSet}", Toast.LENGTH_SHORT).show()
 
         binding.includeKeyboard.apply {
             btnBackSpace.setOnClickListener() {
@@ -141,10 +145,21 @@ class BoardActivity : AppCompatActivity() {
                             box[position].text = intKey[i].text
                             onPressAbjabMove()
                             checkWinCondition(false)
-                            intKey[i].setBackgroundColor(getColor(this@BoardActivity, R.color.selected))
+                            intKey[i].setBackgroundColor(
+                                getColor(
+                                    this@BoardActivity,
+                                    R.color.selected
+                                )
+                            )
                         }
+
                         MotionEvent.ACTION_UP -> {
-                            intKey[i].setBackgroundColor(getColor(this@BoardActivity, R.color.button))
+                            intKey[i].setBackgroundColor(
+                                getColor(
+                                    this@BoardActivity,
+                                    R.color.button
+                                )
+                            )
                         }
                     }
                     return@OnTouchListener true
@@ -155,8 +170,10 @@ class BoardActivity : AppCompatActivity() {
         /* TODO: HEADER ACTIONS*/
         binding.includeHeader.apply {
             btnBack.setOnClickListener() {
-                val i = Intent(this@BoardActivity, QuestionActivity::class.java)
-                startActivity(i)
+                val intent = if (boardSet == BoardSet.PLAY_USER)
+                    Intent(this@BoardActivity, MainActivity::class.java)
+                else Intent(this@BoardActivity, QuestionActivity::class.java)
+                startActivity(intent)
                 finish()
             }
             btnSettingPlay.setOnClickListener() {
@@ -177,7 +194,7 @@ class BoardActivity : AppCompatActivity() {
                             if (clip.isNotEmpty()) pasteId()
                         }
 
-                        BoardSet.PLAY -> {
+                        BoardSet.PLAY, BoardSet.PLAY_USER -> {
                             Keypad().showSoftKeyboard(window, it)
                         }
 
@@ -204,13 +221,14 @@ class BoardActivity : AppCompatActivity() {
         binding.includeQuestionSpan.apply {
             btnNextQuestion.setOnClickListener() {
                 resetBoxColor()
-                if (boardSet != BoardSet.PLAY) fillText()
+                fillText()
+
                 getRequestQuestions(SelectRequest.NEXT)
                 onClickBox()
             }
             btnPrevQuestion.setOnClickListener() {
                 resetBoxColor()
-                if (boardSet != BoardSet.PLAY) fillText()
+                fillText()
                 getRequestQuestions(SelectRequest.PREV)
                 onClickBox()
             }
@@ -221,7 +239,7 @@ class BoardActivity : AppCompatActivity() {
 
         /* FIXME: EDITOR BINDING ACTION*/
         binding.includeEditor.apply {
-            if (boardSet == BoardSet.PLAY) return
+            if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER) return
             // TODO:
 
             btnSave.setOnClickListener() {
@@ -253,34 +271,38 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun fillTextDescription() {
-        listLevel.filter { it.id == Const.currentLevel }.forEach() {
-            binding.includeEditor.apply {
-                textLevelId.text = it.id
-                textCategory.text = it.category
-                textTitle.text = it.title
-                textCreator.text = it.userId
+        if (boardSet == BoardSet.EDITOR_NEW || boardSet == BoardSet.EDITOR_EDIT) {
+            listLevel.filter { it.id == Const.currentLevel }.forEach() {
+                binding.includeEditor.apply {
+                    textLevelId.text = it.id
+                    textCategory.text = it.category
+                    textTitle.text = it.title
+                    textCreator.text = it.userId
+                }
             }
         }
     }
 
     private fun pasteId() {
-        if (curRowId.isEmpty()) {
-            listPartial.filter { it.levelId == currentLevel }
-                .filter { it.id == curPartId }
-                .map {
-                    it.rowQuestionId = clip
-                }
+        if (boardSet == BoardSet.EDITOR_NEW || boardSet == BoardSet.EDITOR_EDIT) {
+            if (curRowId.isEmpty()) {
+                listPartial.filter { it.levelId == currentLevel }
+                    .filter { it.id == curPartId }
+                    .map {
+                        it.rowQuestionId = clip
+                    }
+            }
+            if (curColId.isEmpty()) {
+                listPartial.filter { it.levelId == currentLevel }
+                    .filter { it.id == curPartId }
+                    .map {
+                        it.colQuestionId = clip
+                    }
+            }
+            fillText()
+            clip = ""
+            Toast.makeText(this, "ID Copied, Clip cleared", Toast.LENGTH_SHORT).show()
         }
-        if (curColId.isEmpty()) {
-            listPartial.filter { it.levelId == currentLevel }
-                .filter { it.id == curPartId }
-                .map {
-                    it.colQuestionId = clip
-                }
-        }
-        fillText()
-        clip = ""
-        Toast.makeText(this, "ID Copied, Clip cleared", Toast.LENGTH_SHORT).show()
     }
 
     private fun getInputAnswerDirection() {
@@ -289,7 +311,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun onClickBox() {
-        if (boardSet != BoardSet.PLAY) fillText()
+        fillText() //ONLY when edit
 
         setOnSelectedColor()
         setOnRangeColor()
@@ -409,7 +431,7 @@ class BoardActivity : AppCompatActivity() {
     /* TODO: CHECK WIN*/
     @RequiresApi(Build.VERSION_CODES.R)
     private fun checkWinCondition(color: Boolean = true) {
-        if (boardSet != BoardSet.PLAY) return
+        if (boardSet == BoardSet.EDITOR_EDIT || boardSet == BoardSet.EDITOR_NEW) return
         var pass = true
         for (i in tag) {
 //            if (box[i].text == box[i].tag) {
@@ -671,28 +693,31 @@ class BoardActivity : AppCompatActivity() {
                             box[i].text = it.charStr
                             box[i].tag = it.charStr
                             tag.add(it.charAt)
-                            tagMap.put(it.charAt, it.charStr)
+                            //tagMap.put(it.charAt, it.charStr)
                         }
                     }
                 }
                 resetBoxColor()
             }
 
-            BoardSet.PLAY -> {
+            BoardSet.PLAY, BoardSet.PLAY_USER -> {
                 tag.clear()
                 listPartial.filter { it.levelId == currentLevel }.forEach() {
                     for (i in 0 until box.size) {
                         if (i == it.charAt) {
+                            box[i].text = ""
                             box[i].tag = it.charStr
                             tag.add(it.charAt)
-                            tagMap.put(it.charAt, it.charStr)
+                            //tagMap.put(it.charAt, it.charStr)
                         }
                     }
                 }
                 resetBoxColor()
             }
 
-            else -> {}
+            BoardSet.PLAY_NEXT -> {
+                // TODO: ISI PLAY NEXT 
+            }
         }
     }
 
@@ -737,20 +762,25 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun fillText() {
-        listPartial.filter { it.levelId == currentLevel }.map { it }.forEach() {
-            for (i in 0 until box.size)
-                if (i == it.charAt) {
-                    box[i].text = it.charStr
-                    box[i].tag = it.charStr
-                    tag.add(it.charAt)
-                    tagMap.put(it.charAt, it.charStr)
-                }
+        if (boardSet == BoardSet.EDITOR_NEW || boardSet == BoardSet.EDITOR_EDIT) {
+            listPartial.filter { it.levelId == currentLevel }.map { it }.forEach() {
+                for (i in 0 until box.size)
+                    if (i == it.charAt) {
+                        box[i].text = it.charStr
+                        box[i].tag = it.charStr
+                        tag.add(it.charAt)
+                    }
+            }
         }
     }
 
     private fun resetBoxColor() {
         for (i in 0 until box.size) {
-            if (box[i].tag == "" && boardSet == BoardSet.PLAY) box[i].visibility = View.INVISIBLE
+            if (box[i].tag == "") {
+                if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY) {
+                    box[i].visibility = View.INVISIBLE
+                }
+            }
             box[i].setTextColor(getColor(this, R.color.black))
             box[i].setBackgroundColor(getColor(this, R.color.white))
         }

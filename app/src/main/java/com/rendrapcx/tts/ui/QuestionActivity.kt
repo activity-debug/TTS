@@ -82,6 +82,7 @@ class QuestionActivity : AppCompatActivity() {
                     Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
                         currentLevel
                     )
+
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
                 }

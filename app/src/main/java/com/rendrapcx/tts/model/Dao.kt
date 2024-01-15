@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.Flow
 
 class Dao {
 
-
     @Dao
     interface Level : ILevel {}
 

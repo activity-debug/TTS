@@ -46,6 +46,7 @@ class PlayMenuAdapter : RecyclerView.Adapter<PlayMenuAdapter.PlayViewHolder>() {
             onClickView?.invoke(level)
         }
 
+
     }
 
 }

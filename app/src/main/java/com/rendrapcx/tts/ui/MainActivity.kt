@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                     .ifEmpty { return@launch }
             } finally {
-                binding.btnLogin.text = "EMPTY"
+
             }
         }
     }

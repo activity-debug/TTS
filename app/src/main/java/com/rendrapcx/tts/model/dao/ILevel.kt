@@ -22,6 +22,9 @@ interface ILevel {
     @Query("select * from level")
     suspend fun getAllLevel(): MutableList<Data.Level>
 
+    @Query("SELECT * FROM level WHERE category = :category;")
+    suspend fun getAllByCategory(category: String): MutableList<Data.Level>
+
     @Query("SELECT * FROM level WHERE `id` = :id;")
     suspend fun getLevel(id: String): MutableList<Data.Level>
 
