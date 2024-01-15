@@ -50,7 +50,6 @@ class QuestionActivity : AppCompatActivity() {
                 startActivity(i)
             }
         }
-
     }
 
     @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
@@ -59,12 +58,15 @@ class QuestionActivity : AppCompatActivity() {
             rcViewQuestioner.layoutManager = LinearLayoutManager(this@QuestionActivity)
             rcViewQuestioner.adapter = adapter
 
+            Data.listLevel.clear()
             lifecycleScope.launch {
                 try {
-                    adapter.setListItem(DB.getInstance(applicationContext).level().getAllLevel().ifEmpty { return@launch })
+                    Data.listLevel = DB.getInstance(applicationContext).level().getAllLevel().ifEmpty { return@launch }
                 } finally {
-                    binding.etSearch.setText("Data Kosong")
+                    binding.etSearch.hint = "Data Kosong"
                 }
+                    adapter.setListItem(Data.listLevel)
+                    binding.etSearch.hint = adapter.itemCount.toString()
             }
 
             adapter.setOnClickView { it ->

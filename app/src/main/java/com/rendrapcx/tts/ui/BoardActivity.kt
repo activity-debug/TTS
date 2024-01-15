@@ -127,21 +127,9 @@ class BoardActivity : AppCompatActivity() {
         /* TODO: HEADER ACTIONS*/
         binding.includeHeader.apply {
             btnBack.setOnClickListener() {
-                when (boardSet) {
-                    BoardSet.PLAY, BoardSet.EDITOR_EDIT -> {
-                        val i = Intent(this@BoardActivity, QuestionActivity::class.java)
-                        startActivity(i)
-                        finish()
-                    }
-
-                    BoardSet.EDITOR_NEW -> {
-                        val i = Intent(this@BoardActivity, MainActivity::class.java)
-                        startActivity(i)
-                        finish()
-                    }
-
-                    else -> {}
-                }
+                val i = Intent(this@BoardActivity, QuestionActivity::class.java)
+                startActivity(i)
+                finish()
             }
             btnSettingPlay.setOnClickListener() {
                 Dialog().apply { settingDialog(this@BoardActivity) }
@@ -595,7 +583,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeEditor.apply {
             listQuestion.filter { it.levelId == currentLevel }
                 .forEach() {
-                   curQuestion = it.answer
+                    curQuestion = it.answer
                 }
         }
     }
