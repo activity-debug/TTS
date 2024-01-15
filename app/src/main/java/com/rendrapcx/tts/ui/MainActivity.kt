@@ -33,13 +33,7 @@ class MainActivity : AppCompatActivity() {
         Helper().apply { hideSystemUI() }
 
         binding.apply {
-            btnGoCreator.setOnClickListener() {
-                boardSet = BoardSet.EDITOR_NEW
-                val i = Intent(this@MainActivity, BoardActivity::class.java)
-                startActivity(i)
-            }
             btnGoListQuestion.setOnClickListener() {
-                boardSet = BoardSet.PLAY
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
                 startActivity(i)
             }

@@ -24,7 +24,7 @@ class QuestionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuestionBinding
     private var adapter = QuestionAdapter()
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,46 +36,11 @@ class QuestionActivity : AppCompatActivity() {
 
         initRecyclerView()
 
-        adapter.setOnClickDelete {
-            lifecycleScope.launch {
 
-                val levelId = it.id
-                binding.progressBar2.visibility = View.VISIBLE
-                lifecycleScope.launch {
-                    DB.getInstance(applicationContext).level().deleteLevelById(levelId)
-                }
-                lifecycleScope.launch {
-                    DB.getInstance(applicationContext).question().deleteQuestionByLevelId(levelId)
-                }
-                lifecycleScope.launch {
-                    DB.getInstance(applicationContext).partial().deletePartialByLevelId(levelId)
-                }
-                lifecycleScope.launch {
-                    adapter.setListItem(DB.getInstance(applicationContext).level().getAllLevel())
-                    adapter.notifyDataSetChanged()
-                }
-                delay(2000L)
-                binding.progressBar2.visibility = View.GONE
-                Toast.makeText(this@QuestionActivity, "Deleted", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        adapter.setOnClickEdit { it ->
-            lifecycleScope.launch {
-                boardSet = BoardSet.EDITOR_EDIT
-                currentLevel = it.id
-
-                Data.listLevel =
-                    DB.getInstance(applicationContext).level().getLevel(currentLevel)
-                Data.listQuestion =
-                    DB.getInstance(applicationContext).question().getQuestion(currentLevel)
-                Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                    currentLevel
-                )
-
-                val i = Intent(this@QuestionActivity, BoardActivity::class.java)
-                startActivity(i)
-            }
+        binding.btnNewLevel.setOnClickListener(){
+            boardSet = BoardSet.EDITOR_NEW
+            val i = Intent(this, BoardActivity::class.java)
+            startActivity(i)
         }
 
         binding.headerPanel.apply {
@@ -88,13 +53,18 @@ class QuestionActivity : AppCompatActivity() {
 
     }
 
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     private fun initRecyclerView() {
         binding.apply {
             rcViewQuestioner.layoutManager = LinearLayoutManager(this@QuestionActivity)
             rcViewQuestioner.adapter = adapter
 
             lifecycleScope.launch {
-                adapter.setListItem(DB.getInstance(applicationContext).level().getAllLevel())
+                try {
+                    adapter.setListItem(DB.getInstance(applicationContext).level().getAllLevel().ifEmpty { return@launch })
+                } finally {
+                    binding.etSearch.setText("Data Kosong")
+                }
             }
 
             adapter.setOnClickView { it ->
@@ -114,6 +84,47 @@ class QuestionActivity : AppCompatActivity() {
                 }
             }
 
+            adapter.setOnClickDelete {
+                lifecycleScope.launch {
+
+                    val levelId = it.id
+                    binding.progressBar2.visibility = View.VISIBLE
+                    lifecycleScope.launch {
+                        DB.getInstance(applicationContext).level().deleteLevelById(levelId)
+                    }
+                    lifecycleScope.launch {
+                        DB.getInstance(applicationContext).question().deleteQuestionByLevelId(levelId)
+                    }
+                    lifecycleScope.launch {
+                        DB.getInstance(applicationContext).partial().deletePartialByLevelId(levelId)
+                    }
+                    lifecycleScope.launch {
+                        adapter.setListItem(DB.getInstance(applicationContext).level().getAllLevel())
+                        adapter.notifyDataSetChanged()
+                    }
+                    delay(2000L)
+                    binding.progressBar2.visibility = View.GONE
+                    Toast.makeText(this@QuestionActivity, "Deleted", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            adapter.setOnClickEdit { it ->
+                lifecycleScope.launch {
+                    boardSet = BoardSet.EDITOR_EDIT
+                    currentLevel = it.id
+
+                    Data.listLevel =
+                        DB.getInstance(applicationContext).level().getLevel(currentLevel)
+                    Data.listQuestion =
+                        DB.getInstance(applicationContext).question().getQuestion(currentLevel)
+                    Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
+                        currentLevel
+                    )
+
+                    val i = Intent(this@QuestionActivity, BoardActivity::class.java)
+                    startActivity(i)
+                }
+            }
 
         }
     }
