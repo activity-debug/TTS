@@ -12,7 +12,7 @@
         android:paddingVertical="10dp">
 
         <EditText
-            android:id="@+id/EditLevelId"
+            android:id="@+id/editLevelId"
             android:layout_width="318dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -34,9 +34,9 @@
             android:ems="10"
             android:hint="Title"
             android:inputType="text"
-            app:layout_constraintEnd_toEndOf="@+id/EditLevelId"
-            app:layout_constraintStart_toStartOf="@+id/EditLevelId"
-            app:layout_constraintTop_toBottomOf="@+id/EditLevelId"
+            app:layout_constraintEnd_toEndOf="@+id/editLevelId"
+            app:layout_constraintStart_toStartOf="@+id/editLevelId"
+            app:layout_constraintTop_toBottomOf="@+id/editLevelId"
             tools:ignore="HardcodedText" />
 
         <EditText

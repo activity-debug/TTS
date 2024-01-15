@@ -38,7 +38,6 @@ import com.rendrapcx.tts.databinding.DialogInputSoalBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.Keypad
-import com.rendrapcx.tts.helper.Questioner
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
@@ -97,7 +96,7 @@ class BoardActivity : AppCompatActivity() {
                 setBoxTagText()
                 position = 0
                 listLevel.add(
-                    Data.Level(currentLevel, "New Testing", "10x10")
+                    Data.Level(currentLevel, "2024", "Title", "Admin")
                 )
                 setOnSelectedColor()
             }
@@ -218,8 +217,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             btnEdit.setOnClickListener() {
-                Toast.makeText(this@BoardActivity, "Apa yang mau di edit coba?", Toast.LENGTH_SHORT)
-                    .show()
+                Dialog().apply { inputDescription(binding) }
             }
         }
 
@@ -245,21 +243,6 @@ class BoardActivity : AppCompatActivity() {
         Toast.makeText(this, "ID Copied, Clip cleared", Toast.LENGTH_SHORT).show()
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun showDialogInput() {
-        Questioner().apply {
-            inputDialogQuestioner(
-                this@BoardActivity,
-                position,
-                boxRowOvers().count(),
-                boxRowOvers(),
-                boxColumnOvers().count(),
-                boxColumnOvers(),
-                lifecycle
-            )
-        }
-    }
-
     fun Context.getInputAnswerDirection() {
         if (getColumnId() != "") inputAnswerDirection = InputAnswerDirection.COLUMN
         else if (getRowId() != "") inputAnswerDirection = InputAnswerDirection.ROW
@@ -282,8 +265,9 @@ class BoardActivity : AppCompatActivity() {
             level.insertLevel(
                 level = Data.Level(
                     id = levelId,
-                    category = "testing baru",
-                    dimension = "15x15"
+                    category = binding.includeEditor.textCategory.text.toString(),
+                    title = binding.includeEditor.textTitle.text.toString(),
+                    userId = binding.includeEditor.textCreator.text.toString()
                 )
             )
             delay(1000L)

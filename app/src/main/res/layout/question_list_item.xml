@@ -32,24 +32,26 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Category"
-            app:layout_constraintStart_toStartOf="@+id/textView6"
-            app:layout_constraintTop_toBottomOf="@+id/textView6" />
+            app:layout_constraintEnd_toEndOf="@+id/textView6"
+            app:layout_constraintTop_toBottomOf="@+id/tvItemId" />
 
         <TextView
             android:id="@+id/textView11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Dimension"
-            app:layout_constraintStart_toStartOf="@+id/textView10"
-            app:layout_constraintTop_toBottomOf="@+id/textView10" />
+            android:text="Title"
+            app:layout_constraintEnd_toEndOf="@+id/textView10"
+            app:layout_constraintTop_toBottomOf="@+id/tvItemCategory" />
 
         <TextView
             android:id="@+id/tvItemId"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:text="EF4SD34-5"
+            app:layout_constraintEnd_toStartOf="@+id/btnItemEdit"
             app:layout_constraintStart_toEndOf="@+id/textView6"
             app:layout_constraintTop_toTopOf="@+id/textView6" />
 
@@ -59,35 +61,38 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Created By"
-            app:layout_constraintStart_toStartOf="@+id/textView11"
-            app:layout_constraintTop_toBottomOf="@+id/textView11" />
+            app:layout_constraintEnd_toEndOf="@+id/textView11"
+            app:layout_constraintTop_toBottomOf="@+id/tvItemTitle" />
 
         <TextView
             android:id="@+id/tvItemCategory"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Umum"
+            app:layout_constraintEnd_toEndOf="@+id/tvItemId"
             app:layout_constraintStart_toStartOf="@+id/tvItemId"
             app:layout_constraintTop_toBottomOf="@+id/tvItemId" />
 
         <TextView
-            android:id="@+id/tvItemDimension"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvItemTitle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="10x10"
+            app:layout_constraintEnd_toEndOf="@+id/tvItemCategory"
             app:layout_constraintStart_toStartOf="@+id/tvItemCategory"
             app:layout_constraintTop_toBottomOf="@+id/tvItemCategory" />
 
         <TextView
             android:id="@+id/tvItemCreator"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Admin"
-            app:layout_constraintStart_toStartOf="@+id/tvItemDimension"
-            app:layout_constraintTop_toBottomOf="@+id/tvItemDimension" />
+            app:layout_constraintEnd_toEndOf="@+id/tvItemTitle"
+            app:layout_constraintStart_toStartOf="@+id/tvItemTitle"
+            app:layout_constraintTop_toBottomOf="@+id/tvItemTitle" />
 
         <Button
             android:id="@+id/btnItemEdit"

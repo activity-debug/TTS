@@ -57,7 +57,8 @@ class QuestionAdapter(
         val level = listLevel[position]
         holder.binding.tvItemId.text = level.id
         holder.binding.tvItemCategory.text = level.category
-        holder.binding.tvItemDimension.text = level.dimension
+        holder.binding.tvItemTitle.text = level.title
+        holder.binding.tvItemCreator.text = level.userId
 
         holder.binding.root.setOnClickListener{
             onClickView?.invoke(level)

@@ -1,43 +1,28 @@
 package com.rendrapcx.tts.helper
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
-import android.text.InputFilter
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
-import android.view.Window
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.widget.TextViewCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import com.rendrapcx.tts.constant.Const
-import com.rendrapcx.tts.constant.Direction
-import com.rendrapcx.tts.constant.InputMode
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.CustomDialog1Binding
-import com.rendrapcx.tts.databinding.DialogInputSoalBinding
+import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogUserProfileBinding
 import com.rendrapcx.tts.databinding.DialogWinBinding
-import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.ui.QuestionActivity
-import kotlinx.coroutines.launch
-import java.util.UUID
 
 
 open class Dialog {
@@ -57,7 +42,8 @@ open class Dialog {
 
         window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
             if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
             view.onApplyWindowInsets(windowInsets)
@@ -98,7 +84,8 @@ open class Dialog {
 
         window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
             if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
             view.onApplyWindowInsets(windowInsets)
@@ -139,7 +126,8 @@ open class Dialog {
 
         window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
             if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
             view.onApplyWindowInsets(windowInsets)
@@ -154,7 +142,6 @@ open class Dialog {
 
         dialog.show()
     }
-
 
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -175,7 +162,8 @@ open class Dialog {
 
         window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
             if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
             view.onApplyWindowInsets(windowInsets)
@@ -209,7 +197,8 @@ open class Dialog {
 
         window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
             if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
             view.onApplyWindowInsets(windowInsets)
@@ -228,5 +217,69 @@ open class Dialog {
 
         dialog.show()
     }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun Context.inputDescription(boardBinding: ActivityBoardBinding) {
+        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = DialogInputDescriptionBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(this).setView(binding.root)
+        val dialog = builder.create()
+        val window = dialog.window
+
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window!!, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
+            view.onApplyWindowInsets(windowInsets)
+        }
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {
+            binding.editLevelId.setText(it.id)
+            binding.editCategory.setText(it.category)
+            binding.editTitle.setText(it.title)
+            binding.editCreator.setText(it.userId)
+        }
+
+        fun updateList() {
+            Data.listLevel.filter { it.id == Const.currentLevel }.map { it }.forEach() {
+                boardBinding.apply {
+                    it.id = binding.editLevelId.text.toString()
+                    it.category = binding.editCategory.text.toString()
+                    it.title = binding.editTitle.text.toString()
+                    it.userId = binding.editCreator.text.toString()
+                }
+            }
+        }
+
+        fun fillText() {
+            Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {
+                boardBinding.includeEditor.apply {
+                    textLevelId.text = it.id
+                    textCategory.text = it.category
+                    textTitle.text = it.title
+                    textCreator.text = it.userId
+                }
+            }
+        }
+
+        binding.btnSubmit.setOnClickListener() {
+            updateList()
+            fillText()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
 
 }

@@ -8,12 +8,10 @@ class Data {
     @Entity(tableName = "level")
     data class Level(
         @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id")
-        var id: String,
-        @ColumnInfo(name = "category")
-        var category: String,
-        @ColumnInfo(name = "dimension")
-        var dimension: String,
+        @ColumnInfo(name = "id") var id: String,
+        @ColumnInfo(name = "category") var category: String,
+        @ColumnInfo(name = "title") var title: String,
+        @ColumnInfo(name = "user_id") var userId: String,
     )
 
     @Entity(tableName = "question")
