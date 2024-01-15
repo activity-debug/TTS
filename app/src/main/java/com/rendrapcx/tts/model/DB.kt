@@ -7,7 +7,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [Data.Level::class, Data.Question::class, Data.Partial::class],
+    entities = [
+        Data.Level::class,
+        Data.Question::class,
+        Data.Partial::class,
+        Data.User::class,
+        Data.UserAnswer::class,
+        Data.UserPreferences::class,
+    ],
     version = 2,
     exportSchema = false
 )
@@ -16,10 +23,11 @@ abstract class DB : RoomDatabase() {
     abstract fun level(): Dao.Level
     abstract fun question(): Dao.Question
     abstract fun partial(): Dao.Partial
+    abstract fun user(): Dao.User
+    abstract fun userAnswer(): Dao.UserAnswer
+    abstract fun userPreferences(): Dao.UserPreferences
 
-    //    Room.databaseBuilder(appContext, AppDatabase::class.java, "Sample.db")
-//    .createFromAsset("database/myapp.db")
-//    .build()
+
     companion object {
         @Volatile
         private var INSTANCE: DB? = null

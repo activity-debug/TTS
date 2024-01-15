@@ -75,6 +75,8 @@ class BoardActivity : AppCompatActivity() {
     private var curCharAt = 0
     private var curCharStr = ""
 
+    private var curQuestion = ""
+
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -591,21 +593,9 @@ class BoardActivity : AppCompatActivity() {
 
     private fun showQuestionInfo() {
         binding.includeEditor.apply {
-            textLevelId.text = ""
-            textNumber.text = ""
-            textDIrection.text = ""
-            textAsking.text = ""
-            textAnswer.text = ""
-            textSlot.text = ""
-
             listQuestion.filter { it.levelId == currentLevel }
                 .forEach() {
-                    textLevelId.text = it.levelId
-                    textNumber.text = it.number.toString()
-                    textDIrection.text = it.direction
-                    textAsking.text = it.asking
-                    textAnswer.text = it.answer
-                    textSlot.text = it.slot.toString()
+                   curQuestion = it.answer
                 }
         }
     }
@@ -746,9 +736,6 @@ class BoardActivity : AppCompatActivity() {
 
 
         binding.includeBoard.boardTen.setBackgroundColor(getColor(this, R.color.background))
-
-        binding.includeEditor.containerQuestion.visibility =
-            View.GONE  //<-- TODO: HAPUS Ini hapus komponen aja, cek dulu tapi
 
         binding.includeEditor.containerInfo.visibility = View.GONE
         binding.includeEditor.containerPartial.visibility = View.GONE
