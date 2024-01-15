@@ -84,7 +84,6 @@ class BoardActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
-        binding.loading.visibility = View.VISIBLE
         initBoardChild()
         initIntKeyChild()
 
@@ -124,7 +123,21 @@ class BoardActivity : AppCompatActivity() {
                 onClickBox()
             }
         }
-        binding.loading.visibility = View.INVISIBLE
+
+        binding.includeKeyboard.apply {
+            btnBackSpace.setOnClickListener(){
+                Toast.makeText(this@BoardActivity, "BACKSPACE", Toast.LENGTH_SHORT).show()
+            }
+            btnShuffle.setOnClickListener(){
+                Toast.makeText(this@BoardActivity, "SHUFFLE", Toast.LENGTH_SHORT).show()
+            }
+            //KEYBOARD PRESS
+            for (i in 0 until intKey.size){
+                intKey[i].setOnClickListener(){
+                    Toast.makeText(this@BoardActivity, "${i}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         /* TODO: HEADER ACTIONS*/
         binding.includeHeader.apply {
@@ -208,8 +221,6 @@ class BoardActivity : AppCompatActivity() {
 
             btnAdd.setOnClickListener() {
                 Const.inputMode = InputMode.NEW.name
-                //showDialogInput() // ini juga jalan, cuman gak bisa auto update filltext, harus pake observer keknya
-                //FIXME; INI JALAN
                 inputDataQuestioner(
                     position,
                     boxRowOvers().count(),
@@ -223,6 +234,8 @@ class BoardActivity : AppCompatActivity() {
                 Dialog().apply { inputDescription(binding) }
             }
         }
+
+
 
     }
 
@@ -272,7 +285,6 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun saveAndApply() {
-        binding.loading.visibility = View.VISIBLE
         val levelId = Const.currentLevel
         lifecycle.coroutineScope.launch {
             val level = DB.getInstance(applicationContext).level()
@@ -319,7 +331,6 @@ class BoardActivity : AppCompatActivity() {
             }
             delay(1000L)
         }
-        binding.loading.visibility = View.INVISIBLE
         Helper().apply { alertDialog(this@BoardActivity, "Data berhasil disimpan") }
     }
 
@@ -577,13 +588,22 @@ class BoardActivity : AppCompatActivity() {
         pickByArrow = true
     }
 
-    private fun showQuestionInfo() {
+    private fun showAnswerKeypad() {
         binding.includeEditor.apply {
             listQuestion.filter { it.levelId == currentLevel }
                 .forEach() {
                     curQuestion = it.answer
                 }
             binding.includeHeader.tvLabelTop.text = curQuestion
+
+
+
+
+            for (i in 0 until intKey.size) {
+
+            }
+
+
         }
     }
 
@@ -597,6 +617,7 @@ class BoardActivity : AppCompatActivity() {
                 curColId = it.colQuestionId
             }
         }
+        showAnswerKeypad()
     }
 
     private fun setBoxTagText() {

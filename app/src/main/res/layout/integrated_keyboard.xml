@@ -125,6 +125,7 @@
         android:id="@+id/key08"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginTop="1dp"
         android:background="@color/button"
         android:clickable="true"
         android:gravity="center"
@@ -228,8 +229,8 @@
         android:textColor="@color/button_text"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@+id/key13"
         app:layout_constraintStart_toEndOf="@+id/key13"
+        app:layout_constraintTop_toTopOf="@+id/key13"
         tools:ignore="HardcodedText" />
 
     <ImageButton
@@ -247,7 +248,7 @@
         android:layout_height="48dp"
         android:background="@color/button2_color"
         app:layout_constraintStart_toEndOf="@+id/key14"
-        app:layout_constraintTop_toBottomOf="@+id/key07"
+        app:layout_constraintTop_toTopOf="@+id/key14"
         app:srcCompat="@drawable/arrows_turn_to_dots_solid" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
