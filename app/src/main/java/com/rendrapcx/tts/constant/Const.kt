@@ -1,9 +1,11 @@
 package com.rendrapcx.tts.constant
 
 import android.content.Context
+import android.provider.ContactsContract.Data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.rendrapcx.tts.model.Data.*
 
 class Const {
     enum class BoardSet { PLAY, PLAY_NEXT, EDITOR_NEW, EDITOR_EDIT }

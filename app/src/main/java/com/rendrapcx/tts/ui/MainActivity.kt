@@ -3,19 +3,19 @@ package com.rendrapcx.tts.ui
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.rendrapcx.tts.constant.Const.BoardSet
-import com.rendrapcx.tts.constant.Const.Companion.boardSet
-import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.model.DB
+import com.rendrapcx.tts.model.Data
+import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.ui.dlg.playMenu
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,6 +32,8 @@ class MainActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
+        getData()
+
         binding.apply {
             btnGoListQuestion.setOnClickListener() {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
@@ -45,6 +47,23 @@ class MainActivity : AppCompatActivity() {
             }
             btnLogin.setOnClickListener(){
                 Dialog().apply { loginDialog(this@MainActivity) }
+            }
+            btnGoTTS.setOnClickListener(){
+                playMenu(this@MainActivity, lifecycle)
+//                Dialog().apply { playMenu(this@MainActivity, lifecycle) }
+//                val i = Intent(this@MainActivity, PlayMenuActivity::class.java)
+//                startActivity(i)
+            }
+        }
+    }
+
+    fun getData(){
+        lifecycleScope.launch {
+            try {
+                listLevel = DB.getInstance(applicationContext).level().getAllLevel()
+                    .ifEmpty { return@launch }
+            } finally {
+                binding.btnLogin.text = "EMPTY"
             }
         }
     }

@@ -618,9 +618,6 @@ class BoardActivity : AppCompatActivity() {
 
     private fun showAnswerKeypad() {
         binding.includeEditor.apply {
-
-            binding.includeHeader.tvLabelTop.text = getAnswer()
-
             val abjad = Helper().abjadKapital()
             val jawab = getAnswer()
             val charArr = jawab.toSortedSet()
@@ -641,8 +638,6 @@ class BoardActivity : AppCompatActivity() {
             for (i in 0 until intKey.size) {
                 intKey[i].text = keyJawab[i].toString()
             }
-
-
         }
     }
 

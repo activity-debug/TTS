@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" /> <!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/> -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -14,12 +14,10 @@
         android:roundIcon="@mipmap/ic_launcer_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TTS"
-        tools:targetApi="31">
+        tools:targetApi="31" >
         <activity
             android:name=".ui.RegisterActivity"
-            android:exported="false">
-
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ui.BoardActivity"
             android:exported="false" />
@@ -27,22 +25,15 @@
             android:name=".ui.QuestionActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.CreatorMenuActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.CreatorActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.MainActivity"
-            android:windowSoftInputMode="stateHidden|adjustPan|adjustResize"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="stateHidden|adjustPan|adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
