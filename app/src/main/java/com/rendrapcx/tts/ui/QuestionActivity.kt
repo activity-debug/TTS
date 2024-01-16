@@ -9,12 +9,14 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
+import com.rendrapcx.tts.constant.Const.Companion.qrAction
+import com.rendrapcx.tts.constant.Const.QrAction
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
+import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
@@ -52,6 +54,7 @@ class QuestionActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     private fun initRecyclerView() {
         binding.apply {
@@ -130,6 +133,33 @@ class QuestionActivity : AppCompatActivity() {
 
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
+                }
+            }
+
+            adapter.setOnClickUpload {
+
+            }
+
+            adapter.setOnClickShare {value ->
+                lifecycleScope.launch {
+                    qrAction = QrAction.CREATE
+                    currentLevel = value.id
+
+                    Data.listLevel =
+                        DB.getInstance(applicationContext).level().getLevel(currentLevel)
+                    Data.listQuestion =
+                        DB.getInstance(applicationContext).question().getQuestion(currentLevel)
+                    Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
+                        currentLevel
+                    )
+
+                    val a = Data.listLevel
+                    val b = Data.listQuestion
+                    val c = Data.listPartial
+                    val d = a + "#" + b + "#" + c
+                    val content = a.toString()
+
+                    Dialog().apply { shareQRDialog(this@QuestionActivity, content) }
                 }
             }
 

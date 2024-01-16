@@ -12,8 +12,10 @@ class Const {
     enum class InputQuestionDirection { HORIZONTAL, VERTICAL }
     enum class InputAnswerDirection { ROW, COLUMN }
 
-    companion object {
+    enum class QrAction {READ, CREATE}
 
+    companion object {
+        var qrAction = QrAction.CREATE
 
         var isSignedIn = false
         var currentUserId = "JACK"

@@ -19,6 +19,7 @@ import com.rendrapcx.tts.databinding.CustomDialog1Binding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
+import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
 import com.rendrapcx.tts.databinding.DialogUserProfileBinding
 import com.rendrapcx.tts.databinding.DialogWinBinding
 import com.rendrapcx.tts.model.Data
@@ -26,9 +27,42 @@ import com.rendrapcx.tts.ui.QuestionActivity
 
 
 open class Dialog {
+
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun Context.shareQRDialog(context: Context, content: String) {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = DialogShareQrcodeBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(binding.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        //Show To Image
+        Utils().apply {
+            binding.imgQR.setImageBitmap(getBitmapEncoder(content))
+        }
+
+        binding.btnShareQr.setOnClickListener() {
+            dialog.dismiss()
+        }
+
+        binding.btnSaveQr.setOnClickListener() {
+            Utils().apply { saveBitmapEncoder(content) }
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+
     @RequiresApi(Build.VERSION_CODES.R)
     fun Context.exitDialog(context: Context) {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = CustomDialog1Binding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
@@ -50,12 +84,14 @@ open class Dialog {
 
         dialog.show()
     }
+
     @RequiresApi(Build.VERSION_CODES.R)
     fun Context.winDialog(
         context: Context,
         boardBinding: ActivityBoardBinding
     ) {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogWinBinding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
@@ -83,7 +119,8 @@ open class Dialog {
     fun Context.settingDialog(
         context: Context,
     ) {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogSettingBinding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
@@ -105,7 +142,8 @@ open class Dialog {
     fun Context.userProfile(
         context: Context
     ) {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogUserProfileBinding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
@@ -127,7 +165,8 @@ open class Dialog {
     fun Context.loginDialog(
         context: Context,
     ) {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogLoginBinding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
@@ -214,5 +253,6 @@ open class Dialog {
             view.onApplyWindowInsets(windowInsets)
         }
     }
+
 
 }

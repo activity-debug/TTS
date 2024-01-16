@@ -12,6 +12,8 @@ class QuestionAdapter(
     private var onClickView: ((Data.Level) -> Unit)? = null
     private var onClickEdit: ((Data.Level) -> Unit)? = null
     private var onClickDelete: ((Data.Level) -> Unit)? = null
+    private var onClickShare: ((Data.Level) -> Unit)? = null
+    private var onClickUpload: ((Data.Level) -> Unit)? = null
 
     fun setListItem(level: MutableList<Data.Level>) {
         this.listLevel = level
@@ -28,6 +30,14 @@ class QuestionAdapter(
 
     fun setOnClickDelete(callback: (Data.Level) -> Unit ){
         this.onClickDelete = callback
+    }
+
+    fun setOnClickShare(callback: (Data.Level) -> Unit ){
+        this.onClickShare = callback
+    }
+
+    fun setOnClickUpload(callback: (Data.Level) -> Unit ){
+        this.onClickUpload = callback
     }
 
 
@@ -70,6 +80,14 @@ class QuestionAdapter(
 
         holder.binding.btnItemDelete.setOnClickListener(){
             onClickDelete?.invoke(level)
+        }
+
+        holder.binding.btnCloudUp.setOnClickListener(){
+            onClickUpload?.invoke(level)
+        }
+
+        holder.binding.btnShareAsQR.setOnClickListener(){
+            onClickShare?.invoke(level)
         }
     }
 

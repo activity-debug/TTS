@@ -48,6 +48,9 @@ dependencies {
     //splashscreen
     implementation("androidx.core:core-splashscreen:1.0.1")
 
+    implementation("com.journeyapps:zxing-android-embedded:4.2.0") //{ transitive = false }
+    implementation("com.google.zxing:core:3.4.0")  // For Android SDK versions < 24, Android 14+ support
+
 
     // architecture components
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
