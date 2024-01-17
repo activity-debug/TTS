@@ -152,10 +152,6 @@ open class Dialog {
             }
         }
 
-        binding.btnSettingClose.setOnClickListener() {
-            dialog.dismiss()
-        }
-
         dialog.show()
     }
 

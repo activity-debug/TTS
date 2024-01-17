@@ -24,6 +24,7 @@
                 android:id="@+id/container1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -38,7 +39,7 @@
                         android:id="@+id/include_header"
                         layout="@layout/play_header_part"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp" />
+                        android:layout_height="wrap_content" />
 
                 </FrameLayout>
 
@@ -48,6 +49,8 @@
                 android:id="@+id/container2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/background_gradient_zeus_miracle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/container1">
@@ -97,6 +100,7 @@
                 android:id="@+id/container4"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/container3">
@@ -137,6 +141,7 @@
                 android:id="@+id/container5"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/container4">

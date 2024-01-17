@@ -57,7 +57,6 @@ class BoardActivity : AppCompatActivity() {
     private var box = arrayListOf<TextView>()
     private var intKey = arrayListOf<TextView>()
     private var inputAnswerDirection = InputAnswerDirection.ROW
-    private var inputQuestionDirection = InputQuestionDirection.HORIZONTAL.name
     private var tipTop = true
     private val xLen = 10
     private val yLen = 10
@@ -65,7 +64,6 @@ class BoardActivity : AppCompatActivity() {
     private var currentQuestId = ""
     private var currentRange = arrayListOf<Int>()
     private var pickByArrow = false
-    private var tagMap = mutableMapOf<Int, String>()
     private var tag = arrayListOf<Int>()
     private var clip = ""
 
@@ -838,7 +836,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeHeader.tvLabelTop.text = listLevel.first().title //currentLevel
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
 
-        binding.includeBoard.boardTen.setBackgroundColor(getColor(this, R.color.background))
+        binding.includeBoard.boardTen.setBackgroundColor(R.drawable.background_gradient_zeus_miracle)
 
     }
 
@@ -850,7 +848,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
 
 
-        binding.includeBoard.boardTen.setBackgroundColor(getColor(this, R.color.background))
+        binding.includeBoard.boardTen.setBackgroundColor(R.drawable.background_gradient_zeus_miracle)
 
         binding.includeEditor.containerInfo.visibility = View.GONE
         binding.includeEditor.containerPartial.visibility = View.GONE
