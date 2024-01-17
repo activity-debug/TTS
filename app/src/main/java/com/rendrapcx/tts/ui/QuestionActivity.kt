@@ -2,14 +2,21 @@ package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SnapHelper
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.SnackbarLayout
+import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
@@ -21,6 +28,7 @@ import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.serializer
 
 class QuestionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuestionBinding
@@ -38,11 +46,16 @@ class QuestionActivity : AppCompatActivity() {
 
         initRecyclerView()
 
-
         binding.btnNewLevel.setOnClickListener() {
             boardSet = BoardSet.EDITOR_NEW
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
+        }
+
+        binding.btnSearch.setOnClickListener(){
+            val mp = MediaPlayer.create(applicationContext, R.raw.crowd_applause)
+            mp.start()
+            Toast.makeText(this, "${Data.listUserPreferences}", Toast.LENGTH_SHORT).show()
         }
 
         binding.headerPanel.apply {
@@ -50,6 +63,17 @@ class QuestionActivity : AppCompatActivity() {
             btnBack.setOnClickListener() {
                 val i = Intent(this@QuestionActivity, MainActivity::class.java)
                 startActivity(i)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            }
+        }
+
+        binding.switch1.isChecked = Data.listUserPreferences[0].showFinished
+        binding.switch1.setOnClickListener(){
+            lifecycleScope.launch {
+                val data = binding.switch1.isChecked
+                Data.listUserPreferences[0].showFinished = data
+                DB.getInstance(applicationContext).userPreferences()
+                    .updateShowFinished("0", data)
             }
         }
     }
@@ -69,6 +93,8 @@ class QuestionActivity : AppCompatActivity() {
                 } finally {
                     binding.etSearch.hint = "Data Kosong"
                 }
+                var temp = mutableListOf<Data.Level>()
+
                 adapter.setListItem(Data.listLevel)
                 binding.etSearch.hint = adapter.itemCount.toString()
             }
@@ -88,6 +114,7 @@ class QuestionActivity : AppCompatActivity() {
 
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 }
             }
 
@@ -114,7 +141,11 @@ class QuestionActivity : AppCompatActivity() {
                         binding.etSearch.hint = adapter.itemCount.toString()
                     }
                     binding.progressBar2.visibility = View.GONE
-                    Toast.makeText(this@QuestionActivity, "Deleted", Toast.LENGTH_SHORT).show()
+                    Snackbar.make(binding.questionLayout, "Deleted", Snackbar.LENGTH_SHORT)
+                        .setAction("Undo", View.OnClickListener {
+                            Toast.makeText(this@QuestionActivity, "KASIH KODE DISINI", Toast.LENGTH_SHORT).show()
+                        })
+                        .show()
                 }
             }
 

@@ -1,47 +1,61 @@
 package com.rendrapcx.tts.ui
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.TextView
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.LuminanceSource
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.Reader
 import com.google.zxing.common.HybridBinarizer
-import com.google.zxing.integration.android.IntentIntegrator
-import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const.Companion.currentUserId
+import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
 import com.rendrapcx.tts.databinding.ActivityMainBinding
+import com.rendrapcx.tts.databinding.DialogLoginBinding
+import com.rendrapcx.tts.databinding.DialogSignOutBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.model.Data.Companion.listUser
+import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
 import com.rendrapcx.tts.ui.dlg.playMenu
 import com.rendrapcx.tts.ui.trial.TestActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.json.JSONException
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
+import java.util.UUID
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,53 +67,201 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        installSplashScreen()
 
         Helper().apply { hideSystemUI() }
 
+        loadUserPreferences()
+
+        loadCurrentUser()
+
         getData()
+
+        animLogo()
 
         binding.apply {
             btnGoListQuestion.setOnClickListener() {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
                 startActivity(i)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
             btnSettingMain.setOnClickListener() {
-                Dialog().apply { settingDialog(this@MainActivity) }
+                Dialog().apply { settingDialog(this@MainActivity, lifecycle) }
             }
             btnUserSecret.setOnClickListener() {
                 Dialog().apply { userProfile(this@MainActivity) }
             }
             btnLogin.setOnClickListener() {
-                Dialog().apply { loginDialog(this@MainActivity) }
+                if (currentUserId.isNotEmpty()) signOut()
+                else loginDialog()
             }
             btnGoTTS.setOnClickListener() {
                 playMenu(this@MainActivity, lifecycle)
             }
 
             btnGoWiw.setOnClickListener() {
-               val intent = Intent(this@MainActivity, TestActivity::class.java)
+                val intent = Intent(this@MainActivity, TestActivity::class.java)
                 startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
-            btnScanQRCode.setOnClickListener(){ v ->
-                openAlbums()
+            btnGoTBK.setOnClickListener() {
+                Toast.makeText(this@MainActivity, "${listUserPreferences[0].integratedKeyboard}", Toast.LENGTH_SHORT)
+                    .show()
             }
+        }
+    }
 
-            btnGoTBK.setOnClickListener(){
-                val data = listLevel[0].toString()
-                val ara = mutableListOf<Data.Level>()
-
-                tvResult.text = data
+    private fun loadUserPreferences() {
+        lifecycleScope.launch {
+            val count =
+                DB.getInstance(applicationContext).userPreferences().getAllUserPreferences().count()
+            if (count == 0) {
+                DB.getInstance(applicationContext).userPreferences().insertUserPref(
+                    Data.UserPreferences(
+                        id = "0",
+                        isLogin = false,
+                        showFinished = false,
+                        sortOrderByAuthor = false,
+                        integratedKeyboard = false,
+                        isMusic = true,
+                        isSound = true,
+                    )
+                )
+            } else {
+                listUserPreferences =
+                    DB.getInstance(applicationContext).userPreferences().getAllUserPreferences()
 
             }
         }
     }
 
-    fun getData() {
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun loadCurrentUser() {
+        lifecycle.coroutineScope.launch {
+            listUser = DB.getInstance(applicationContext).user().getAllUser()
+            if (listUser.isEmpty()) {
+                loginDialog()
+                return@launch
+            } else {
+                val guest = listUser[0].isGuest
+                if (guest) binding.btnLogin.text = "Guest"
+                else binding.btnLogin.text = listUser[0].username
+                currentUserId = listUser[0].id
+                isSignedIn = true
+            }
+        }
+    }
+
+    private fun animLogo() {
+        YoYo.with(Techniques.Tada)
+            .duration(2000)
+            //.repeat(1)
+            .playOn(binding.imgLogo);
+    }
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun signOut(
+    ) {
+        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val bind = DialogSignOutBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(this).setView(bind.root)
+        val dialog = builder.create()
+        val window = dialog.window
+
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window!!, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
+            view.onApplyWindowInsets(windowInsets)
+        }
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        bind.btnSignOut.setOnClickListener() {
+            isSignedIn = false
+            currentUserId = ""
+            binding.btnLogin.text = "Login"
+            loginDialog()
+            dialog.dismiss()
+        }
+
+        bind.btnCancelSignOut.setOnClickListener() {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun loginDialog(
+    ) {
+        val inflater =
+            this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val bind = DialogLoginBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(this).setView(bind.root)
+        val dialog = builder.create()
+        val window = dialog.window
+
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window!!, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
+            view.onApplyWindowInsets(windowInsets)
+        }
+
+        dialog.window!!.attributes.windowAnimations = R.style.LoginDialogAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false)
+
+        fun createUserGuest() {
+            val id = UUID.randomUUID().toString().substring(0, 10)
+            val name = "Guest-$id"
+            lifecycle.coroutineScope.launch {
+                DB.getInstance(applicationContext).user().insertUser(
+                    Data.User(
+                        id = id,
+                        username = name,
+                        password = "secret",
+                        isGuest = true
+                    )
+                )
+                delay(1000L)
+                loadCurrentUser()
+            }
+        }
+
+        bind.btnLogin.setOnClickListener() {
+            dialog.dismiss()
+        }
+
+        bind.btnLoginGuest.setOnClickListener() {
+            createUserGuest()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun getData() {
         lifecycleScope.launch {
             try {
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
@@ -110,7 +272,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getQRContent(file: File) : String {
+    private fun getQRContent(file: File): String {
         val inputStream: InputStream = BufferedInputStream(FileInputStream(file))
         val bitmap = BitmapFactory.decodeStream(inputStream)
         return decodeQRImage(bitmap)!!
@@ -153,8 +315,10 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show()
             }
         }
+
     private fun openAlbums() {
-        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+        val galleryIntent =
+            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
         resultLauncherGallery.launch(galleryIntent)
     }
 

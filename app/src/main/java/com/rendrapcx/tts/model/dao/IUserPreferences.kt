@@ -1,5 +1,6 @@
 package com.rendrapcx.tts.model.dao
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -28,4 +29,19 @@ interface IUserPreferences{
             "   SET integrated_keyboard = :integratedKeyboard " +
             "   WHERE `id` = :id;")
     suspend fun updateIntegratedKeyboard(id: String, integratedKeyboard: Boolean)
+
+    @Query("UPDATE user_preferences " +
+            "   SET is_login = :isLogin " +
+            "   WHERE `id` = :id;")
+    suspend fun updateIsLogin(id: String, isLogin: Boolean)
+
+    @Query("UPDATE user_preferences " +
+            "   SET is_music = :isMusic " +
+            "   WHERE `id` = :id;")
+    suspend fun updateIsMusic(id: String, isMusic: Boolean)
+
+    @Query("UPDATE user_preferences " +
+            "   SET is_sound = :isSound " +
+            "   WHERE `id` = :id;")
+    suspend fun updateIsSound(id: String, isSound: Boolean)
 }

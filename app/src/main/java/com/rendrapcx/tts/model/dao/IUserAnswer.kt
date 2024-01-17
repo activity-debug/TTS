@@ -8,10 +8,10 @@ import com.rendrapcx.tts.model.Data
 
 interface IUserAnswer {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertUserAnswer(userAnswer: Data.UserAnswer)
+    suspend fun insertUserAnswer(userAnswer: Data.UserAnswer)
 
     @Update
-    fun updateUserAnswer(userAnswer: Data.UserAnswer)
+    suspend fun updateUserAnswer(userAnswer: Data.UserAnswer)
 
     @Query("SELECT * FROM user_answer")
     suspend fun getAllUserAnswer(): MutableList<Data.UserAnswer>

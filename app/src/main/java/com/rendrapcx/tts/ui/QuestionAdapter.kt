@@ -1,8 +1,14 @@
 package com.rendrapcx.tts.ui
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.databinding.QuestionListItemBinding
 import com.rendrapcx.tts.model.Data
 
@@ -63,6 +69,7 @@ class QuestionAdapter(
         return listLevel.size
     }
 
+    @SuppressLint("ClickableViewAccessibility", "ResourceAsColor")
     override fun onBindViewHolder(holder: QuestionViewHolder, position: Int) {
         val level = listLevel[position]
         holder.binding.tvItemId.text = level.id

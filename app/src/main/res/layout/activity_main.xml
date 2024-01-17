@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity">
+    tools:context=".ui.MainActivity"
+    android:background="@drawable/background_gradient_teen_notebook"
+    >
 
     <Button
         android:id="@+id/btnDatabase"
@@ -32,7 +34,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:text="QUESTION"
+        android:text="EDITOR"
         android:textColor="@color/button"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,11 +43,12 @@
 
     <Button
         android:id="@+id/btnGoTTS"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
-        android:text="TTS"
+        android:text="MULAI"
+        android:textColor="@color/button"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoListQuestion"
         app:layout_constraintHorizontal_bias="0.225"
@@ -112,7 +115,7 @@
     <Button
         android:id="@+id/btnLogin"
         style="@style/Widget.Material3.Button.IconButton.Outlined"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Login"
@@ -140,17 +143,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/terka_no_bg" />
-
-    <TextView
-        android:id="@+id/tvResult"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnGoWiw" />
 
     <Button
         android:id="@+id/btnScanQRCode"

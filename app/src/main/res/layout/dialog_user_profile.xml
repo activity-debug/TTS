@@ -81,6 +81,16 @@
                     app:layout_constraintStart_toEndOf="@+id/textdasdsad"
                     app:layout_constraintTop_toTopOf="@+id/textdasdsad" />
 
+                <Button
+                    android:id="@+id/btnCloseProfile"
+                    style="@style/Widget.Material3.Button.IconButton.Outlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    app:icon="@drawable/baseline_close_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout

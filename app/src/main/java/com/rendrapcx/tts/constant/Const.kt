@@ -18,7 +18,8 @@ class Const {
         var qrAction = QrAction.CREATE
 
         var isSignedIn = false
-        var currentUserId = "JACK"
+        var currentUserId = "ADMIN"
+        var currentUserRefId = ""
 
         var gameState = GameState.CREATOR
         var boardSet = BoardSet.EDITOR_NEW

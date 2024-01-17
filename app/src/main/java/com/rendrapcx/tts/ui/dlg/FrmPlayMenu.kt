@@ -1,5 +1,6 @@
 package com.rendrapcx.tts.ui.dlg
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -15,12 +16,15 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.ui.BoardActivity
 import com.rendrapcx.tts.ui.PlayMenuAdapter
+import com.rendrapcx.tts.ui.PlayMenuTitleAdapter
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -39,9 +43,8 @@ fun Context.playMenu(
     dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     dialog.setCancelable(true)
 
-    var state = 0
-
     fun listByCategory(): MutableList<Data.Level> {
+
         val new = mutableListOf<Data.Level>()
         val arr = arrayListOf<String>()
         Data.listLevel.forEach() {
@@ -60,8 +63,8 @@ fun Context.playMenu(
         binding.apply {
 
             val filteredList = Data.listLevel.filter { it.category == category }.toMutableList()
-            val adapter = PlayMenuAdapter()
-            myRecView.layoutManager = GridLayoutManager(context, 2)
+            val adapter = PlayMenuTitleAdapter()
+            myRecView.layoutManager = GridLayoutManager(context, 3)
             myRecView.adapter = adapter
             adapter.setListItem(filteredList)
 
@@ -89,19 +92,26 @@ fun Context.playMenu(
 
     }
 
-
     fun showListByCategory() {
         binding.apply {
             val adapter = PlayMenuAdapter()
-            myRecView.layoutManager = GridLayoutManager(context, 2)
+            myRecView.layoutManager = LinearLayoutManager(context)
             myRecView.adapter = adapter
             adapter.setListItem(listByCategory())
 
 
             adapter.setOnClickView {
                 changeListFiltered(it.category)
+                binding.tvPlayMenuHeader.text = it.category
             }
         }
+    }
+
+    binding.tvPlayMenuHeader.text = "Select Category"
+
+    binding.btnBackToCategoryAdapter.setOnClickListener(){
+        binding.tvPlayMenuHeader.text = "Select Category"
+        showListByCategory()
     }
 
     showListByCategory()

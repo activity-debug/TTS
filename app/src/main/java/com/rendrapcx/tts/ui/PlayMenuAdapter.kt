@@ -39,8 +39,7 @@ class PlayMenuAdapter : RecyclerView.Adapter<PlayMenuAdapter.PlayViewHolder>() {
     override fun onBindViewHolder(holder: PlayViewHolder, position: Int) {
         val level = listLevel[position]
 
-        holder.binding.tvMenuLevel.text = level.title
-        holder.binding.tvMenuScore.text = level.category
+        holder.binding.tvMenuLevel.text = level.category
 
         holder.binding.root.setOnClickListener {
             onClickView?.invoke(level)

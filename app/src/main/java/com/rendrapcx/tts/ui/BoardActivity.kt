@@ -22,6 +22,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.coroutineScope
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
@@ -45,6 +47,7 @@ import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
+import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -68,7 +71,6 @@ class BoardActivity : AppCompatActivity() {
 
     private var selectedQuestion = ""
     private var onType = false
-    private var softKeyboard = true
 
     private var curPartId = ""
     private var curRowId = ""
@@ -92,7 +94,6 @@ class BoardActivity : AppCompatActivity() {
             BoardSet.EDITOR_NEW -> {
                 initLayoutEditor()
                 currentLevel = UUID.randomUUID().toString().substring(0, 20)
-                binding.includeHeader.tvLabelTop.text = currentLevel
                 setBoxTagText()
                 position = 0
                 listLevel.add(
@@ -100,6 +101,7 @@ class BoardActivity : AppCompatActivity() {
                 )
                 fillTextDescription()
                 setOnSelectedColor()
+                binding.includeHeader.tvLabelTop.text = listLevel.first(){it.id == currentLevel}.title
             }
 
             BoardSet.EDITOR_EDIT -> {
@@ -127,15 +129,28 @@ class BoardActivity : AppCompatActivity() {
             }
         }
 
-        Toast.makeText(this, "${boardSet}", Toast.LENGTH_SHORT).show()
+        for (i in 0 until box.size) {
+            YoYo.with(Techniques.RotateInUpRight)
+                .duration(2000)
+                .repeat(0)
+                .playOn(box[i]);
+        }
 
         binding.includeKeyboard.apply {
             btnBackSpace.setOnClickListener() {
                 box[position].text = ""
                 onPressBackSpace()
+                YoYo.with(Techniques.Landing)
+                    .duration(500)
+                    //.repeat(1)
+                    .playOn(btnBackSpace);
             }
             btnShuffle.setOnClickListener() {
                 showAnswerKeypad()
+                YoYo.with(Techniques.Landing)
+                    .duration(500)
+                    //.repeat(1)
+                    .playOn(btnShuffle);
             }
             //KEYBOARD PRESS
             for (i in 0 until intKey.size) {
@@ -145,21 +160,17 @@ class BoardActivity : AppCompatActivity() {
                             box[position].text = intKey[i].text
                             onPressAbjabMove()
                             checkWinCondition(false)
-                            intKey[i].setBackgroundColor(
-                                getColor(
-                                    this@BoardActivity,
-                                    R.color.selected
-                                )
-                            )
+                            YoYo.with(Techniques.Landing)
+                                .duration(1000)
+                                .repeat(0)
+                                .playOn(box[position]);
                         }
 
                         MotionEvent.ACTION_UP -> {
-                            intKey[i].setBackgroundColor(
-                                getColor(
-                                    this@BoardActivity,
-                                    R.color.button
-                                )
-                            )
+                            YoYo.with(Techniques.Landing)
+                                .duration(500)
+                                .repeat(0)
+                                .playOn(intKey[i]);
                         }
                     }
                     return@OnTouchListener true
@@ -175,9 +186,10 @@ class BoardActivity : AppCompatActivity() {
                 else Intent(this@BoardActivity, QuestionActivity::class.java)
                 startActivity(intent)
                 finish()
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
             btnSettingPlay.setOnClickListener() {
-                Dialog().apply { settingDialog(this@BoardActivity) }
+                Dialog().apply { settingDialog(this@BoardActivity, lifecycle) }
             }
         }
 
@@ -189,13 +201,21 @@ class BoardActivity : AppCompatActivity() {
                     position = i
                     getInputAnswerDirection()
                     onClickBox()
+
+                    YoYo.with(Techniques.RubberBand)
+                        .duration(1000)
+                        .repeat(0)
+                        .playOn(box[i]);
+
                     when (boardSet) {
                         BoardSet.EDITOR_NEW, BoardSet.EDITOR_EDIT -> {
                             if (clip.isNotEmpty()) pasteId()
                         }
 
                         BoardSet.PLAY, BoardSet.PLAY_USER -> {
-                            Keypad().showSoftKeyboard(window, it)
+                            if (listUserPreferences[0].integratedKeyboard) {
+                                Keypad().showSoftKeyboard(window, it)
+                            }
                         }
 
                         else -> {}
@@ -222,15 +242,30 @@ class BoardActivity : AppCompatActivity() {
             btnNextQuestion.setOnClickListener() {
                 resetBoxColor()
                 fillText()
-
                 getRequestQuestions(SelectRequest.NEXT)
                 onClickBox()
+                YoYo.with(Techniques.ZoomIn)
+                    .duration(500)
+                    //.repeat(1)
+                    .playOn(btnNextQuestion);
+                YoYo.with(Techniques.FadeInLeft)
+                    .duration(500)
+                    //.repeat(1)
+                    .playOn(tvSpanQuestion);
             }
             btnPrevQuestion.setOnClickListener() {
                 resetBoxColor()
                 fillText()
                 getRequestQuestions(SelectRequest.PREV)
                 onClickBox()
+                YoYo.with(Techniques.ZoomIn)
+                    .duration(500)
+                    //.repeat(1)
+                    .playOn(btnPrevQuestion);
+                YoYo.with(Techniques.FadeInRight)
+                    .duration(500)
+                    //.repeat(1)
+                    .playOn(tvSpanQuestion);
             }
             tvSpanQuestion.setOnClickListener() {
                 checkWinCondition()
@@ -320,7 +355,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun saveAndApply() {
-        val levelId = Const.currentLevel
+        val levelId = currentLevel
         lifecycle.coroutineScope.launch {
             val level = DB.getInstance(applicationContext).level()
             level.insertLevel(
@@ -439,7 +474,13 @@ class BoardActivity : AppCompatActivity() {
 //                box[i].setBackgroundColor(getColor(this, R.color.pass))
 //            }
             if (box[i].text != box[i].tag) {
-                if (color) box[i].setBackgroundColor(getColor(this, R.color.not_pass))
+                if (color) {
+                    box[i].setBackgroundColor(getColor(this, R.color.not_pass))
+                    YoYo.with(Techniques.Flash)
+                        .duration(1000)
+                        .repeat(0)
+                        .playOn(box[i]);
+                }
                 pass = false
             }
         }
@@ -587,7 +628,9 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun getQuestion(): String {
-        var id = getRowId()
+        var id = if (listQuestion.isEmpty()) ""
+        else getRowId()
+
         if (inputAnswerDirection == InputAnswerDirection.ROW) id = getRowId()
         else if (inputAnswerDirection == InputAnswerDirection.COLUMN) id = getColumnId()
 
@@ -656,7 +699,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             val keyJawab = charArr.toCharArray()
-
+            keyJawab.shuffle()
             for (i in 0 until intKey.size) {
                 intKey[i].text = keyJawab[i].toString()
             }
@@ -781,7 +824,7 @@ class BoardActivity : AppCompatActivity() {
                     box[i].visibility = View.INVISIBLE
                 }
             }
-            box[i].setTextColor(getColor(this, R.color.black))
+            box[i].setTextColor(getColor(this, R.color.button))
             box[i].setBackgroundColor(getColor(this, R.color.white))
         }
     }
@@ -792,7 +835,7 @@ class BoardActivity : AppCompatActivity() {
     private fun initLayoutPlay() {
         binding.includeEditor.mainContainer.visibility = View.GONE
 
-        binding.includeHeader.tvLabelTop.text = currentLevel
+        binding.includeHeader.tvLabelTop.text = listLevel.first().title //currentLevel
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
 
         binding.includeBoard.boardTen.setBackgroundColor(getColor(this, R.color.background))
@@ -803,7 +846,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeEditor.mainContainer.visibility = View.VISIBLE
         binding.includeKeyboard.integratedKeyboard.visibility = View.GONE
 
-        binding.includeHeader.tvLabelTop.text = ""
+        binding.includeHeader.tvLabelTop.text = "TERKA EDITOR"
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
 
 
@@ -876,7 +919,6 @@ class BoardActivity : AppCompatActivity() {
         //TODO: INITIAL NEW
         val rowFilter = arrayOf<InputFilter>(InputFilter.LengthFilter(rowCount))
         val colFilter = arrayOf<InputFilter>(InputFilter.LengthFilter(colCount))
-        bind.etDirectionInput.visibility = View.INVISIBLE   //todo: kalo udah beres hapus komponenya
         bind.etNoInput.setText("${position}")
         bind.etAskInput.requestFocus()
         bind.etAnswerInput.filters = rowFilter

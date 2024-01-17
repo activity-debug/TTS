@@ -40,13 +40,13 @@ class Data {
         constructor() : this("",0,"","","","")
     }
 
-    @Entity(tableName = "User")
+    @Entity(tableName = "user")
     data class User(
-        @PrimaryKey(autoGenerate = true)
-        @ColumnInfo(name = "id") var id : Int,
-        @ColumnInfo(name = "name") var name : String,
+        @PrimaryKey(autoGenerate = false)
+        @ColumnInfo(name = "id") var id : String,
         @ColumnInfo(name = "username") var username : String,
-        @ColumnInfo(name = "email") var email : String,
+        @ColumnInfo(name = "password") var password : String,
+        @ColumnInfo(name = "is_guest") var isGuest : Boolean,
     )
 
     @Entity(tableName = "user_answer")
@@ -63,14 +63,19 @@ class Data {
     data class UserPreferences(
         @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "id") var id : String,
+        @ColumnInfo(name = "is_login") var isLogin: Boolean,
         @ColumnInfo(name = "show_finished") var showFinished : Boolean,
         @ColumnInfo(name = "sort_order_by_author") var sortOrderByAuthor : Boolean,
         @ColumnInfo(name = "integrated_keyboard") var integratedKeyboard : Boolean,
+        @ColumnInfo(name = "is_music") var isMusic : Boolean,
+        @ColumnInfo(name = "is_sound") var isSound : Boolean,
     )
 
     companion object {
         var listLevel = mutableListOf<Level>()
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
+        var listUser = mutableListOf<User>()
+        var listUserPreferences = mutableListOf<UserPreferences>()
     }
 }

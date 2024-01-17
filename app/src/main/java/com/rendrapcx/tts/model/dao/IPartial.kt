@@ -10,9 +10,6 @@ interface IPartial {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPartial(partial: Data.Partial)
 
-    @Query("select * from partial")
-    fun getAllPartial(): LiveData<List<Data.Partial>>
-
     @Query("SELECT * FROM partial WHERE level_id = :levelId;")
     suspend fun getPartial(levelId: String): MutableList<Data.Partial>
 

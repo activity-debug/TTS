@@ -75,20 +75,6 @@
             app:layout_constraintStart_toEndOf="@+id/btnCancelInput"
             app:layout_constraintTop_toTopOf="@+id/btnCancelInput" />
 
-        <EditText
-            android:id="@+id/etDirectionInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:ems="10"
-            android:hint="HORIZONTAL"
-            android:inputType="text"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/etNoInput"
-            app:layout_constraintTop_toTopOf="@+id/etNoInput"
-            tools:ignore="HardcodedText" />
-
         <TextView
             android:id="@+id/tvSlotPreview"
             android:layout_width="0dp"
@@ -128,6 +114,8 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="8dp"
             android:text="Row"
+            android:textSize="20sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@+id/etNoInput"
             app:layout_constraintTop_toTopOf="@+id/etNoInput" />
 

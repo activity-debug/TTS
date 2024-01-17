@@ -8,7 +8,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.rendrapcx.tts.model.dao.ICustomDao
 import com.rendrapcx.tts.model.dao.ILevel
 import com.rendrapcx.tts.model.dao.IPartial
 import com.rendrapcx.tts.model.dao.IQuestion
@@ -28,7 +27,6 @@ class Dao {
     @Dao
     interface Partial : IPartial {}
 
-
     @Dao
     interface User : IUser {}
 
@@ -38,6 +36,4 @@ class Dao {
     @Dao
     interface UserPreferences : IUserPreferences {}
 
-    @Dao
-    interface CustomDao : ICustomDao {}
 }

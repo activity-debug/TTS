@@ -13,17 +13,24 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
+import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.CustomDialog1Binding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
-import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
 import com.rendrapcx.tts.databinding.DialogUserProfileBinding
 import com.rendrapcx.tts.databinding.DialogWinBinding
+import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
+import com.rendrapcx.tts.model.Data.Companion.listUser
+import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
+import com.rendrapcx.tts.ui.MainActivity
 import com.rendrapcx.tts.ui.QuestionActivity
+import kotlinx.coroutines.launch
 
 
 open class Dialog {
@@ -107,7 +114,7 @@ open class Dialog {
         }
 
         binding.btnBack.setOnClickListener() {
-            val i = Intent(context.applicationContext, QuestionActivity::class.java)
+            val i = Intent(context.applicationContext, MainActivity::class.java)
             startActivity(i)
             dialog.dismiss()
         }
@@ -117,7 +124,7 @@ open class Dialog {
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun Context.settingDialog(
-        context: Context,
+        context: Context, lifecycle: Lifecycle
     ) {
         val inflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -127,8 +134,23 @@ open class Dialog {
 
         extracted(dialog)
 
+        dialog.window!!.attributes.windowAnimations = R.style.LoginDialogAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
+
+        binding.apply {
+            swSettingKeyboard.isChecked = listUserPreferences[0].integratedKeyboard
+        }
+
+        binding.swSettingKeyboard.setOnClickListener() {
+            lifecycle.coroutineScope.launch {
+                val data = binding.swSettingKeyboard.isChecked
+                listUserPreferences[0].integratedKeyboard = data
+                DB.getInstance(context.applicationContext).userPreferences()
+                    .updateIntegratedKeyboard("0", data)
+            }
+        }
 
         binding.btnSettingClose.setOnClickListener() {
             dialog.dismiss()
@@ -149,37 +171,20 @@ open class Dialog {
         val dialog = builder.create()
 
         extracted(dialog)
-
-        dialog.window?.attributes?.gravity = Gravity.BOTTOM
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.attributes.gravity = Gravity.BOTTOM
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
+
+        binding.apply {
+            textUserId.text = listUser[0].id
+            textUsername.text = listUser[0].username
+        }
 
         binding.btnSaveProgress.setOnClickListener() {
             Toast.makeText(this, "Save Progress", Toast.LENGTH_SHORT).show()
         }
 
-        dialog.show()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    fun Context.loginDialog(
-        context: Context,
-    ) {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val binding = DialogLoginBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(binding.root)
-        val dialog = builder.create()
-        extracted(dialog)
-
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(true)
-
-        binding.btnLogin.setOnClickListener() {
-            dialog.dismiss()
-        }
-
-        binding.btnLoginGuest.setOnClickListener() {
+        binding.btnCloseProfile.setOnClickListener() {
             dialog.dismiss()
         }
 

@@ -7,7 +7,7 @@ import com.rendrapcx.tts.model.Data
 
 interface IUser {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertUser(user: Data.User)
+    suspend fun insertUser(user: Data.User)
 
     @Query("SELECT * FROM user")
     suspend fun getAllUser(): MutableList<Data.User>
