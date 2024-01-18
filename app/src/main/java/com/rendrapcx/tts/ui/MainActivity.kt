@@ -38,6 +38,7 @@ import com.google.zxing.Reader
 import com.google.zxing.common.HybridBinarizer
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.constant.Const.Companion.currentUserId
 import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
 import com.rendrapcx.tts.databinding.ActivityMainBinding
@@ -189,6 +190,8 @@ class MainActivity : AppCompatActivity() {
                 adapter.setOnClickView {
                     changeListFiltered(it.category)
                     binding.tvPlayMenuHeader.text = it.category
+                    Const.currentCategory = it.category
+                    Toast.makeText(this@MainActivity, "${it.category}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -265,7 +268,9 @@ class MainActivity : AppCompatActivity() {
                 val guest = listUser[0].isGuest
                 if (guest) binding.btnLogin.text = "Guest"
                 else binding.btnLogin.text = listUser[0].username
+
                 currentUserId = listUser[0].id
+                currentUser = listUser[0].username
                 isSignedIn = true
             }
         }
@@ -328,21 +333,6 @@ class MainActivity : AppCompatActivity() {
         val bind = DialogLoginBinding.inflate(inflater)
         val builder = AlertDialog.Builder(this).setView(bind.root)
         val dialog = builder.create()
-//        val window = dialog.window
-
-//        val windowInsetsController =
-//            WindowCompat.getInsetsController(window!!, window.decorView)
-//        windowInsetsController.systemBarsBehavior =
-//            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-//
-//        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-//            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-//                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-//            ) {
-//                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-//            }
-//            view.onApplyWindowInsets(windowInsets)
-//        }
 
         extracted(dialog)
 

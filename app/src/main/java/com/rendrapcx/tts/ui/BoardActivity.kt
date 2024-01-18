@@ -23,12 +23,14 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
+import com.rendrapcx.tts.constant.Const.Companion.currentCategory
 import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.position
@@ -40,6 +42,7 @@ import com.rendrapcx.tts.constant.InputMode
 import com.rendrapcx.tts.constant.SelectRequest
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogInputSoalBinding
+import com.rendrapcx.tts.databinding.DialogWinBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.Keypad
@@ -77,6 +80,9 @@ class BoardActivity : AppCompatActivity() {
     private var curCharAt = 0
     private var curCharStr = ""
 
+    private var isNew = true
+    private var finishedId = arrayListOf<String>() //ganti nanti
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,44 +97,65 @@ class BoardActivity : AppCompatActivity() {
 
         when (boardSet) {
             BoardSet.EDITOR_NEW -> {
-                initLayoutEditor()
                 currentLevel = UUID.randomUUID().toString().substring(0, 20)
-                setBoxTagText()
-                position = 0
                 listLevel.add(
                     Data.Level(currentLevel, "2024", "Title", "Admin")
                 )
 
+                binding.apply {
+                    includeEditor.mainContainer.visibility = View.VISIBLE
+                    includeKeyboard.integratedKeyboard.visibility = View.GONE
+                    includeQuestionSpan.tvSpanQuestion.text = ""
+                    includeEditor.containerInfo.visibility = View.GONE
+                    includeEditor.containerPartial.visibility = View.GONE
+                    includeHeader.tvLabelTop.text =
+                        listLevel.first() { it.id == currentLevel }.title
+                }
+
+                position = 0
+                setBoxTagText()
                 getInputAnswerDirection()
                 onClickBox()
 
                 fillTextDescription()
                 setOnSelectedColor()
-                binding.includeHeader.tvLabelTop.text = listLevel.first(){it.id == currentLevel}.title
+
             }
 
             BoardSet.EDITOR_EDIT -> {
-                initLayoutEditor()
-                setBoxTagText()
+                binding.apply {
+                    includeEditor.mainContainer.visibility = View.VISIBLE
+                    includeKeyboard.integratedKeyboard.visibility = View.GONE
+                    includeQuestionSpan.tvSpanQuestion.text = ""
+                    includeEditor.containerInfo.visibility = View.GONE
+                    includeEditor.containerPartial.visibility = View.GONE
+                    includeHeader.tvLabelTop.text =
+                        listLevel.first() { it.id == currentLevel }.title
+                }
 
                 position = listPartial.first { it.levelId == currentLevel }.charAt
 
+                setBoxTagText()
                 fillTextDescription()
-
                 getInputAnswerDirection()
                 onClickBox()
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
+                binding.apply {
+                    includeEditor.mainContainer.visibility = View.GONE
+                    includeHeader.tvLabelTop.text =
+                        listLevel.first() { it.id == currentLevel }.title
+                }
+
                 position = listPartial.first { it.levelId == currentLevel }.charAt
-                initLayoutPlay()
                 setBoxTagText()
                 getInputAnswerDirection()
                 onClickBox()
             }
 
             BoardSet.PLAY_NEXT -> {
-                // TODO: KALO PAS WIN PILIH LANJUT
+
             }
         }
 
@@ -243,6 +270,7 @@ class BoardActivity : AppCompatActivity() {
         // FIXME: SELECT QUESTION BY ARROW
         binding.includeQuestionSpan.apply {
             btnNextQuestion.setOnClickListener() {
+                if (isNew && boardSet == BoardSet.EDITOR_NEW) return@setOnClickListener
                 resetBoxColor()
                 fillText()
                 getRequestQuestions(SelectRequest.NEXT)
@@ -257,6 +285,7 @@ class BoardActivity : AppCompatActivity() {
                     .playOn(tvSpanQuestion);
             }
             btnPrevQuestion.setOnClickListener() {
+                if (isNew && boardSet == BoardSet.EDITOR_NEW) return@setOnClickListener
                 resetBoxColor()
                 fillText()
                 getRequestQuestions(SelectRequest.PREV)
@@ -271,11 +300,12 @@ class BoardActivity : AppCompatActivity() {
                     .playOn(tvSpanQuestion);
             }
             tvSpanQuestion.setOnClickListener() {
-                checkWinCondition()
+                //checkWinCondition()
+                playNext()
             }
         }
 
-        /* FIXME: EDITOR BINDING ACTION*/
+        /* EDITOR BINDING ACTION                                                                 */
         binding.includeEditor.apply {
             if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER) return
             // TODO:
@@ -284,6 +314,7 @@ class BoardActivity : AppCompatActivity() {
                 if (listQuestion.isEmpty()) {
                     Helper().apply { alertDialog(this@BoardActivity, "Data masih kosong") }
                 } else {
+                    isNew = false
                     saveAndApply()
                 }
             }
@@ -491,12 +522,119 @@ class BoardActivity : AppCompatActivity() {
             // TODO: 1. win dialog, 2. next question or back to list, 3. update score 4. update user data level finished
             val mp = MediaPlayer.create(applicationContext, R.raw.crowd_applause)
             mp.start()
-            Dialog().apply { winDialog(this@BoardActivity, binding) }
-
+            winDialog(this)
         }
     }
 
-    /* FIXME: GET ID QUESTION DARI PARTIAL Row ID */
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun winDialog(
+        context: Context,
+    ) {
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val bind = DialogWinBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(bind.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false)
+
+        bind.btnNext.setOnClickListener() {
+            playNext()
+            dialog.dismiss()
+        }
+
+        bind.btnBack.setOnClickListener() {
+            val i = Intent(context.applicationContext, MainActivity::class.java)
+            startActivity(i)
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    /* asdsd ad                                                                              */
+    private fun playNext() {
+        lifecycleScope.launch {
+            //Get Data Level by Category on Play
+            val dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
+                currentCategory
+            )
+            val count = dataLevel.count()
+
+            finishedId.add(currentLevel)
+
+            if (count == finishedId.count()) {
+                val i = Intent(this@BoardActivity, MainActivity::class.java)
+                startActivity(i)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                return@launch
+            }
+
+            var newId = ""
+            for (i in dataLevel) {
+                if (!finishedId.contains(i.id) ) {
+                    newId = i.id
+                    Toast.makeText(this@BoardActivity, "${i.id}", Toast.LENGTH_SHORT).show()
+                    break
+                }
+            }
+
+            currentLevel = newId
+
+            //GET DATA from New currentLevel
+            boardSet = BoardSet.PLAY_USER
+
+            listLevel.clear()
+            listLevel =
+                DB.getInstance(applicationContext).level().getLevel(currentLevel)
+
+            listQuestion.clear()
+            listQuestion =
+                DB.getInstance(applicationContext).question()
+                    .getQuestion(currentLevel)
+            listPartial.clear()
+            listPartial = DB.getInstance(applicationContext).partial().getPartial(
+                currentLevel
+            )
+
+            binding.apply {
+                includeEditor.mainContainer.visibility = View.GONE
+                includeHeader.tvLabelTop.text =
+                    listLevel.first() { it.id == currentLevel }.title
+            }
+
+            position = listPartial.first { it.levelId == currentLevel }.charAt
+
+            setBoxTagText()
+            getInputAnswerDirection()
+            onClickBox()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun extracted(dialog: AlertDialog) {
+        val window = dialog.window
+
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window!!, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
+            view.onApplyWindowInsets(windowInsets)
+        }
+    }
+
+    /* GET ID QUESTION DARI PARTIAL Row ID */
     private fun getRowId(): String {
         val pos = position
         var rowId = ""
@@ -511,7 +649,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
 
-    /* FIXME: GET ID QUESTION DARI PARTIAL Column ID */
+    /* GET ID QUESTION DARI PARTIAL Column ID */
     private fun getColumnId(): String {
         val pos = position
         var colId = ""
@@ -840,9 +978,8 @@ class BoardActivity : AppCompatActivity() {
     private fun initLayoutPlay() {
         binding.includeEditor.mainContainer.visibility = View.GONE
 
-        binding.includeHeader.tvLabelTop.text = listLevel.first().title //currentLevel
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
-
+        binding.includeHeader.tvLabelTop.text = listLevel.first() { it.id == currentLevel }.title
     }
 
     private fun initLayoutEditor() {
@@ -854,6 +991,7 @@ class BoardActivity : AppCompatActivity() {
 
         binding.includeEditor.containerInfo.visibility = View.GONE
         binding.includeEditor.containerPartial.visibility = View.GONE
+        binding.includeHeader.tvLabelTop.text = listLevel.first() { it.id == currentLevel }.title
     }
 
     private fun initIntKeyChild() {
@@ -882,7 +1020,6 @@ class BoardActivity : AppCompatActivity() {
     /*
     * INPUT DATA DENGAN DIALOG INTERNAL, KALO PAKE YANG EXTERNAL, GAK BISA MANGGIL onCLick,
     * walau kebaca di external dialog tapi error pas runtime, CARI TAU
-    * TODO: cari tau cara manggil fungsi parent dari dialog
     * */
     @RequiresApi(Build.VERSION_CODES.R)
     private fun inputDataQuestioner(
@@ -952,7 +1089,7 @@ class BoardActivity : AppCompatActivity() {
 
             val id: String = bind.tvIdInput.text.toString()
             val number: Int = bind.etNoInput.text.toString().toInt()
-            val asking: String = bind.etAskInput.text.toString()
+            val asking: String = bind.etAskInput.text.toString().trim()
             val answer: String = bind.etAnswerInput.text.toString().trim()
             val direction: String = bind.swDirection.text.toString()
 

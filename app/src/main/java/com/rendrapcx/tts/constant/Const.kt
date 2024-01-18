@@ -19,6 +19,7 @@ class Const {
 
         var isSignedIn = false
         var currentUserId = "ADMIN"
+        var currentUser = ""
         var currentUserRefId = ""
 
         var gameState = GameState.CREATOR
@@ -29,6 +30,7 @@ class Const {
 
 
         var currentLevel = ""
+        var currentCategory = ""
         var inputMode = ""
 
         val strRight = "➡\uFE0F"

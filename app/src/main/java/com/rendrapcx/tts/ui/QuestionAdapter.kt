@@ -17,9 +17,10 @@ class QuestionAdapter(
     private var onClickShare: ((Data.Level) -> Unit)? = null
     private var onClickUpload: ((Data.Level) -> Unit)? = null
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setListItem(level: MutableList<Data.Level>) {
         this.listLevel = level
-        this.notifyItemChanged(level.size)
+        this.notifyDataSetChanged()
     }
 
     fun setOnClickView(callback: (Data.Level) -> Unit ){

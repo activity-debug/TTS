@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
+import android.text.InputFilter
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -18,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.CustomDialog1Binding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
@@ -86,36 +88,6 @@ open class Dialog {
 
         binding.btnCancel.setOnClickListener() {
             Toast.makeText(this, "Nah gotu donk", Toast.LENGTH_LONG).show()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    fun Context.winDialog(
-        context: Context,
-        boardBinding: ActivityBoardBinding
-    ) {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val binding = DialogWinBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(binding.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(false)
-
-        binding.btnNext.setOnClickListener() {
-            Toast.makeText(context.applicationContext, "NEXT", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
-
-        binding.btnBack.setOnClickListener() {
-            val i = Intent(context.applicationContext, MainActivity::class.java)
-            startActivity(i)
             dialog.dismiss()
         }
 
@@ -199,6 +171,15 @@ open class Dialog {
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
+
+        /* INIT KOMPONEN */
+        binding.apply {
+            editLevelId.isEnabled = false
+            editCategory.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(50))
+            editTitle.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(50))
+            editCreator.setText(currentUser)
+        }
+
 
         Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {
             binding.editLevelId.setText(it.id)

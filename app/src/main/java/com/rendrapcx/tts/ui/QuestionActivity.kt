@@ -51,7 +51,7 @@ class QuestionActivity : AppCompatActivity() {
             boardSet = BoardSet.EDITOR_NEW
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
@@ -83,11 +83,11 @@ class QuestionActivity : AppCompatActivity() {
         }
     }
 
-    private fun filter(string: String) {
-        val filterLevel = listLevel.ifEmpty { return }
-        val result =
-            filterLevel.filter { it.category.contains(string) }.sortedBy { it.category }
-                .toMutableList()
+    private fun filter(str: String) {
+        if (listLevel.isEmpty()) return
+        val listLevelFilter = listLevel
+        val result = listLevelFilter.filter { it.category.contains(str)}.toMutableList()
+
         if (result.isEmpty()) {
             adapter.setListItem(listLevel)
         } else {
