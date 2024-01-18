@@ -2,15 +2,11 @@ package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.rendrapcx.tts.R
-import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.databinding.QuestionListItemBinding
 import com.rendrapcx.tts.model.Data
+import java.util.Locale
 
 class QuestionAdapter(
 ) : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>() {
@@ -46,14 +42,9 @@ class QuestionAdapter(
         this.onClickUpload = callback
     }
 
-
     class QuestionViewHolder(val binding: QuestionListItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-//        private var onClickView: ((Data.Level) -> Unit)? = null
-//        fun setOnClickView(callback: (Data.Level) -> Unit ){
-//            this.onClickView = callback
-//        }
-    }
+        RecyclerView.ViewHolder(binding.root) {}
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuestionViewHolder {
         return QuestionViewHolder(

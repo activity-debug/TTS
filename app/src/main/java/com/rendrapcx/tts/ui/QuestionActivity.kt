@@ -2,20 +2,17 @@ package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.SnapHelper
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.Snackbar.SnackbarLayout
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
@@ -27,36 +24,44 @@ import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
+import com.rendrapcx.tts.model.Data.Companion.listLevel
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.serializer
 
 class QuestionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuestionBinding
     private var adapter = QuestionAdapter()
 
-    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuestionBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.progressBar2.visibility = View.GONE
 
         Helper().apply { hideSystemUI() }
 
-        initRecyclerView()
+        binding.apply {
+            rcViewQuestioner.layoutManager = LinearLayoutManager(this@QuestionActivity)
+            rcViewQuestioner.adapter = adapter
+        }
+
+        /* Adapter Data and Actions */
+        recyclerViewDataActions()
 
         binding.btnNewLevel.setOnClickListener() {
             boardSet = BoardSet.EDITOR_NEW
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
         }
 
-        binding.btnSearch.setOnClickListener(){
-            val mp = MediaPlayer.create(applicationContext, R.raw.crowd_applause)
-            mp.start()
-            Toast.makeText(this, "${Data.listUserPreferences}", Toast.LENGTH_SHORT).show()
-        }
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                filter(s.toString())
+            }
+        })
+
 
         binding.headerPanel.apply {
             tvLabelTop.text = "Questioner"
@@ -68,7 +73,7 @@ class QuestionActivity : AppCompatActivity() {
         }
 
         binding.switch1.isChecked = Data.listUserPreferences[0].showFinished
-        binding.switch1.setOnClickListener(){
+        binding.switch1.setOnClickListener() {
             lifecycleScope.launch {
                 val data = binding.switch1.isChecked
                 Data.listUserPreferences[0].showFinished = data
@@ -78,24 +83,31 @@ class QuestionActivity : AppCompatActivity() {
         }
     }
 
+    private fun filter(string: String) {
+        val filterLevel = listLevel.ifEmpty { return }
+        val result =
+            filterLevel.filter { it.category.contains(string) }.sortedBy { it.category }
+                .toMutableList()
+        if (result.isEmpty()) {
+            adapter.setListItem(listLevel)
+        } else {
+            adapter.setListItem(result)
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
-    private fun initRecyclerView() {
+    private fun recyclerViewDataActions() {
         binding.apply {
-            rcViewQuestioner.layoutManager = LinearLayoutManager(this@QuestionActivity)
-            rcViewQuestioner.adapter = adapter
-
-            Data.listLevel.clear()
+            listLevel.clear()
             lifecycleScope.launch {
                 try {
-                    Data.listLevel = DB.getInstance(applicationContext).level().getAllLevel()
+                    listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                         .ifEmpty { return@launch }
                 } finally {
                     binding.etSearch.hint = "Data Kosong"
                 }
-                var temp = mutableListOf<Data.Level>()
-
-                adapter.setListItem(Data.listLevel)
+                adapter.setListItem(listLevel)
                 binding.etSearch.hint = adapter.itemCount.toString()
             }
 
@@ -104,7 +116,7 @@ class QuestionActivity : AppCompatActivity() {
                     boardSet = BoardSet.PLAY
                     currentLevel = it.id
 
-                    Data.listLevel =
+                    listLevel =
                         DB.getInstance(applicationContext).level().getLevel(currentLevel)
                     Data.listQuestion =
                         DB.getInstance(applicationContext).question().getQuestion(currentLevel)
@@ -122,7 +134,6 @@ class QuestionActivity : AppCompatActivity() {
                 lifecycleScope.launch {
 
                     val levelId = it.id
-                    binding.progressBar2.visibility = View.VISIBLE
                     lifecycleScope.launch {
                         DB.getInstance(applicationContext).level().deleteLevelById(levelId)
                     }
@@ -134,16 +145,19 @@ class QuestionActivity : AppCompatActivity() {
                         DB.getInstance(applicationContext).partial().deletePartialByLevelId(levelId)
                     }
                     lifecycleScope.launch {
-                        Data.listLevel.clear()
-                        Data.listLevel = DB.getInstance(applicationContext).level().getAllLevel()
-                        adapter.setListItem(Data.listLevel)
+                        listLevel.clear()
+                        listLevel = DB.getInstance(applicationContext).level().getAllLevel()
+                        adapter.setListItem(listLevel)
                         adapter.notifyDataSetChanged()
                         binding.etSearch.hint = adapter.itemCount.toString()
                     }
-                    binding.progressBar2.visibility = View.GONE
                     Snackbar.make(binding.questionLayout, "Deleted", Snackbar.LENGTH_SHORT)
                         .setAction("Undo", View.OnClickListener {
-                            Toast.makeText(this@QuestionActivity, "KASIH KODE DISINI", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@QuestionActivity,
+                                "KASIH KODE DISINI",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         })
                         .show()
                 }
@@ -154,7 +168,7 @@ class QuestionActivity : AppCompatActivity() {
                     boardSet = BoardSet.EDITOR_EDIT
                     currentLevel = it.id
 
-                    Data.listLevel =
+                    listLevel =
                         DB.getInstance(applicationContext).level().getLevel(currentLevel)
                     Data.listQuestion =
                         DB.getInstance(applicationContext).question().getQuestion(currentLevel)
@@ -164,6 +178,7 @@ class QuestionActivity : AppCompatActivity() {
 
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 }
             }
 
@@ -171,12 +186,12 @@ class QuestionActivity : AppCompatActivity() {
 
             }
 
-            adapter.setOnClickShare {value ->
+            adapter.setOnClickShare { value ->
                 lifecycleScope.launch {
                     qrAction = QrAction.CREATE
                     currentLevel = value.id
 
-                    Data.listLevel =
+                    listLevel =
                         DB.getInstance(applicationContext).level().getLevel(currentLevel)
                     Data.listQuestion =
                         DB.getInstance(applicationContext).question().getQuestion(currentLevel)
@@ -184,7 +199,7 @@ class QuestionActivity : AppCompatActivity() {
                         currentLevel
                     )
 
-                    val a = Data.listLevel
+                    val a = listLevel
                     val b = Data.listQuestion
                     val c = Data.listPartial
                     val d = a + "#" + b + "#" + c

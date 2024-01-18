@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.text.InputFilter
@@ -97,6 +98,10 @@ class BoardActivity : AppCompatActivity() {
                 listLevel.add(
                     Data.Level(currentLevel, "2024", "Title", "Admin")
                 )
+
+                getInputAnswerDirection()
+                onClickBox()
+
                 fillTextDescription()
                 setOnSelectedColor()
                 binding.includeHeader.tvLabelTop.text = listLevel.first(){it.id == currentLevel}.title
@@ -484,6 +489,8 @@ class BoardActivity : AppCompatActivity() {
         }
         if (pass) {
             // TODO: 1. win dialog, 2. next question or back to list, 3. update score 4. update user data level finished
+            val mp = MediaPlayer.create(applicationContext, R.raw.crowd_applause)
+            mp.start()
             Dialog().apply { winDialog(this@BoardActivity, binding) }
 
         }
@@ -836,8 +843,6 @@ class BoardActivity : AppCompatActivity() {
         binding.includeHeader.tvLabelTop.text = listLevel.first().title //currentLevel
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
 
-        binding.includeBoard.boardTen.setBackgroundColor(R.drawable.background_gradient_zeus_miracle)
-
     }
 
     private fun initLayoutEditor() {
@@ -846,9 +851,6 @@ class BoardActivity : AppCompatActivity() {
 
         binding.includeHeader.tvLabelTop.text = "TERKA EDITOR"
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
-
-
-        binding.includeBoard.boardTen.setBackgroundColor(R.drawable.background_gradient_zeus_miracle)
 
         binding.includeEditor.containerInfo.visibility = View.GONE
         binding.includeEditor.containerPartial.visibility = View.GONE

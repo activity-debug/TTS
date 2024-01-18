@@ -23,8 +23,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.google.zxing.BinaryBitmap
@@ -34,19 +37,22 @@ import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.Reader
 import com.google.zxing.common.HybridBinarizer
 import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentUserId
 import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
+import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.databinding.DialogSignOutBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.model.Data.Companion.listPartial
+import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
-import com.rendrapcx.tts.ui.dlg.playMenu
 import com.rendrapcx.tts.ui.trial.TestActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -95,11 +101,11 @@ class MainActivity : AppCompatActivity() {
                 Dialog().apply { userProfile(this@MainActivity) }
             }
             btnLogin.setOnClickListener() {
-                if (currentUserId.isNotEmpty()) signOut()
+                if (currentUserId.isNotEmpty()) signOutDialog()
                 else loginDialog()
             }
             btnGoTTS.setOnClickListener() {
-                playMenu(this@MainActivity, lifecycle)
+                playMenuDialog(this@MainActivity, lifecycle)
             }
 
             btnGoWiw.setOnClickListener() {
@@ -109,33 +115,142 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnGoTBK.setOnClickListener() {
-                Toast.makeText(this@MainActivity, "${listUserPreferences[0].integratedKeyboard}", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this@MainActivity,
+                    "${listUserPreferences[0].integratedKeyboard}",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun playMenuDialog(
+        context: Context,
+        lifecycle: Lifecycle
+    ) {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = DialogMenuPlayBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(binding.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogBottomAnim
+        dialog.window!!.attributes.gravity = Gravity.BOTTOM
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        fun changeListFiltered(category: String) {
+            binding.apply {
+
+                val filteredList =
+                    listLevel.sortedBy { it.title }.filter { it.category == category }
+                        .toMutableList()
+                val adapter = PlayMenuTitleAdapter()
+                myRecView.layoutManager = GridLayoutManager(context, 3)
+                myRecView.adapter = adapter
+                adapter.setListItem(filteredList)
+
+                adapter.setOnClickView {
+                    lifecycle.coroutineScope.launch {
+                        Const.boardSet = Const.BoardSet.PLAY_USER
+                        Const.currentLevel = it.id
+
+                        listLevel =
+                            DB.getInstance(applicationContext).level().getLevel(Const.currentLevel)
+                        listQuestion =
+                            DB.getInstance(applicationContext).question()
+                                .getQuestion(Const.currentLevel)
+                        listPartial = DB.getInstance(applicationContext).partial().getPartial(
+                            Const.currentLevel
+                        )
+
+                        val i = Intent(this@MainActivity, BoardActivity::class.java)
+                        startActivity(i)
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                        dialog.dismiss()
+                    }
+
+                }
+            }
+
+        }
+
+        fun showListByCategory() {
+            binding.apply {
+                val adapter = PlayMenuAdapter()
+                myRecView.layoutManager = LinearLayoutManager(context)
+                myRecView.adapter = adapter
+                adapter.setListItem(listLevel.distinctBy { it.category }.sortedBy { it.category }
+                    .toMutableList())
+
+                adapter.setOnClickView {
+                    changeListFiltered(it.category)
+                    binding.tvPlayMenuHeader.text = it.category
+                }
+            }
+        }
+
+        binding.tvPlayMenuHeader.text = "Select Category"
+
+        binding.btnBackToCategoryAdapter.setOnClickListener() {
+            binding.tvPlayMenuHeader.text = "Select Category"
+            showListByCategory()
+        }
+
+        showListByCategory()
+
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun extracted(dialog: AlertDialog) {
+        val window = dialog.window
+
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window!!, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
+            view.onApplyWindowInsets(windowInsets)
+        }
+    }
+
     private fun loadUserPreferences() {
         lifecycleScope.launch {
-            val count =
-                DB.getInstance(applicationContext).userPreferences().getAllUserPreferences().count()
-            if (count == 0) {
-                DB.getInstance(applicationContext).userPreferences().insertUserPref(
-                    Data.UserPreferences(
-                        id = "0",
-                        isLogin = false,
-                        showFinished = false,
-                        sortOrderByAuthor = false,
-                        integratedKeyboard = false,
-                        isMusic = true,
-                        isSound = true,
-                    )
-                )
-            } else {
-                listUserPreferences =
-                    DB.getInstance(applicationContext).userPreferences().getAllUserPreferences()
+            val isEmpty =
+                DB.getInstance(applicationContext)
+                    .userPreferences().getAllUserPreferences().isEmpty()
 
-            }
+            if (isEmpty) writeDefaultPreferences()
+
+            listUserPreferences =
+                DB.getInstance(applicationContext)
+                    .userPreferences().getAllUserPreferences()
+        }
+    }
+
+    private fun writeDefaultPreferences() {
+        lifecycleScope.launch {
+            DB.getInstance(applicationContext).userPreferences().insertUserPref(
+                Data.UserPreferences(
+                    id = "0",
+                    isLogin = false,
+                    showFinished = false,
+                    sortOrderByAuthor = false,
+                    integratedKeyboard = false,
+                    isMusic = true,
+                    isSound = true,
+                )
+            )
         }
     }
 
@@ -162,8 +277,9 @@ class MainActivity : AppCompatActivity() {
             //.repeat(1)
             .playOn(binding.imgLogo);
     }
+
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun signOut(
+    private fun signOutDialog(
     ) {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val bind = DialogSignOutBinding.inflate(inflater)
@@ -185,7 +301,8 @@ class MainActivity : AppCompatActivity() {
             view.onApplyWindowInsets(windowInsets)
         }
 
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
         bind.btnSignOut.setOnClickListener() {
@@ -211,23 +328,25 @@ class MainActivity : AppCompatActivity() {
         val bind = DialogLoginBinding.inflate(inflater)
         val builder = AlertDialog.Builder(this).setView(bind.root)
         val dialog = builder.create()
-        val window = dialog.window
+//        val window = dialog.window
 
-        val windowInsetsController =
-            WindowCompat.getInsetsController(window!!, window.decorView)
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//        val windowInsetsController =
+//            WindowCompat.getInsetsController(window!!, window.decorView)
+//        windowInsetsController.systemBarsBehavior =
+//            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//
+//        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+//            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+//                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+//            ) {
+//                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+//            }
+//            view.onApplyWindowInsets(windowInsets)
+//        }
 
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-            }
-            view.onApplyWindowInsets(windowInsets)
-        }
+        extracted(dialog)
 
-        dialog.window!!.attributes.windowAnimations = R.style.LoginDialogAnim
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
         dialog.window!!.attributes.gravity = Gravity.TOP
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(false)

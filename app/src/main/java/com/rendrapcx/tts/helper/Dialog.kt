@@ -1,5 +1,6 @@
 package com.rendrapcx.tts.helper
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -29,7 +30,6 @@ import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
 import com.rendrapcx.tts.ui.MainActivity
-import com.rendrapcx.tts.ui.QuestionActivity
 import kotlinx.coroutines.launch
 
 
@@ -123,7 +123,7 @@ open class Dialog {
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun Context.settingDialog(
+    fun settingDialog(
         context: Context, lifecycle: Lifecycle
     ) {
         val inflater =
@@ -134,7 +134,7 @@ open class Dialog {
 
         extracted(dialog)
 
-        dialog.window!!.attributes.windowAnimations = R.style.LoginDialogAnim
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
         dialog.window!!.attributes.gravity = Gravity.TOP
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
@@ -157,7 +157,7 @@ open class Dialog {
 
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun Context.userProfile(
+    fun userProfile(
         context: Context
     ) {
         val inflater =
@@ -167,6 +167,8 @@ open class Dialog {
         val dialog = builder.create()
 
         extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogBottomAnim
         dialog.window!!.attributes.gravity = Gravity.BOTTOM
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
@@ -177,7 +179,7 @@ open class Dialog {
         }
 
         binding.btnSaveProgress.setOnClickListener() {
-            Toast.makeText(this, "Save Progress", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Save Progress", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnCloseProfile.setOnClickListener() {

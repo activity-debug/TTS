@@ -19,10 +19,10 @@ interface ILevel {
     @Delete()
     suspend fun deleteLevel(level: Data.Level)
 
-    @Query("select * from level sort")
+    @Query("select * from level")
     suspend fun getAllLevel(): MutableList<Data.Level>
 
-    @Query("SELECT * FROM level WHERE category = :category;")
+    @Query("SELECT * FROM level WHERE category = :category ORDER BY category ASC;")
     suspend fun getAllByCategory(category: String): MutableList<Data.Level>
 
     @Query("SELECT * FROM level WHERE `id` = :id;")
