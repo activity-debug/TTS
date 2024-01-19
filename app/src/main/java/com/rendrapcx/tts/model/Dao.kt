@@ -11,6 +11,7 @@ import androidx.room.Update
 import com.rendrapcx.tts.model.dao.ILevel
 import com.rendrapcx.tts.model.dao.IPartial
 import com.rendrapcx.tts.model.dao.IQuestion
+import com.rendrapcx.tts.model.dao.ITebakKata
 import com.rendrapcx.tts.model.dao.IUser
 import com.rendrapcx.tts.model.dao.IUserAnswer
 import com.rendrapcx.tts.model.dao.IUserPreferences
@@ -35,5 +36,8 @@ class Dao {
 
     @Dao
     interface UserPreferences : IUserPreferences {}
+
+    @Dao
+    interface TebakKata : ITebakKata {}
 
 }

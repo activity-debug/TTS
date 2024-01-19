@@ -1,35 +1,51 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.rendrapcx.tts.R
+import com.rendrapcx.tts.R.drawable.*
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.qrAction
 import com.rendrapcx.tts.constant.Const.QrAction
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
+import com.rendrapcx.tts.databinding.DialogInputTbkBinding
+import com.rendrapcx.tts.databinding.DialogSelectInputBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.model.Data.Companion.listTebakKata
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class QuestionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuestionBinding
-    private var adapter = QuestionAdapter()
+    private var questionAdapter = QuestionAdapter()
+    private var tebakKataAdapter = TebakKataAdapter()
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,17 +57,14 @@ class QuestionActivity : AppCompatActivity() {
 
         binding.apply {
             rcViewQuestioner.layoutManager = LinearLayoutManager(this@QuestionActivity)
-            rcViewQuestioner.adapter = adapter
+            rcViewQuestioner.adapter = questionAdapter
         }
 
         /* Adapter Data and Actions */
-        recyclerViewDataActions()
+        questionAdapterActions()
 
         binding.btnNewLevel.setOnClickListener() {
-            boardSet = BoardSet.EDITOR_NEW
-            val i = Intent(this, BoardActivity::class.java)
-            startActivity(i)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            createSoalDialog(this)
         }
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
@@ -81,23 +94,217 @@ class QuestionActivity : AppCompatActivity() {
                     .updateShowFinished("0", data)
             }
         }
+
+        /*Tabs Switch*/
+        binding.apply {
+            tabTts.setOnClickListener() {
+                activeTab(0)
+                questionAdapterActions()
+                binding.rcViewQuestioner.adapter = questionAdapter
+            }
+            tabTbk.setOnClickListener() {
+                activeTab(1)
+                tebakKataAdapterActions()
+                binding.rcViewQuestioner.adapter = tebakKataAdapter
+            }
+            tabWiw.setOnClickListener() {
+                activeTab(2)
+            }
+        }
     }
 
+    private fun activeTab(tab: Int = 0) {
+        binding.apply {
+            when (tab) {
+                0 -> {
+                    tabTts.setBackgroundResource(tabs_active_shape)
+                    tabTbk.setBackgroundResource(tabs_disable_shape)
+                    tabWiw.setBackgroundResource(tabs_disable_shape)
+                }
+
+                1 -> {
+                    tabTts.setBackgroundResource(tabs_disable_shape)
+                    tabTbk.setBackgroundResource(tabs_active_shape)
+                    tabWiw.setBackgroundResource(tabs_disable_shape)
+                }
+
+                2 -> {
+                    tabTts.setBackgroundResource(tabs_disable_shape)
+                    tabTbk.setBackgroundResource(tabs_disable_shape)
+                    tabWiw.setBackgroundResource(tabs_active_shape)
+                }
+            }
+        }
+    }
+
+    private fun tebakKataAdapterActions() {
+        binding.apply {
+            listTebakKata.clear()
+            lifecycleScope.launch {
+                try {
+                    listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
+                        .ifEmpty { return@launch }
+                } finally {
+                    etSearch.hint = "Data Kosong"
+                }
+                tebakKataAdapter.setListItem(listTebakKata)
+                etSearch.hint = tebakKataAdapter.itemCount.toString()
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun createSoalDialog(context: Context) {
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val bind = DialogSelectInputBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(bind.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false)
+
+        bind.btnCreateTBK.setOnClickListener() {
+            dialogInputTbk(this)
+            dialog.dismiss()
+        }
+
+        bind.btnCreateTTS.setOnClickListener() {
+            boardSet = BoardSet.EDITOR_NEW
+            val i = Intent(this, BoardActivity::class.java)
+            startActivity(i)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        }
+
+        bind.btnCreateWiw.setOnClickListener() {
+            Toast.makeText(this, "Bikin Soal WIW", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun dialogInputTbk(context: Context) {
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val bind = DialogInputTbkBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(bind.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false)
+
+        bind.etId.isEnabled = false
+        bind.etId.setText(UUID.randomUUID().toString())
+        bind.etImgUrl.isEnabled = false
+        bind.tvPreview.text = ""
+        bind.etAnswer.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(45))
+
+        @SuppressLint("SetTextI18n")
+        fun previewAnswer(string: String) {
+            val xLen = 15
+            val yLen = 3
+            val size = 45
+            val rightMargin = arrayListOf<Int>()
+            for (i in 0 until yLen) {
+                rightMargin.add((i * xLen) - 1)
+            }
+            var pre = ""
+            for (i in 0 until size) {
+                if (i in rightMargin) {
+                    if (i >= string.length) {
+                        pre += "_"
+                        continue
+                    } else if (string[i] == ' ') pre += "_" + "\n"
+                    else pre += string[i] + "\n"
+                } else {
+                    if (i >= string.length) {
+                        pre += "_"
+                        continue
+                    } else if (string[i] == ' ') pre += "_"
+                    else pre += string[i]
+                }
+            }
+            bind.tvPreview.text = pre
+        }
+
+        bind.etAnswer.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                previewAnswer(s.toString())
+            }
+
+        })
+
+        bind.btnCancelAddTbk.setOnClickListener() {
+            dialog.dismiss()
+        }
+
+        bind.btnSaveTbk.setOnClickListener() {
+            lifecycleScope.launch {
+                DB.getInstance(applicationContext).tebakKata().insertTbk(
+                    Data.TebakKata(
+                        id = bind.etId.text.toString(),
+                        imageUrl = bind.etImgUrl.text.toString(),
+                        answer = bind.etAnswer.text.toString(),
+                        hint1 = bind.etHint1.text.toString(),
+                        hint2 = bind.etHint2.text.toString(),
+                        hint3 = bind.etHint3.text.toString(),
+                        hint4 = bind.etHint4.text.toString(),
+                        hint5 = bind.etHint5.text.toString(),
+                    )
+                )
+                dialog.dismiss()
+            }
+        }
+
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun extracted(dialog: AlertDialog) {
+        val window = dialog.window
+
+        val windowInsetsController =
+            WindowCompat.getInsetsController(window!!, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+            ) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+            }
+            view.onApplyWindowInsets(windowInsets)
+        }
+    }
+
+    /* searching filter category */
     private fun filter(str: String) {
         if (listLevel.isEmpty()) return
         val listLevelFilter = listLevel
-        val result = listLevelFilter.filter { it.category.contains(str)}.toMutableList()
+        val result = listLevelFilter.filter { it.category.contains(str) }.toMutableList()
 
         if (result.isEmpty()) {
-            adapter.setListItem(listLevel)
+            questionAdapter.setListItem(listLevel)
         } else {
-            adapter.setListItem(result)
+            questionAdapter.setListItem(result)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
-    private fun recyclerViewDataActions() {
+    private fun questionAdapterActions() {
         binding.apply {
             listLevel.clear()
             lifecycleScope.launch {
@@ -107,11 +314,11 @@ class QuestionActivity : AppCompatActivity() {
                 } finally {
                     binding.etSearch.hint = "Data Kosong"
                 }
-                adapter.setListItem(listLevel)
-                binding.etSearch.hint = adapter.itemCount.toString()
+                questionAdapter.setListItem(listLevel)
+                binding.etSearch.hint = questionAdapter.itemCount.toString()
             }
 
-            adapter.setOnClickView { it ->
+            questionAdapter.setOnClickView { it ->
                 lifecycleScope.launch {
                     boardSet = BoardSet.PLAY
                     currentLevel = it.id
@@ -130,7 +337,7 @@ class QuestionActivity : AppCompatActivity() {
                 }
             }
 
-            adapter.setOnClickDelete {
+            questionAdapter.setOnClickDelete {
                 lifecycleScope.launch {
 
                     val levelId = it.id
@@ -147,9 +354,9 @@ class QuestionActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         listLevel.clear()
                         listLevel = DB.getInstance(applicationContext).level().getAllLevel()
-                        adapter.setListItem(listLevel)
-                        adapter.notifyDataSetChanged()
-                        binding.etSearch.hint = adapter.itemCount.toString()
+                        questionAdapter.setListItem(listLevel)
+                        questionAdapter.notifyDataSetChanged()
+                        binding.etSearch.hint = questionAdapter.itemCount.toString()
                     }
                     Snackbar.make(binding.questionLayout, "Deleted", Snackbar.LENGTH_SHORT)
                         .setAction("Undo", View.OnClickListener {
@@ -163,7 +370,7 @@ class QuestionActivity : AppCompatActivity() {
                 }
             }
 
-            adapter.setOnClickEdit { it ->
+            questionAdapter.setOnClickEdit { it ->
                 lifecycleScope.launch {
                     boardSet = BoardSet.EDITOR_EDIT
                     currentLevel = it.id
@@ -182,11 +389,11 @@ class QuestionActivity : AppCompatActivity() {
                 }
             }
 
-            adapter.setOnClickUpload {
+            questionAdapter.setOnClickUpload {
 
             }
 
-            adapter.setOnClickShare { value ->
+            questionAdapter.setOnClickShare { value ->
                 lifecycleScope.launch {
                     qrAction = QrAction.CREATE
                     currentLevel = value.id

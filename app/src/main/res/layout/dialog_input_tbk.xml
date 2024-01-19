@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.cardview.widget.CardView
+        app:cardCornerRadius="30dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container"
+            android:padding="20sp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <EditText
+                android:id="@+id/etId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:ems="10"
+                android:hint="ID"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/etAnswer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:ems="10"
+                android:hint="Answer"
+                android:inputType="text"
+                android:maxLength="45"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvPreview" />
+
+            <EditText
+                android:id="@+id/etHint1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="Hint1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/etAnswer" />
+
+            <EditText
+                android:id="@+id/etHint2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="Hint2"
+                app:layout_constraintEnd_toEndOf="@+id/etHint1"
+                app:layout_constraintStart_toStartOf="@+id/etHint1"
+                app:layout_constraintTop_toBottomOf="@+id/etHint1" />
+
+            <EditText
+                android:id="@+id/etHint3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="Hint3"
+                app:layout_constraintEnd_toEndOf="@+id/etHint2"
+                app:layout_constraintStart_toStartOf="@+id/etHint2"
+                app:layout_constraintTop_toBottomOf="@+id/etHint2" />
+
+
+            <EditText
+                android:id="@+id/etHint4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="Hint4"
+                app:layout_constraintEnd_toEndOf="@+id/etHint3"
+                app:layout_constraintStart_toStartOf="@+id/etHint3"
+                app:layout_constraintTop_toBottomOf="@+id/etHint3" />
+
+            <EditText
+                android:id="@+id/etHint5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="Hint5"
+                app:layout_constraintEnd_toEndOf="@+id/etHint4"
+                app:layout_constraintStart_toStartOf="@+id/etHint4"
+                app:layout_constraintTop_toBottomOf="@+id/etHint4" />
+
+            <TextView
+                android:id="@+id/tvPreview"
+                android:layout_width="230sp"
+                android:layout_height="100sp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/box_shape_siapa"
+                android:fontFamily="serif-monospace"
+                android:gravity="center_vertical"
+                android:lineSpacingExtra="8sp"
+                android:paddingHorizontal="5dp"
+                android:text="AAAAAAAAAAAAAAABBBBBBBBBBBBBBBCCCCCCCCCCCCCCC"
+                android:textAllCaps="true"
+                android:textColor="#1A237E"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:typeface="monospace"
+                app:layout_constraintEnd_toEndOf="@+id/btnOpenImage"
+                app:layout_constraintStart_toStartOf="@+id/etImgUrl"
+                app:layout_constraintTop_toBottomOf="@+id/etImgUrl" />
+
+            <Button
+                android:id="@+id/btnOpenImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GET"
+                app:layout_constraintEnd_toEndOf="@+id/etId"
+                app:layout_constraintTop_toTopOf="@+id/etImgUrl" />
+
+            <Button
+                android:id="@+id/btnCancelAddTbk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="52dp"
+                android:layout_marginTop="24dp"
+                android:text="Cancel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/etHint5" />
+
+            <Button
+                android:id="@+id/btnSaveTbk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btnCancelAddTbk"
+                app:layout_constraintTop_toTopOf="@+id/btnCancelAddTbk" />
+
+            <EditText
+                android:id="@+id/etImgUrl"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Url"
+                android:inputType="text"
+                app:layout_constraintEnd_toStartOf="@+id/btnOpenImage"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/etId"
+                app:layout_constraintTop_toBottomOf="@+id/etId" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -26,6 +26,9 @@
         android:theme="@style/Theme.TTS"
         tools:targetApi="31">
         <activity
+            android:name=".ui.TebakKataActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.trial.TestActivity"
             android:exported="false" />
         <activity

@@ -119,7 +119,7 @@ class BoardActivity : AppCompatActivity() {
 
                 fillTextDescription()
                 setOnSelectedColor()
-
+                Dialog().apply { inputDescription(binding) }
             }
 
             BoardSet.EDITOR_EDIT -> {
@@ -139,6 +139,7 @@ class BoardActivity : AppCompatActivity() {
                 fillTextDescription()
                 getInputAnswerDirection()
                 onClickBox()
+                Dialog().apply { inputDescription(binding) }
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
@@ -609,7 +610,13 @@ class BoardActivity : AppCompatActivity() {
 
             position = listPartial.first { it.levelId == currentLevel }.charAt
 
+            for (i in 0 until box.size) {
+                box[i].text = ""
+                box[i].tag = ""
+            }
+
             setBoxTagText()
+            resetBoxColor()
             getInputAnswerDirection()
             onClickBox()
         }
@@ -1085,12 +1092,23 @@ class BoardActivity : AppCompatActivity() {
         }
 
         bind.btnUpdateInput.setOnClickListener() {
-            if (bind.etAskInput.text.isEmpty() || bind.etAnswerInput.text.isEmpty()) return@setOnClickListener
+            if (bind.etAskInput.text.isEmpty()) {
+                bind.etAskInput.error = "tidak boleh kosong"
+                return@setOnClickListener
+            }
+            if (bind.etAnswerInput.text.isEmpty()) {
+                bind.etAnswerInput.error = "tidak boleh kosong"
+                return@setOnClickListener
+            }
+            if (!bind.etAnswerInput.text.all { it.isLetter() }) {
+                bind.etAnswerInput.error = "hanya huruf kapital, jangan ada spasi, angka atau simbol"
+                return@setOnClickListener
+            }
 
             val id: String = bind.tvIdInput.text.toString()
             val number: Int = bind.etNoInput.text.toString().toInt()
             val asking: String = bind.etAskInput.text.toString().trim()
-            val answer: String = bind.etAnswerInput.text.toString().trim()
+            val answer: String = bind.etAnswerInput.text.toString().uppercase()
             val direction: String = bind.swDirection.text.toString()
 
             addQuestion(id, number, asking, answer, direction, rowAvailable, colAvailable)
@@ -1099,7 +1117,6 @@ class BoardActivity : AppCompatActivity() {
 
             getInputAnswerDirection()
             onClickBox()
-
             dialog.dismiss()
         }
         bind.btnCancelInput.setOnClickListener() {

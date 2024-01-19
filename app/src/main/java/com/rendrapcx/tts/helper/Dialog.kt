@@ -21,7 +21,7 @@ import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
-import com.rendrapcx.tts.databinding.CustomDialog1Binding
+import com.rendrapcx.tts.databinding.DialogExitAppBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
@@ -33,10 +33,10 @@ import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
 import com.rendrapcx.tts.ui.MainActivity
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 
 open class Dialog {
-
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun Context.shareQRDialog(context: Context, content: String) {
@@ -69,25 +69,25 @@ open class Dialog {
 
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun Context.exitDialog(context: Context) {
+    fun exitDialog(context: Context) {
         val inflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val binding = CustomDialog1Binding.inflate(inflater)
+        val binding = DialogExitAppBinding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
 
         extracted(dialog)
 
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(false)
 
         binding.btnOK.setOnClickListener() {
-            Toast.makeText(this, "OKEH BYE!!", Toast.LENGTH_LONG).show()
-            dialog.dismiss()
+            exitProcess(0)
         }
 
         binding.btnCancel.setOnClickListener() {
-            Toast.makeText(this, "Nah gotu donk", Toast.LENGTH_LONG).show()
             dialog.dismiss()
         }
 

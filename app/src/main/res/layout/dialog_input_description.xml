@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="350dp"
@@ -73,7 +74,8 @@
             android:text="Submit"
             app:layout_constraintEnd_toEndOf="@+id/editCreator"
             app:layout_constraintStart_toStartOf="@+id/editCreator"
-            app:layout_constraintTop_toBottomOf="@+id/editCreator" />
+            app:layout_constraintTop_toBottomOf="@+id/editCreator"
+            tools:ignore="HardcodedText" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

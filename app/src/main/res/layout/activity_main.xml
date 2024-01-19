@@ -43,13 +43,14 @@
 
     <Button
         android:id="@+id/btnGoTTS"
-        style="@style/Widget.Material3.Button.TonalButton"
+        style="@style/Widget.Material3.Button.TonalButton.Icon"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
-        android:text="MULAI"
+        android:fontFamily="@font/lemon_reguler"
+        android:text="TTS"
         android:textColor="@color/button"
-        android:textSize="24sp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoListQuestion"
         app:layout_constraintHorizontal_bias="0.225"
         app:layout_constraintStart_toStartOf="@+id/btnGoListQuestion"
@@ -57,24 +58,28 @@
 
     <Button
         android:id="@+id/btnGoTBK"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="@font/lemon_reguler"
         android:text="TBK"
-        android:textSize="24sp"
+        android:textColor="@color/button"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoTTS"
         app:layout_constraintStart_toStartOf="@+id/btnGoListQuestion"
         app:layout_constraintTop_toBottomOf="@+id/btnGoTTS" />
 
     <Button
         android:id="@+id/btnGoWiw"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.Material3.Button.TonalButton.Icon"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="@font/lemon_reguler"
         android:text="WIW"
-        android:textSize="24sp"
+        android:textColor="@color/button"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoTBK"
         app:layout_constraintStart_toStartOf="@+id/btnGoTBK"
         app:layout_constraintTop_toBottomOf="@+id/btnGoTBK" />
@@ -91,7 +96,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/btnExitApp"
         style="@style/Widget.Material3.Button.IconButton.Outlined"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/keyboard_abc"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+
+    <TextView
+        android:id="@+id/key_1"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_2"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_1"
+        app:layout_constraintTop_toTopOf="@+id/key_1"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_3"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_2"
+        app:layout_constraintTop_toTopOf="@+id/key_2"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_4"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_3"
+        app:layout_constraintTop_toTopOf="@+id/key_3"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_5"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_4"
+        app:layout_constraintTop_toTopOf="@+id/key_4"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_6"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_5"
+        app:layout_constraintTop_toTopOf="@+id/key_5"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_7"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_6"
+        app:layout_constraintTop_toTopOf="@+id/key_6"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_8"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/key_1"
+        app:layout_constraintTop_toBottomOf="@+id/key_1"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_9"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_8"
+        app:layout_constraintTop_toBottomOf="@+id/key_2"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_10"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_9"
+        app:layout_constraintTop_toBottomOf="@+id/key_3"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_11"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_10"
+        app:layout_constraintTop_toBottomOf="@+id/key_4"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_12"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_11"
+        app:layout_constraintTop_toBottomOf="@+id/key_5"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_13"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_12"
+        app:layout_constraintTop_toBottomOf="@+id/key_6"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_14"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_13"
+        app:layout_constraintTop_toBottomOf="@+id/key_7"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_15"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/key_8"
+        app:layout_constraintTop_toBottomOf="@+id/key_8"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_16"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_15"
+        app:layout_constraintTop_toBottomOf="@+id/key_9"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_17"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_16"
+        app:layout_constraintTop_toBottomOf="@+id/key_10"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_18"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_17"
+        app:layout_constraintTop_toBottomOf="@+id/key_11"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_19"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_18"
+        app:layout_constraintTop_toBottomOf="@+id/key_12"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_20"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_19"
+        app:layout_constraintTop_toBottomOf="@+id/key_13"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_21"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_20"
+        app:layout_constraintTop_toBottomOf="@+id/key_14"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_22"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_15"
+        app:layout_constraintTop_toBottomOf="@+id/key_15"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_23"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_22"
+        app:layout_constraintTop_toBottomOf="@+id/key_16"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_24"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_23"
+        app:layout_constraintTop_toBottomOf="@+id/key_17"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_25"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_24"
+        app:layout_constraintTop_toBottomOf="@+id/key_18"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/key_26"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/custom_textview"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="@color/button"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/key_25"
+        app:layout_constraintTop_toBottomOf="@+id/key_19"
+        tools:ignore="HardcodedText" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

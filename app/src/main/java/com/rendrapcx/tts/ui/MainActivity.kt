@@ -45,8 +45,7 @@ import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.databinding.DialogSignOutBinding
-import com.rendrapcx.tts.helper.Dialog
-import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.helper.*
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
@@ -54,7 +53,6 @@ import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
-import com.rendrapcx.tts.ui.trial.TestActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
@@ -110,18 +108,19 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnGoWiw.setOnClickListener() {
-                val intent = Intent(this@MainActivity, TestActivity::class.java)
+//                val intent = Intent(this@MainActivity, TestActivity::class.java)
+//                startActivity(intent)
+//                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
+
+            btnGoTBK.setOnClickListener() {
+                val intent = Intent(this@MainActivity, TebakKataActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
-            btnGoTBK.setOnClickListener() {
-                Toast.makeText(
-                    this@MainActivity,
-                    "${listUserPreferences[0].integratedKeyboard}",
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+            btnExitApp.setOnClickListener(){
+                Dialog().exitDialog(this@MainActivity)
             }
         }
     }

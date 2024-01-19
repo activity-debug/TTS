@@ -3,6 +3,8 @@ package com.rendrapcx.tts.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.AnswerStatus
 
 class Data {
     @Entity(tableName = "level")
@@ -40,6 +42,19 @@ class Data {
         constructor() : this("",0,"","","","")
     }
 
+    @Entity(tableName = "tebak_kata")
+    data class TebakKata(
+        @PrimaryKey(autoGenerate = false)
+        @ColumnInfo(name = "id") var id: String,
+        @ColumnInfo(name = "image_url") var imageUrl: String,
+        @ColumnInfo(name = "answer") var answer: String,
+        @ColumnInfo(name = "hint_1") var hint1: String,
+        @ColumnInfo(name = "hint_2") var hint2: String,
+        @ColumnInfo(name = "hint_3") var hint3: String,
+        @ColumnInfo(name = "hint_4") var hint4: String,
+        @ColumnInfo(name = "hint_5") var hint5: String,
+    )
+
     @Entity(tableName = "user")
     data class User(
         @PrimaryKey(autoGenerate = false)
@@ -51,12 +66,12 @@ class Data {
 
     @Entity(tableName = "user_answer")
     data class UserAnswer(
-        @PrimaryKey(autoGenerate = true)
+        @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "id") var id : Int,
-        @ColumnInfo(name = "user_id") var userId: Int?=-1,
-        @ColumnInfo(name = "level_id") var levelId: String?=null,
-        @ColumnInfo(name = "answer") var answer: String? =null,
-        @ColumnInfo(name = "status") var status: Int? = 0,
+        @ColumnInfo(name = "user_id") var userId: Int,
+        @ColumnInfo(name = "level_id") var levelId: String,
+        @ColumnInfo(name = "answer") var answer: String,
+        @ColumnInfo(name = "status") var status: AnswerStatus,
     )
 
     @Entity(tableName = "user_preferences")
@@ -77,5 +92,6 @@ class Data {
         var listPartial = mutableListOf<Partial>()
         var listUser = mutableListOf<User>()
         var listUserPreferences = mutableListOf<UserPreferences>()
+        var listTebakKata = mutableListOf<TebakKata>()
     }
 }

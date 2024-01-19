@@ -119,12 +119,54 @@
             android:id="@+id/switch1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:background="@drawable/box_shape"
+            android:paddingStart="10sp"
             android:text="Published"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
+
+        <TextView
+            android:id="@+id/tab_tts"
+            android:layout_width="42sp"
+            android:layout_height="36sp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/tabs_active_shape"
+            android:gravity="center"
+            android:text="TTS"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/switch1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tab_tbk"
+            android:layout_width="42sp"
+            android:layout_height="36sp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/tabs_disable_shape"
+            android:gravity="center"
+            android:text="TBK"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/tab_tts"
+            app:layout_constraintTop_toTopOf="@+id/tab_tts" />
+
+        <TextView
+            android:id="@+id/tab_wiw"
+            android:layout_width="42sp"
+            android:layout_height="36sp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/tabs_disable_shape"
+            android:gravity="center"
+            android:text="WIW"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/tab_tbk"
+            app:layout_constraintTop_toTopOf="@+id/tab_tbk" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

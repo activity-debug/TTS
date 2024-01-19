@@ -18,8 +18,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.rendrapcx.tts.databinding.CustomDialog1Binding
-import com.rendrapcx.tts.databinding.DialogSettingBinding
 
 class Helper {
 

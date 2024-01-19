@@ -3,7 +3,7 @@
     android:shareInterpolator="false"
     >
     <alpha
-        android:duration="@integer/material_motion_duration_medium_1"
+        android:duration="@integer/material_motion_duration_long_2"
         android:fromAlpha="0.1"
         android:toAlpha="1.0" />
 </set>

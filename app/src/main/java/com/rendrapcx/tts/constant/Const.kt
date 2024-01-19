@@ -14,6 +14,8 @@ class Const {
 
     enum class QrAction {READ, CREATE}
 
+    enum class AnswerStatus {DONE, PROGRESS}
+
     companion object {
         var qrAction = QrAction.CREATE
 
