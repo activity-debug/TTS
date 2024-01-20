@@ -26,6 +26,7 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
+import com.google.android.material.snackbar.Snackbar
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
@@ -302,7 +303,7 @@ class BoardActivity : AppCompatActivity() {
             }
             tvSpanQuestion.setOnClickListener() {
                 //checkWinCondition()
-                playNext()
+                //playNext()
             }
         }
 
@@ -371,7 +372,15 @@ class BoardActivity : AppCompatActivity() {
             }
             fillText()
             clip = ""
-            Toast.makeText(this, "ID Copied, Clip cleared", Toast.LENGTH_SHORT).show()
+            Snackbar.make(binding.boardActivityRoot, "Deleted", Snackbar.LENGTH_SHORT)
+                .setAction("Undo", View.OnClickListener {
+                    Toast.makeText(
+                        this@BoardActivity,
+                        "belum tersedia",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
+                .show()
         }
     }
 
@@ -579,7 +588,6 @@ class BoardActivity : AppCompatActivity() {
             for (i in dataLevel) {
                 if (!finishedId.contains(i.id) ) {
                     newId = i.id
-                    Toast.makeText(this@BoardActivity, "${i.id}", Toast.LENGTH_SHORT).show()
                     break
                 }
             }
@@ -613,10 +621,10 @@ class BoardActivity : AppCompatActivity() {
             for (i in 0 until box.size) {
                 box[i].text = ""
                 box[i].tag = ""
+                box[i].visibility = View.VISIBLE
             }
 
             setBoxTagText()
-            resetBoxColor()
             getInputAnswerDirection()
             onClickBox()
         }

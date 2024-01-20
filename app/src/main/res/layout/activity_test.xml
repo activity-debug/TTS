@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:text="Encode  and Save"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.112"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editInputContent" />
 
@@ -49,9 +50,9 @@
     <TextView
         android:id="@+id/textResultContent"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="0dp"
         android:text="result"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnDecodeFromCamera" />
@@ -64,4 +65,21 @@
         android:text="Decode from Gallery"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnEncode" />
+
+    <Button
+        android:id="@+id/btnShare1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="share1"
+        app:layout_constraintStart_toEndOf="@+id/btnEncode"
+        app:layout_constraintTop_toTopOf="@+id/btnEncode" />
+
+    <Button
+        android:id="@+id/btnShare2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="Share2"
+        app:layout_constraintStart_toEndOf="@+id/btnShare1"
+        app:layout_constraintTop_toTopOf="@+id/btnShare1" />
 </androidx.constraintlayout.widget.ConstraintLayout>

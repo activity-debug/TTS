@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.LuminanceSource
@@ -26,10 +27,8 @@ import com.google.zxing.Reader
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.integration.android.IntentIntegrator
 import com.journeyapps.barcodescanner.BarcodeEncoder
-import com.journeyapps.barcodescanner.camera.CameraConfigurationUtils
 import com.rendrapcx.tts.databinding.ActivityTestBinding
 import com.rendrapcx.tts.helper.Utils
-import com.rendrapcx.tts.model.Data
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -47,6 +46,8 @@ enum class RequestCode {
 open class TestActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTestBinding
     private lateinit var tvResult: TextView
+    private var fileUrl = ""
+    private var imgUri = ""
 
     private var WRITE_EXTERNAL_STORAGE_PERMISSION_CODE: Int = 1
     private var READ_EXTERNAL_STORAGE_PERMISSION_CODE: Int = 2
@@ -64,27 +65,56 @@ open class TestActivity : AppCompatActivity() {
             }
 
             btnEncode.setOnClickListener() {
-                val content =  editInputContent.text.toString()
+                val content = editInputContent.text.toString()
                 val barcodeEncoder = BarcodeEncoder()
                 val bitmap: Bitmap =
                     barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
-//                saveMediaToStorage(bitmap)
-                Utils().apply { saveMediaToStorage(bitmap) }
+                saveMediaToStorage(bitmap)
                 imgCoder.setImageBitmap(bitmap)
+                editInputContent.setText(fileUrl)
             }
 
             btnDecodeFromCamera.setOnClickListener() {
                 openCamera()
             }
+
+            btnShare1.setOnClickListener() {
+//                val filename = binding.editInputContent.text.toString()
+//                Toast.makeText(this@TestActivity, "${uri}", Toast.LENGTH_SHORT).show()
+////                val path = uri +".png"
+//                val shareIntent: Intent = Intent().apply {
+//                    action = Intent.ACTION_SEND
+//                    // Example: content://com.google.android.apps.photos.contentprovider/...
+//                    ///sdcard/Pictures/1705435063572.png
+//                    putExtra(Intent.EXTRA_STREAM, path.toUri())
+//                    type = "image/jpeg"
+//                }
+//                startActivity(Intent.createChooser(shareIntent, null))
+
+            }
+
+            btnShare2.setOnClickListener() {
+//                val path =
+//                    Toast.makeText(this@TestActivity, "${path}", Toast.LENGTH_SHORT).show()
+//                val shareIntent: Intent = Intent().apply {
+//                    action = Intent.ACTION_SEND
+//                    // Example: content://com.google.android.apps.photos.contentprovider/...
+//                    ///sdcard/Pictures/1705435063572.png
+//                    putExtra(Intent.EXTRA_STREAM, path)
+//                    type = "image/jpeg"
+//                }
+//                startActivity(Intent.createChooser(shareIntent, null))
+            }
         }
 
     }
 
-   open val resultLauncherGallery =
+    open val resultLauncherGallery =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
                 val imageUri = data!!.data!!
+                binding.editInputContent.setText(imageUri.path)
                 binding.imgCoder.setImageURI(imageUri)
 
                 val imagePath = convertMediaUriToPath(imageUri)
@@ -147,9 +177,9 @@ open class TestActivity : AppCompatActivity() {
 
     private fun saveMediaToStorage(bitmap: Bitmap) {
         val filename = "${System.currentTimeMillis()}.png"
+        fileUrl = filename
 
         var outputStream: OutputStream? = null
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             this.contentResolver?.also { resolver ->
                 val contentValues = ContentValues().apply {
@@ -158,9 +188,17 @@ open class TestActivity : AppCompatActivity() {
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
                 }
                 val imageUri: Uri? =
-                    resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                    resolver.insert(Media.EXTERNAL_CONTENT_URI, contentValues)
+
+                imgUri = imageUri.toString()
 
                 outputStream = imageUri?.let { resolver.openOutputStream(it) }
+                val shareIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_STREAM, imageUri)
+                    type = "image/jpeg"
+                }
+                startActivity(Intent.createChooser(shareIntent, null))
             }
         } else {
             val imagesDir =
@@ -171,7 +209,7 @@ open class TestActivity : AppCompatActivity() {
 
         outputStream?.use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            Toast.makeText(this, "Captured View and saved to Gallery", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "${imgUri}", Toast.LENGTH_SHORT).show()
         }
     }
 

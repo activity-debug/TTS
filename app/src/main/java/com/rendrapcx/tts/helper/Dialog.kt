@@ -39,36 +39,6 @@ import kotlin.system.exitProcess
 open class Dialog {
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun Context.shareQRDialog(context: Context, content: String) {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val binding = DialogShareQrcodeBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(binding.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(true)
-
-        //Show To Image
-        Utils().apply {
-            binding.imgQR.setImageBitmap(getBitmapEncoder(content))
-        }
-
-        binding.btnShareQr.setOnClickListener() {
-            dialog.dismiss()
-        }
-
-        binding.btnSaveQr.setOnClickListener() {
-            Utils().apply { saveBitmapEncoder(content) }
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.R)
     fun exitDialog(context: Context) {
         val inflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater

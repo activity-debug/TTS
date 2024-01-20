@@ -1,12 +1,17 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
@@ -23,23 +28,26 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.R.drawable.*
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
-import com.rendrapcx.tts.constant.Const.Companion.qrAction
-import com.rendrapcx.tts.constant.Const.QrAction
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
 import com.rendrapcx.tts.databinding.DialogInputTbkBinding
 import com.rendrapcx.tts.databinding.DialogSelectInputBinding
-import com.rendrapcx.tts.helper.Dialog
+import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listTebakKata
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.util.UUID
 
 class QuestionActivity : AppCompatActivity() {
@@ -137,6 +145,8 @@ class QuestionActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun tebakKataAdapterActions() {
         binding.apply {
             listTebakKata.clear()
@@ -150,7 +160,109 @@ class QuestionActivity : AppCompatActivity() {
                 tebakKataAdapter.setListItem(listTebakKata)
                 etSearch.hint = tebakKataAdapter.itemCount.toString()
             }
+
+            tebakKataAdapter.setOnClickShare {
+                val string =
+                    it.id + ";" + it.imageUrl + ";" + it.answer + ";" + it.hint1 + ";" + it.hint2 + ";" + it.hint3 + ";" + it.hint4 + ";" + it.hint5
+                shareQRDialog(this@QuestionActivity, string)
+            }
+
+            tebakKataAdapter.setOnClickDelete {tbk->
+                lifecycleScope.launch {
+                    val id = tbk.id
+                    lifecycleScope.launch {
+                        DB.getInstance(applicationContext).tebakKata().deleteTbkById(id)
+                    }
+                    lifecycleScope.launch {
+                        listTebakKata.clear()
+                        listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
+                        tebakKataAdapter.setListItem(listTebakKata)
+                        tebakKataAdapter.notifyDataSetChanged()
+                        binding.etSearch.hint = tebakKataAdapter.itemCount.toString()
+                    }
+                    Snackbar.make(binding.questionLayout, "Tbk Deleted", Snackbar.LENGTH_SHORT)
+                        .setAction("Undo", View.OnClickListener {
+                            Toast.makeText(
+                                this@QuestionActivity,
+                                "KASIH KODE DISINI",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        })
+                        .show()
+                }
+            }
+
         }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun shareQRDialog(context: Context, content: String) {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = DialogShareQrcodeBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(binding.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        val barcodeEncoder = BarcodeEncoder()
+        val bitmap: Bitmap =
+            barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
+        binding.imgQR.setImageBitmap(bitmap)
+
+        binding.btnShareQr.setOnClickListener() {
+            saveAndShareQRTBK(content)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+
+    private fun saveAndShareQRTBK(content: String) {
+        val barcodeEncoder = BarcodeEncoder()
+        val bitmap: Bitmap =
+            barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
+
+        val filename = "${System.currentTimeMillis()}.png"
+        var outputStream: OutputStream? = null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            this.contentResolver?.also { resolver ->
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                }
+                val imageUri: Uri? =
+                    resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+                outputStream = imageUri?.let { resolver.openOutputStream(it) }
+
+                val shareIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_STREAM, imageUri)
+                    type = "image/png"
+                }
+                startActivity(Intent.createChooser(shareIntent, null))
+            }
+        } else {
+            val imagesDir =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            val image = File(imagesDir, filename)
+            outputStream = FileOutputStream(image)
+        }
+
+        outputStream?.use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            Helper().alertDialog(this, "Captured View and saved to Gallery")
+        }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -386,33 +498,6 @@ class QuestionActivity : AppCompatActivity() {
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                }
-            }
-
-            questionAdapter.setOnClickUpload {
-
-            }
-
-            questionAdapter.setOnClickShare { value ->
-                lifecycleScope.launch {
-                    qrAction = QrAction.CREATE
-                    currentLevel = value.id
-
-                    listLevel =
-                        DB.getInstance(applicationContext).level().getLevel(currentLevel)
-                    Data.listQuestion =
-                        DB.getInstance(applicationContext).question().getQuestion(currentLevel)
-                    Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                        currentLevel
-                    )
-
-                    val a = listLevel
-                    val b = Data.listQuestion
-                    val c = Data.listPartial
-                    val d = a + "#" + b + "#" + c
-                    val content = a.toString()
-
-                    Dialog().apply { shareQRDialog(this@QuestionActivity, content) }
                 }
             }
 

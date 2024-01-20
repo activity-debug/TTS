@@ -53,6 +53,7 @@ import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
+import com.rendrapcx.tts.ui.trial.TestActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
@@ -108,9 +109,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnGoWiw.setOnClickListener() {
-//                val intent = Intent(this@MainActivity, TestActivity::class.java)
-//                startActivity(intent)
-//                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                val intent = Intent(this@MainActivity, TestActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
             btnGoTBK.setOnClickListener() {
@@ -190,7 +191,6 @@ class MainActivity : AppCompatActivity() {
                     changeListFiltered(it.category)
                     binding.tvPlayMenuHeader.text = it.category
                     Const.currentCategory = it.category
-                    Toast.makeText(this@MainActivity, "${it.category}", Toast.LENGTH_SHORT).show()
                 }
             }
         }

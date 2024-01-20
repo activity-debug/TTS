@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_gradient_zeus_miracle"
-    tools:context=".ui.BoardActivity">
+    tools:context=".ui.BoardActivity"
+    android:id="@+id/board_activity_root"
+    >
 
     <ScrollView
         android:id="@+id/scrollView2"

@@ -20,6 +20,9 @@ interface ITebakKata {
     @Query("SELECT * FROM tebak_kata")
     suspend fun getAllTbk(): MutableList<Data.TebakKata>
 
+    @Query("DELETE FROM tebak_kata WHERE id = :id;")
+    suspend fun deleteTbkById(id: String)
+
     @Query("SELECT * FROM tebak_kata WHERE id = :id ORDER BY id ASC;")
     suspend fun getTbkById(id : String): MutableList<Data.TebakKata>
 
