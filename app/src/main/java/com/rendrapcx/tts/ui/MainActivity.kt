@@ -23,6 +23,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -47,6 +49,10 @@ import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.databinding.DialogSignOutBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.helper.MyState
+import com.rendrapcx.tts.helper.NetworkStatusTracker
+import com.rendrapcx.tts.helper.NetworkStatusViewModel
+import com.rendrapcx.tts.helper.Sound
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
@@ -69,6 +75,18 @@ import kotlin.system.exitProcess
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val viewModelNet: NetworkStatusViewModel by lazy {
+        ViewModelProvider(
+            this,
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    val networkStatusTracker = NetworkStatusTracker(this@MainActivity)
+                    return NetworkStatusViewModel(networkStatusTracker) as T
+                }
+            },
+        )[NetworkStatusViewModel::class.java]
+    }
 
 
     private var resultQRDecoded = ""
@@ -80,8 +98,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         Helper().apply { hideSystemUI() }
+
+        viewModelNet.state.observe(this) { state ->
+            binding.apply {
+                when (state) {
+                    MyState.Fetched -> imgInfoNetwork.setImageResource(R.drawable.square_check_solid)
+                    MyState.Error -> imgInfoNetwork.setImageResource(R.drawable.square_xmark_solid)
+                }
+            }
+        }
+        binding.imgInfoNetwork.setImageResource(R.drawable.square_check_solid)
+
 
         UserRef().loadUserPref(this, lifecycle)
 
@@ -281,7 +309,8 @@ class MainActivity : AppCompatActivity() {
     private fun animLogo() {
         YoYo.with(Techniques.Tada)
             .duration(2000)
-            .playOn(binding.imgLogo);
+            .playOn(binding.imgLogo)
+        Sound().logo(this)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -365,7 +394,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getDataTebakKata(){
+    private fun getDataTebakKata() {
         lifecycleScope.launch {
             listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
         }

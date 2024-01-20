@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class UserRef {
 
-    fun writeDefaultPreferences(context: Context, lifecycle: Lifecycle) {
+    private fun writeDefaultPreferences(context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
             DB.getInstance(context).userPreferences().insertUserPref(
                 Data.UserPreferences(

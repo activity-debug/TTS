@@ -158,5 +158,15 @@
         app:layout_constraintStart_toEndOf="@+id/btnDatabase"
         app:layout_constraintTop_toTopOf="@+id/btnDatabase" />
 
+    <ImageView
+        android:id="@+id/imgInfoNetwork"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="10dp"
+        android:background="@drawable/box_image_shape"
+        app:layout_constraintStart_toEndOf="@+id/btnScanQRCode"
+        app:layout_constraintTop_toTopOf="@+id/btnScanQRCode"
+        app:srcCompat="@drawable/square_xmark_solid" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

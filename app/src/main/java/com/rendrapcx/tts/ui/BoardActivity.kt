@@ -47,6 +47,7 @@ import com.rendrapcx.tts.databinding.DialogWinBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.Keypad
+import com.rendrapcx.tts.helper.Sound
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
@@ -109,6 +110,7 @@ class BoardActivity : AppCompatActivity() {
                     includeQuestionSpan.tvSpanQuestion.text = ""
                     includeEditor.containerInfo.visibility = View.GONE
                     includeEditor.containerPartial.visibility = View.GONE
+                    includeGameHelperBottom.bottomHelper.visibility = View.GONE
                     includeHeader.tvLabelTop.text =
                         listLevel.first() { it.id == currentLevel }.title
                 }
@@ -130,6 +132,7 @@ class BoardActivity : AppCompatActivity() {
                     includeQuestionSpan.tvSpanQuestion.text = ""
                     includeEditor.containerInfo.visibility = View.GONE
                     includeEditor.containerPartial.visibility = View.GONE
+                    includeGameHelperBottom.bottomHelper.visibility = View.GONE
                     includeHeader.tvLabelTop.text =
                         listLevel.first() { it.id == currentLevel }.title
                 }
@@ -210,7 +213,7 @@ class BoardActivity : AppCompatActivity() {
             }
         }
 
-        /* TODO: HEADER ACTIONS*/
+        /* HEADER ACTIONS*/
         binding.includeHeader.apply {
             btnBack.setOnClickListener() {
                 val intent = if (boardSet == BoardSet.PLAY_USER)
@@ -255,16 +258,25 @@ class BoardActivity : AppCompatActivity() {
                 }
 
                 box[i].setOnLongClickListener() {
-                    if (clip.isEmpty()) {
-                        clip = curRowId.ifEmpty { curColId }
-                        Dialog().showDialog(this@BoardActivity, "pilih box sibling untuk menempelkan")
-                    }
+                    //if (clip.isEmpty()) {
+                    clip = curRowId.ifEmpty { curColId }
+                    Snackbar.make(
+                        binding.boardActivityRoot,
+                        "Pilih box sibling untuk menempelkan",
+                        Snackbar.LENGTH_INDEFINITE
+                    )
+                        .setAction("Clear", View.OnClickListener {
+                            clip = ""
+                            Toast.makeText(this, "clip dikosongkan", Toast.LENGTH_SHORT).show()
+                        })
+                        .show()
+                    //}
                     return@setOnLongClickListener true
                 }
             }
         }
 
-        // FIXME: SELECT QUESTION BY ARROW
+        /* SELECT QUESTION BY ARROW */
         binding.includeQuestionSpan.apply {
             btnNextQuestion.setOnClickListener() {
                 if (isNew && boardSet == BoardSet.EDITOR_NEW) return@setOnClickListener
@@ -274,11 +286,9 @@ class BoardActivity : AppCompatActivity() {
                 onClickBox()
                 YoYo.with(Techniques.ZoomIn)
                     .duration(500)
-                    //.repeat(1)
                     .playOn(btnNextQuestion);
                 YoYo.with(Techniques.FadeInLeft)
                     .duration(500)
-                    //.repeat(1)
                     .playOn(tvSpanQuestion);
             }
             btnPrevQuestion.setOnClickListener() {
@@ -296,17 +306,20 @@ class BoardActivity : AppCompatActivity() {
                     //.repeat(1)
                     .playOn(tvSpanQuestion);
             }
-            tvSpanQuestion.setOnClickListener() {
-                //checkWinCondition()
-                //playNext()
+        }
+
+        /*GAME HELPER ACTIONS*/
+        binding.includeGameHelperBottom.apply {
+            btnShowPicture.setOnClickListener() {
+                Sound().dingDong(this@BoardActivity)
+                checkWinCondition()
+                //playNext() //hapus aku
             }
         }
 
         /* EDITOR BINDING ACTION                                                                 */
         binding.includeEditor.apply {
             if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER) return
-            // TODO:
-
             btnSave.setOnClickListener() {
                 if (listQuestion.isEmpty()) {
                     Dialog().showDialog(this@BoardActivity, "Data masih kosong")
@@ -371,7 +384,7 @@ class BoardActivity : AppCompatActivity() {
                 .setAction("Undo", View.OnClickListener {
                     Toast.makeText(
                         this@BoardActivity,
-                        "belum tersedia",
+                        "No Actions",
                         Toast.LENGTH_SHORT
                     ).show()
                 })
@@ -526,8 +539,7 @@ class BoardActivity : AppCompatActivity() {
         }
         if (pass) {
             // TODO: 1. win dialog, 2. next question or back to list, 3. update score 4. update user data level finished
-            val mp = MediaPlayer.create(applicationContext, R.raw.crowd_applause)
-            mp.start()
+            Sound().tepukTangan(this)
             winDialog(this)
         }
     }
@@ -582,7 +594,7 @@ class BoardActivity : AppCompatActivity() {
 
             var newId = ""
             for (i in dataLevel) {
-                if (!finishedId.contains(i.id) ) {
+                if (!finishedId.contains(i.id)) {
                     newId = i.id
                     break
                 }
@@ -1109,7 +1121,8 @@ class BoardActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             if (!bind.etAnswerInput.text.all { it.isLetter() }) {
-                bind.etAnswerInput.error = "hanya huruf kapital, jangan ada spasi, angka atau simbol"
+                bind.etAnswerInput.error =
+                    "hanya huruf kapital, jangan ada spasi, angka atau simbol"
                 return@setOnClickListener
             }
 

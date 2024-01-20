@@ -41,6 +41,7 @@ class TebakKataActivity : AppCompatActivity() {
 
         playTBK()
 
+
         /*MULAI ACTION LISTENER*/
 
         /*Keyboard Action*/
@@ -71,19 +72,6 @@ class TebakKataActivity : AppCompatActivity() {
                             .playOn(kb[i])
                     }
                 }
-            }
-        }
-
-
-        for (i in 0 until 45) {
-            sp[i].setOnClickListener() {
-                Toast.makeText(this, "${sp[i].tag}", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        binding.imgSoal.setOnClickListener() {
-            for (i in 0 until kb.size) {
-                kb[i].visibility = View.VISIBLE
             }
         }
 
@@ -173,6 +161,7 @@ class TebakKataActivity : AppCompatActivity() {
             binding.btnHint5.tag = listTebakKata[curIndex].hint5
 
             binding.gameHelperBottom.btnShowPicture.visibility = View.VISIBLE
+            binding.headerContent.tvLabelTop.text = binding.tvQuestionTbk.text
 
             shuffleKey(0)
             activeHint()

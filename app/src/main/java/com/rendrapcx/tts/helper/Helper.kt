@@ -1,10 +1,13 @@
 package com.rendrapcx.tts.helper
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
@@ -56,5 +59,7 @@ class Helper {
             }
         ).show()
     }
+
+
 
 }
