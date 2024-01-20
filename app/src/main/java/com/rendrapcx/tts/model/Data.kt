@@ -47,6 +47,7 @@ class Data {
         @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "id") var id: String,
         @ColumnInfo(name = "image_url") var imageUrl: String,
+        @ColumnInfo(name = "asking") var asking: String,
         @ColumnInfo(name = "answer") var answer: String,
         @ColumnInfo(name = "hint_1") var hint1: String,
         @ColumnInfo(name = "hint_2") var hint2: String,

@@ -163,6 +163,16 @@
                     tools:layout_editor_absoluteX="0dp"
                     tools:layout_editor_absoluteY="0dp" />
 
+                <include
+                    android:id="@+id/game_helper_bottom"
+                    layout="@layout/game_helper_bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/include_keyboard" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

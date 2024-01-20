@@ -28,7 +28,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:ems="10"
                 android:hint="ID"
@@ -42,7 +41,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:ems="10"
                 android:hint="Answer"
@@ -116,7 +114,6 @@
                 android:id="@+id/tvPreview"
                 android:layout_width="230sp"
                 android:layout_height="100sp"
-                android:layout_marginTop="8dp"
                 android:background="@drawable/box_shape_siapa"
                 android:fontFamily="serif-monospace"
                 android:gravity="center_vertical"
@@ -129,8 +126,9 @@
                 android:textStyle="bold"
                 android:typeface="monospace"
                 app:layout_constraintEnd_toEndOf="@+id/btnOpenImage"
+                app:layout_constraintHorizontal_bias="0.512"
                 app:layout_constraintStart_toStartOf="@+id/etImgUrl"
-                app:layout_constraintTop_toBottomOf="@+id/etImgUrl" />
+                app:layout_constraintTop_toBottomOf="@+id/etQuestion" />
 
             <Button
                 android:id="@+id/btnOpenImage"
@@ -170,6 +168,17 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/etId"
                 app:layout_constraintTop_toBottomOf="@+id/etId" />
+
+            <EditText
+                android:id="@+id/etQuestion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="Questions: Siapa Dia?"
+                app:layout_constraintEnd_toEndOf="@+id/btnOpenImage"
+                app:layout_constraintStart_toStartOf="@+id/etImgUrl"
+                app:layout_constraintTop_toBottomOf="@+id/etImgUrl" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

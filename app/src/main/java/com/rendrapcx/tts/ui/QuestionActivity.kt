@@ -39,6 +39,7 @@ import com.rendrapcx.tts.databinding.ActivityQuestionBinding
 import com.rendrapcx.tts.databinding.DialogInputTbkBinding
 import com.rendrapcx.tts.databinding.DialogSelectInputBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
+import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
@@ -68,8 +69,7 @@ class QuestionActivity : AppCompatActivity() {
             rcViewQuestioner.adapter = questionAdapter
         }
 
-        /* Adapter Data and Actions */
-        questionAdapterActions()
+        activeTab(1)
 
         binding.btnNewLevel.setOnClickListener() {
             createSoalDialog(this)
@@ -85,7 +85,6 @@ class QuestionActivity : AppCompatActivity() {
 
 
         binding.headerPanel.apply {
-            tvLabelTop.text = "Questioner"
             btnBack.setOnClickListener() {
                 val i = Intent(this@QuestionActivity, MainActivity::class.java)
                 startActivity(i)
@@ -107,13 +106,9 @@ class QuestionActivity : AppCompatActivity() {
         binding.apply {
             tabTts.setOnClickListener() {
                 activeTab(0)
-                questionAdapterActions()
-                binding.rcViewQuestioner.adapter = questionAdapter
             }
             tabTbk.setOnClickListener() {
                 activeTab(1)
-                tebakKataAdapterActions()
-                binding.rcViewQuestioner.adapter = tebakKataAdapter
             }
             tabWiw.setOnClickListener() {
                 activeTab(2)
@@ -128,18 +123,27 @@ class QuestionActivity : AppCompatActivity() {
                     tabTts.setBackgroundResource(tabs_active_shape)
                     tabTbk.setBackgroundResource(tabs_disable_shape)
                     tabWiw.setBackgroundResource(tabs_disable_shape)
+                    btnSelectFilter.visibility = View.VISIBLE
+                    binding.headerPanel.tvLabelTop.text = "TTS"
+                    questionAdapterActions()
+                    binding.rcViewQuestioner.adapter = questionAdapter
                 }
 
                 1 -> {
                     tabTts.setBackgroundResource(tabs_disable_shape)
                     tabTbk.setBackgroundResource(tabs_active_shape)
                     tabWiw.setBackgroundResource(tabs_disable_shape)
+                    btnSelectFilter.visibility = View.GONE
+                    binding.headerPanel.tvLabelTop.text = "Tebak Kata"
+                    tebakKataAdapterActions()
+                    binding.rcViewQuestioner.adapter = tebakKataAdapter
                 }
 
                 2 -> {
                     tabTts.setBackgroundResource(tabs_disable_shape)
                     tabTbk.setBackgroundResource(tabs_disable_shape)
                     tabWiw.setBackgroundResource(tabs_active_shape)
+                    binding.headerPanel.tvLabelTop.text = "Kata Bermakna"
                 }
             }
         }
@@ -224,6 +228,7 @@ class QuestionActivity : AppCompatActivity() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveAndShareQRTBK(content: String) {
         val barcodeEncoder = BarcodeEncoder()
         val bitmap: Bitmap =
@@ -260,7 +265,7 @@ class QuestionActivity : AppCompatActivity() {
 
         outputStream?.use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            Helper().alertDialog(this, "Captured View and saved to Gallery")
+            Dialog().showDialog(this, "Captured View and saved to Gallery")
         }
 
     }
@@ -275,10 +280,10 @@ class QuestionActivity : AppCompatActivity() {
 
         extracted(dialog)
 
-        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
-        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(false)
+        dialog.setCancelable(true)
 
         bind.btnCreateTBK.setOnClickListener() {
             dialogInputTbk(this)
@@ -318,7 +323,15 @@ class QuestionActivity : AppCompatActivity() {
         bind.etId.setText(UUID.randomUUID().toString())
         bind.etImgUrl.isEnabled = false
         bind.tvPreview.text = ""
+        bind.etQuestion.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
         bind.etAnswer.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(45))
+        bind.etHint1.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
+        bind.etHint2.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
+        bind.etHint3.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
+        bind.etHint4.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
+        bind.etHint5.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
+
+        bind.etQuestion.requestFocus()
 
         @SuppressLint("SetTextI18n")
         fun previewAnswer(string: String) {
@@ -367,6 +380,7 @@ class QuestionActivity : AppCompatActivity() {
                     Data.TebakKata(
                         id = bind.etId.text.toString(),
                         imageUrl = bind.etImgUrl.text.toString(),
+                        asking = bind.etQuestion.text.toString(),
                         answer = bind.etAnswer.text.toString(),
                         hint1 = bind.etHint1.text.toString(),
                         hint2 = bind.etHint2.text.toString(),

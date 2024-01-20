@@ -8,7 +8,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.collection.arraySetOf
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.daimajia.androidanimations.library.Techniques
@@ -48,18 +47,30 @@ class TebakKataActivity : AppCompatActivity() {
         for (i in 0 until kb.size) {
             kb[i].setOnClickListener() {
                 for (x in 0 until 45) {
+                    YoYo.with(Techniques.Bounce)
+                        .onEnd {
+                            YoYo.with(Techniques.Swing).repeat(1)
+                                .onEnd {
+                                    kb[i].text = ""
+                                    kb[i].isEnabled = false
+                                }
+                                .playOn(sp[x])
+                        }
+                        .playOn(kb[i])
                     if (sp[x].tag.toString() == kb[i].text.toString()) {
-                        sp[x].text = sp[x].tag.toString()
-
-                        YoYo.with(Techniques.FlipInY).duration(2000).repeat(0).playOn(sp[x])
-                        YoYo.with(Techniques.Bounce).duration(2000).repeat(0).playOn(sp[x])
-                        YoYo.with(Techniques.Shake).duration(1000).repeat(0).playOn(sp[x])
-
+                        YoYo.with(Techniques.Bounce).duration(2000)
+                            .onEnd {
+                                YoYo.with(Techniques.Bounce).duration(2000)
+                                    .onEnd { YoYo.with(Techniques.Tada).repeat(1).playOn(kb[i]) }
+                                    .onEnd { YoYo.with(Techniques.Tada).playOn(sp[x]) }
+                                    .onEnd { YoYo.with(Techniques.Bounce).playOn(sp[x]) }
+                                    .onEnd { YoYo.with(Techniques.Landing).playOn(sp[x]) }
+                                    .onEnd { sp[x].text = sp[x].tag.toString() }
+                                    .playOn(sp[x])
+                            }
+                            .playOn(kb[i])
                     }
                 }
-                YoYo.with(Techniques.Bounce).duration(1000).playOn(kb[i]);
-                kb[i].isEnabled = false
-                kb[i].text = ""
             }
         }
 
@@ -70,7 +81,7 @@ class TebakKataActivity : AppCompatActivity() {
             }
         }
 
-        binding.imgSoal.setOnClickListener(){
+        binding.imgSoal.setOnClickListener() {
             for (i in 0 until kb.size) {
                 kb[i].visibility = View.VISIBLE
             }
@@ -86,9 +97,39 @@ class TebakKataActivity : AppCompatActivity() {
         }
 
         /*bottom actions*/
-        binding.apply {
-            btnSuffleKey.setOnClickListener(){ shuffleKey(1) }
-            btnGetHint.setOnClickListener(){ /* hints aktif dari reward */}
+        binding.gameHelperBottom.apply {
+            btnGetHint.setOnClickListener() { /* hints aktif dari reward */ }
+            btnSuffleKey.setOnClickListener() {
+                YoYo.with(Techniques.Shake)
+                    .onEnd { shuffleKey(1) }
+                    .playOn(btnSuffleKey)
+
+            }
+            btnHideEmpty.setOnClickListener() {
+                for (i in 0 until sp.size) {
+                    if (sp[i].tag !in Helper().abjadKapital()) {
+                        YoYo.with(Techniques.Shake)
+                            .onEnd { YoYo.with(Techniques.Shake)
+                                .onEnd {
+                                    sp[i].visibility = View.INVISIBLE
+                                    btnHideEmpty.visibility = View.INVISIBLE
+                                }
+                                .playOn(sp[i]) }
+                            .playOn(btnHideEmpty)
+                    }
+                }
+            }
+            btnShowPicture.setOnClickListener() {
+                YoYo.with(Techniques.Flash)
+                    .onEnd {
+                        YoYo.with(Techniques.Bounce)
+                            .onEnd {
+                                binding.tvHider.setBackgroundColor(getColor(R.color.hider_intip))
+                                btnShowPicture.visibility = View.INVISIBLE }
+                            .playOn(btnShowPicture)
+                    }
+                    .playOn(btnShowPicture)
+            }
         }
 
         binding.headerContent.apply {
@@ -105,7 +146,6 @@ class TebakKataActivity : AppCompatActivity() {
         lifecycleScope.launch {
             listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
 
-
             /* GetUserPlayed & Current */
 
 
@@ -119,6 +159,8 @@ class TebakKataActivity : AppCompatActivity() {
             if (url.isEmpty()) binding.imgSoal.setImageResource(R.drawable.terka_box)
             else binding.imgSoal.setImageURI(url.toUri())
 
+            binding.tvQuestionTbk.text = listTebakKata[curIndex].asking
+
             val answer = listTebakKata[curIndex].answer
             for (i in answer.indices) {
                 sp[i].tag = answer[i].toString().uppercase()
@@ -129,6 +171,8 @@ class TebakKataActivity : AppCompatActivity() {
             binding.btnHint3.tag = listTebakKata[curIndex].hint3
             binding.btnHint4.tag = listTebakKata[curIndex].hint4
             binding.btnHint5.tag = listTebakKata[curIndex].hint5
+
+            binding.gameHelperBottom.btnShowPicture.visibility = View.VISIBLE
 
             shuffleKey(0)
             activeHint()
@@ -143,17 +187,18 @@ class TebakKataActivity : AppCompatActivity() {
                     kb[i].text = key[i]
                 }
             }
+
             1 -> {
                 val new = mutableListOf<String>()
                 for (i in 0 until kb.size) {
                     if (kb[i].isEnabled) new.add(kb[i].text.toString())
                 }
                 new.shuffle()
-                for (i in 0 until kb.size){
-                    //if (i == new.size) break
+                for (i in 0 until kb.size) {
                     if (kb[i].isEnabled) {
                         kb[i].text = new[0]
                         new.removeAt(0)
+                        YoYo.with(Techniques.RotateIn).playOn(kb[i])
                     }
                 }
             }

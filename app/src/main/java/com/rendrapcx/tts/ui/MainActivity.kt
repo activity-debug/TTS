@@ -23,7 +23,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -42,17 +41,20 @@ import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.constant.Const.Companion.currentUserId
 import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
 import com.rendrapcx.tts.databinding.ActivityMainBinding
+import com.rendrapcx.tts.databinding.DialogExitAppBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.databinding.DialogSignOutBinding
-import com.rendrapcx.tts.helper.*
+import com.rendrapcx.tts.helper.Dialog
+import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
+import com.rendrapcx.tts.model.Data.Companion.listTebakKata
 import com.rendrapcx.tts.model.Data.Companion.listUser
-import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
 import com.rendrapcx.tts.ui.trial.TestActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -61,6 +63,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.util.UUID
+import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
@@ -80,11 +83,12 @@ class MainActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
-        loadUserPreferences()
+        UserRef().loadUserPref(this, lifecycle)
 
         loadCurrentUser()
 
-        getData()
+        getDataLevel() //init for playMenuTTS
+        getDataTebakKata() //init For PlayTBK
 
         animLogo()
 
@@ -105,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                 else loginDialog()
             }
             btnGoTTS.setOnClickListener() {
-                playMenuDialog(this@MainActivity, lifecycle)
+                playMenuTTSDialog()
             }
 
             btnGoWiw.setOnClickListener() {
@@ -115,25 +119,53 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnGoTBK.setOnClickListener() {
+                if (listTebakKata.isEmpty()) {
+                    Dialog().showDialog(this@MainActivity, "Belum ada data Tebak kata")
+                    return@setOnClickListener
+                }
                 val intent = Intent(this@MainActivity, TebakKataActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
-            btnExitApp.setOnClickListener(){
-                Dialog().exitDialog(this@MainActivity)
+            btnExitApp.setOnClickListener() {
+                exitDialog()
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun playMenuDialog(
-        context: Context,
-        lifecycle: Lifecycle
-    ) {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private fun exitDialog() {
+        val inflater =
+            this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val bind = DialogExitAppBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(this).setView(bind.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false)
+
+        bind.btnOK.setOnClickListener() {
+            exitProcess(-1)
+        }
+
+        bind.btnCancel.setOnClickListener() {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun playMenuTTSDialog() {
+        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogMenuPlayBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(binding.root)
+        val builder = AlertDialog.Builder(this).setView(binding.root)
         val dialog = builder.create()
 
         extracted(dialog)
@@ -143,6 +175,7 @@ class MainActivity : AppCompatActivity() {
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
+
         fun changeListFiltered(category: String) {
             binding.apply {
 
@@ -150,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                     listLevel.sortedBy { it.title }.filter { it.category == category }
                         .toMutableList()
                 val adapter = PlayMenuTitleAdapter()
-                myRecView.layoutManager = GridLayoutManager(context, 3)
+                myRecView.layoutManager = GridLayoutManager(this@MainActivity, 3)
                 myRecView.adapter = adapter
                 adapter.setListItem(filteredList)
 
@@ -176,13 +209,12 @@ class MainActivity : AppCompatActivity() {
 
                 }
             }
-
         }
 
         fun showListByCategory() {
             binding.apply {
                 val adapter = PlayMenuAdapter()
-                myRecView.layoutManager = LinearLayoutManager(context)
+                myRecView.layoutManager = LinearLayoutManager(this@MainActivity)
                 myRecView.adapter = adapter
                 adapter.setListItem(listLevel.distinctBy { it.category }.sortedBy { it.category }
                     .toMutableList())
@@ -195,14 +227,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        //Init Dialog Komponen
         binding.tvPlayMenuHeader.text = "Select Category"
+        showListByCategory()
 
+        //Actions
         binding.btnBackToCategoryAdapter.setOnClickListener() {
             binding.tvPlayMenuHeader.text = "Select Category"
             showListByCategory()
         }
-
-        showListByCategory()
 
         dialog.show()
     }
@@ -223,36 +256,6 @@ class MainActivity : AppCompatActivity() {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
             }
             view.onApplyWindowInsets(windowInsets)
-        }
-    }
-
-    private fun loadUserPreferences() {
-        lifecycleScope.launch {
-            val isEmpty =
-                DB.getInstance(applicationContext)
-                    .userPreferences().getAllUserPreferences().isEmpty()
-
-            if (isEmpty) writeDefaultPreferences()
-
-            listUserPreferences =
-                DB.getInstance(applicationContext)
-                    .userPreferences().getAllUserPreferences()
-        }
-    }
-
-    private fun writeDefaultPreferences() {
-        lifecycleScope.launch {
-            DB.getInstance(applicationContext).userPreferences().insertUserPref(
-                Data.UserPreferences(
-                    id = "0",
-                    isLogin = false,
-                    showFinished = false,
-                    sortOrderByAuthor = false,
-                    integratedKeyboard = false,
-                    isMusic = true,
-                    isSound = true,
-                )
-            )
         }
     }
 
@@ -278,7 +281,6 @@ class MainActivity : AppCompatActivity() {
     private fun animLogo() {
         YoYo.with(Techniques.Tada)
             .duration(2000)
-            //.repeat(1)
             .playOn(binding.imgLogo);
     }
 
@@ -289,21 +291,8 @@ class MainActivity : AppCompatActivity() {
         val bind = DialogSignOutBinding.inflate(inflater)
         val builder = AlertDialog.Builder(this).setView(bind.root)
         val dialog = builder.create()
-        val window = dialog.window
 
-        val windowInsetsController =
-            WindowCompat.getInsetsController(window!!, window.decorView)
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-            }
-            view.onApplyWindowInsets(windowInsets)
-        }
+        extracted(dialog)
 
         dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -369,14 +358,16 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun getData() {
+    private fun getDataLevel() {
         lifecycleScope.launch {
-            try {
-                listLevel = DB.getInstance(applicationContext).level().getAllLevel()
-                    .ifEmpty { return@launch }
-            } finally {
+            listLevel = DB.getInstance(applicationContext).level().getAllLevel()
+                .ifEmpty { return@launch }
+        }
+    }
 
-            }
+    private fun getDataTebakKata(){
+        lifecycleScope.launch {
+            listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
         }
     }
 

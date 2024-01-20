@@ -225,7 +225,7 @@ class BoardActivity : AppCompatActivity() {
             }
         }
 
-        /* TODO: BOX CLICK ACTION*/
+        /*  BOX CLICK ACTION*/
         binding.includeBoard.boardTen.setOnClickListener() {
             for (i in 0 until box.size) {
                 box[i].setOnClickListener() {
@@ -257,12 +257,7 @@ class BoardActivity : AppCompatActivity() {
                 box[i].setOnLongClickListener() {
                     if (clip.isEmpty()) {
                         clip = curRowId.ifEmpty { curColId }
-                        Helper().apply {
-                            alertDialog(
-                                this@BoardActivity,
-                                "Select box to paste"
-                            )
-                        }
+                        Dialog().showDialog(this@BoardActivity, "pilih box sibling untuk menempelkan")
                     }
                     return@setOnLongClickListener true
                 }
@@ -314,7 +309,7 @@ class BoardActivity : AppCompatActivity() {
 
             btnSave.setOnClickListener() {
                 if (listQuestion.isEmpty()) {
-                    Helper().apply { alertDialog(this@BoardActivity, "Data masih kosong") }
+                    Dialog().showDialog(this@BoardActivity, "Data masih kosong")
                 } else {
                     isNew = false
                     saveAndApply()
@@ -372,7 +367,7 @@ class BoardActivity : AppCompatActivity() {
             }
             fillText()
             clip = ""
-            Snackbar.make(binding.boardActivityRoot, "Deleted", Snackbar.LENGTH_SHORT)
+            Snackbar.make(binding.boardActivityRoot, "berhasil menempelkan", Snackbar.LENGTH_SHORT)
                 .setAction("Undo", View.OnClickListener {
                     Toast.makeText(
                         this@BoardActivity,
@@ -398,6 +393,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeQuestionSpan.tvSpanQuestion.text = selectedQuestion
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveAndApply() {
         val levelId = currentLevel
         lifecycle.coroutineScope.launch {
@@ -445,7 +441,7 @@ class BoardActivity : AppCompatActivity() {
             }
             delay(1000L)
         }
-        Helper().apply { alertDialog(this@BoardActivity, "Data berhasil disimpan") }
+        Dialog().showDialog(this@BoardActivity, "Data berhasil disimpan")
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -622,6 +618,10 @@ class BoardActivity : AppCompatActivity() {
                 box[i].text = ""
                 box[i].tag = ""
                 box[i].visibility = View.VISIBLE
+            }
+
+            binding.apply {
+
             }
 
             setBoxTagText()

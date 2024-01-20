@@ -8,7 +8,6 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F48FB1"
         app:cardCornerRadius="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -17,13 +16,14 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/background_gradient_zeus_miracle"
+            >
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/container_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#F3E5F5"
                 android:paddingVertical="20dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -101,43 +101,48 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/container_header">
 
-                <Button
-                    android:id="@+id/btnTabProfile"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="32dp"
-                    android:text="Profile"
-                    android:textSize="14sp"
-                    app:layout_constraintEnd_toStartOf="@+id/btnTabJelajah"
+                <TextView
+                    android:id="@+id/btnTabTTS"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tabs_active_shape"
+                    android:gravity="center"
+                    android:paddingHorizontal="20dp"
+                    android:text="Teka Teki"
+                    android:textColor="@color/button2_text"
+                    app:layout_constraintEnd_toStartOf="@+id/btnTabTBK"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/btnTabJelajah"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:text="Jelajah"
-                    android:textSize="14sp"
-                    app:layout_constraintEnd_toStartOf="@+id/btnTabCard"
+                <TextView
+                    android:id="@+id/btnTabTBK"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tabs_disable_shape"
+                    android:gravity="center"
+                    android:paddingHorizontal="20dp"
+                    android:text="Tebak Kata"
+                    android:textColor="@color/button2_text"
+                    app:layout_constraintEnd_toStartOf="@+id/btnTabWIW"
                     app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/btnTabProfile"
-                    app:layout_constraintTop_toTopOf="@+id/btnTabProfile" />
+                    app:layout_constraintStart_toEndOf="@+id/btnTabTTS"
+                    app:layout_constraintTop_toTopOf="@+id/btnTabTTS" />
 
-                <Button
-                    android:id="@+id/btnTabCard"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="32dp"
-                    android:text="Card"
-                    android:textSize="14sp"
+                <TextView
+                    android:id="@+id/btnTabWIW"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tabs_disable_shape"
+                    android:gravity="center"
+                    android:paddingHorizontal="20dp"
+                    android:text="WoW"
+                    android:textColor="@color/button2_text"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/btnTabJelajah"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintStart_toEndOf="@+id/btnTabTBK"
+                    app:layout_constraintTop_toTopOf="@+id/btnTabTBK" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -152,7 +157,8 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    tools:ignore="MissingConstraints" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout

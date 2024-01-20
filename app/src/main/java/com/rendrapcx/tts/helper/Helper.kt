@@ -57,19 +57,4 @@ class Helper {
         ).show()
     }
 
-    fun alertDialog(context: Context, msg: String, title: String = "Information") {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-        builder
-            .setMessage(msg)
-            .setTitle(title)
-//            .setNegativeButton("Negative") { dialog, which ->
-////                showToast("you select negatif")
-//            }
-//            .setItems(arrayOf("Item One", "Item Two", "Item Three")) { _, _ ->
-////                showToast("You select on items")
-//            }
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
-    }
-
 }

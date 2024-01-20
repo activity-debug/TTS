@@ -9,4 +9,6 @@
     <color name="not_pass">#FFF9C4</color>
     <color name="button2_color">#5D5EA9</color>
     <color name="button2_text">#EFE1EE</color>
+    <color name="hider">#B388FF</color>
+    <color name="hider_intip">#BFB388FF</color>
 </resources>

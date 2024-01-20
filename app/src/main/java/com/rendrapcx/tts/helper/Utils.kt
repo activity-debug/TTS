@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.io.File
@@ -24,6 +25,7 @@ class Utils {
         saveAndShare(getBitmapEncoder(content))
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun Context.saveAndShare(bitmap: Bitmap, fileNameStr : String = "") {
         val filename = if (fileNameStr.isEmpty()) "${System.currentTimeMillis()}.png" else "${fileNameStr}.png"
 
@@ -50,7 +52,7 @@ class Utils {
 
         outputStream?.use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            Helper().alertDialog(this, "Captured View and saved to Gallery")
+            Dialog().showDialog(applicationContext, "Captured View and saved to Gallery")
         }
     }
 }

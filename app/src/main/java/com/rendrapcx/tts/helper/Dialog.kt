@@ -1,8 +1,6 @@
 package com.rendrapcx.tts.helper
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
@@ -16,7 +14,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.coroutineScope
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
@@ -24,45 +23,13 @@ import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogExitAppBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
-import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
 import com.rendrapcx.tts.databinding.DialogUserProfileBinding
-import com.rendrapcx.tts.databinding.DialogWinBinding
-import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listUser
-import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
-import com.rendrapcx.tts.ui.MainActivity
-import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 
 open class Dialog {
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    fun exitDialog(context: Context) {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val binding = DialogExitAppBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(binding.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
-        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(false)
-
-        binding.btnOK.setOnClickListener() {
-            exitProcess(0)
-        }
-
-        binding.btnCancel.setOnClickListener() {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun settingDialog(
@@ -81,17 +48,31 @@ open class Dialog {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
-        binding.apply {
-            swSettingKeyboard.isChecked = listUserPreferences[0].integratedKeyboard
+
+
+        UserRef().loadUserPref(context, lifecycle)
+
+        var isSound = UserRef().getIsSound()
+        if (isSound) binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_enable)
+        else binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_disable)
+        binding.imgBtnSound.setOnClickListener() {
+            if (isSound) {
+                binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_disable)
+                UserRef().setIsSound("0", false, context, lifecycle)
+            } else {
+                binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_enable)
+                UserRef().setIsSound("0", true, context, lifecycle)
+            }
+            isSound = UserRef().getIsSound()
+            Sound().doorOpen(context)
+            YoYo.with(Techniques.Bounce).playOn(it)
         }
 
+        binding.swSettingKeyboard.isChecked = UserRef().getIntKey()
         binding.swSettingKeyboard.setOnClickListener() {
-            lifecycle.coroutineScope.launch {
-                val data = binding.swSettingKeyboard.isChecked
-                listUserPreferences[0].integratedKeyboard = data
-                DB.getInstance(context.applicationContext).userPreferences()
-                    .updateIntegratedKeyboard("0", data)
-            }
+            UserRef().setIntKey("0", binding.swSettingKeyboard.isChecked, context, lifecycle)
+            Sound().doorOpen(context)
+            YoYo.with(Techniques.Wave).playOn(it)
         }
 
         dialog.show()
@@ -115,17 +96,53 @@ open class Dialog {
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
+        fun activeTabs(int: Int){
+            when(int){
+                0 -> {
+                    binding.btnTabTTS.setBackgroundResource(R.drawable.tabs_active_shape)
+                    binding.btnTabTBK.setBackgroundResource(R.drawable.tabs_disable_shape)
+                    binding.btnTabWIW.setBackgroundResource(R.drawable.tabs_disable_shape)
+                }
+                1 -> {
+                    binding.btnTabTTS.setBackgroundResource(R.drawable.tabs_disable_shape)
+                    binding.btnTabTBK.setBackgroundResource(R.drawable.tabs_active_shape)
+                    binding.btnTabWIW.setBackgroundResource(R.drawable.tabs_disable_shape)
+                }
+                2 -> {
+                    binding.btnTabTTS.setBackgroundResource(R.drawable.tabs_disable_shape)
+                    binding.btnTabTBK.setBackgroundResource(R.drawable.tabs_disable_shape)
+                    binding.btnTabWIW.setBackgroundResource(R.drawable.tabs_active_shape)
+                }
+            }
+        }
+
+        // Init
+        activeTabs(0)
+
         binding.apply {
             textUserId.text = listUser[0].id
             textUsername.text = listUser[0].username
         }
 
+        //Actions
         binding.btnSaveProgress.setOnClickListener() {
             Toast.makeText(context, "Save Progress", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnCloseProfile.setOnClickListener() {
             dialog.dismiss()
+        }
+
+        binding.btnTabTTS.setOnClickListener(){
+            activeTabs(0)
+        }
+
+        binding.btnTabTBK.setOnClickListener(){
+            activeTabs(1)
+        }
+
+        binding.btnTabWIW.setOnClickListener(){
+            activeTabs(2)
         }
 
         dialog.show()
@@ -185,6 +202,19 @@ open class Dialog {
             fillText()
             dialog.dismiss()
         }
+
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun showDialog(context: Context, msg: String, title: String = "Information") {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder
+            .setMessage(msg)
+            .setTitle(title)
+
+        val dialog: AlertDialog = builder.create()
+        extracted(dialog)
 
         dialog.show()
     }

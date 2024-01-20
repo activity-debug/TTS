@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_gradient_zeus_miracle"
     tools:context=".ui.TebakKataActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,7 +27,7 @@
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_gradient_zeus_miracle"
+
         android:paddingVertical="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,6 +51,11 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/terka_box" />
 
+            <TextView
+                android:id="@+id/tvHider"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:background="#B388FF" />
         </androidx.cardview.widget.CardView>
 
 
@@ -58,11 +64,11 @@
             layout="@layout/board_siapa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="1dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.627"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/drawView" />
+            app:layout_constraintTop_toBottomOf="@+id/tvQuestionTbk" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/hints"
@@ -86,7 +92,6 @@
                 android:fontFamily="@font/lemon_reguler"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="20sp"
-                android:text='"aku suka dibawah"'
                 android:textColor="#BA68C8"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -182,39 +187,42 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/hints" />
 
+        <TextView
+            android:id="@+id/tvQuestionTbk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:background="@drawable/box_shape"
+            android:fontFamily="@font/lemon_reguler"
+            android:gravity="center"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="5dp"
+            android:text="Siapakah aku? "
+            android:textColor="#B287FE"
+            android:textSize="20sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/drawView" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="#BA68C8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/content">
 
-        <ImageView
-            android:id="@+id/btnGetHint"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="16dp"
-            android:background="@drawable/button_image_enable"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/hand_point_up_solid" />
-
-        <ImageView
-            android:id="@+id/btnSuffleKey"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/button_image_enable"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/btnGetHint"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/arrows_turn_to_dots_solid" />
+        <include
+            android:id="@+id/game_helper_bottom"
+            layout="@layout/game_helper_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

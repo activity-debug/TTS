@@ -16,7 +16,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -27,7 +29,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp1"
         app:layout_constraintTop_toTopOf="@+id/sp1" />
 
@@ -38,7 +42,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp2"
         app:layout_constraintTop_toTopOf="@+id/sp2" />
 
@@ -49,7 +55,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp3"
         app:layout_constraintTop_toTopOf="@+id/sp3" />
 
@@ -60,7 +68,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp4"
         app:layout_constraintTop_toTopOf="@+id/sp4" />
 
@@ -71,7 +81,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp5"
         app:layout_constraintTop_toTopOf="@+id/sp5" />
 
@@ -82,7 +94,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp6"
         app:layout_constraintTop_toTopOf="@+id/sp6" />
 
@@ -93,7 +107,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp7"
         app:layout_constraintTop_toTopOf="@+id/sp7" />
 
@@ -104,7 +120,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp8"
         app:layout_constraintTop_toTopOf="@+id/sp8" />
 
@@ -115,7 +133,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp9"
         app:layout_constraintTop_toTopOf="@+id/sp9" />
 
@@ -126,7 +146,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp10"
         app:layout_constraintTop_toTopOf="@+id/sp10" />
 
@@ -137,7 +159,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp11"
         app:layout_constraintTop_toTopOf="@+id/sp11" />
 
@@ -148,7 +172,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp12"
         app:layout_constraintTop_toTopOf="@+id/sp12" />
 
@@ -159,7 +185,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp13"
         app:layout_constraintTop_toTopOf="@+id/sp13" />
 
@@ -170,7 +198,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp14"
         app:layout_constraintTop_toTopOf="@+id/sp14" />
 
@@ -181,7 +211,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sp1" />
 
@@ -192,7 +224,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp16"
         app:layout_constraintTop_toTopOf="@+id/sp16" />
 
@@ -203,7 +237,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp17"
         app:layout_constraintTop_toTopOf="@+id/sp17" />
 
@@ -214,7 +250,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp18"
         app:layout_constraintTop_toTopOf="@+id/sp18" />
 
@@ -225,7 +263,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp19"
         app:layout_constraintTop_toTopOf="@+id/sp19" />
 
@@ -236,7 +276,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp20"
         app:layout_constraintTop_toTopOf="@+id/sp20" />
 
@@ -247,7 +289,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp21"
         app:layout_constraintTop_toTopOf="@+id/sp21" />
 
@@ -258,7 +302,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp22"
         app:layout_constraintTop_toTopOf="@+id/sp22" />
 
@@ -269,7 +315,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp23"
         app:layout_constraintTop_toTopOf="@+id/sp23" />
 
@@ -280,7 +328,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp24"
         app:layout_constraintTop_toTopOf="@+id/sp24" />
 
@@ -291,7 +341,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp25"
         app:layout_constraintTop_toTopOf="@+id/sp25" />
 
@@ -302,7 +354,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp26"
         app:layout_constraintTop_toTopOf="@+id/sp26" />
 
@@ -313,7 +367,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp27"
         app:layout_constraintTop_toTopOf="@+id/sp27" />
 
@@ -324,7 +380,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp28"
         app:layout_constraintTop_toTopOf="@+id/sp28" />
 
@@ -335,7 +393,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp29"
         app:layout_constraintTop_toTopOf="@+id/sp29" />
 
@@ -346,7 +406,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sp16" />
 
@@ -357,7 +419,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp31"
         app:layout_constraintTop_toTopOf="@+id/sp31" />
 
@@ -368,7 +432,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp32"
         app:layout_constraintTop_toTopOf="@+id/sp32" />
 
@@ -379,7 +445,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp33"
         app:layout_constraintTop_toTopOf="@+id/sp33" />
 
@@ -390,7 +458,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp34"
         app:layout_constraintTop_toTopOf="@+id/sp34" />
 
@@ -401,7 +471,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp35"
         app:layout_constraintTop_toTopOf="@+id/sp35" />
 
@@ -412,7 +484,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp36"
         app:layout_constraintTop_toTopOf="@+id/sp36" />
 
@@ -423,7 +497,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp37"
         app:layout_constraintTop_toTopOf="@+id/sp37" />
 
@@ -434,7 +510,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp38"
         app:layout_constraintTop_toTopOf="@+id/sp38" />
 
@@ -445,7 +523,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp39"
         app:layout_constraintTop_toTopOf="@+id/sp39" />
 
@@ -456,7 +536,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp40"
         app:layout_constraintTop_toTopOf="@+id/sp40" />
 
@@ -467,7 +549,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp41"
         app:layout_constraintTop_toTopOf="@+id/sp41" />
 
@@ -478,7 +562,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp42"
         app:layout_constraintTop_toTopOf="@+id/sp42" />
 
@@ -489,7 +575,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp43"
         app:layout_constraintTop_toTopOf="@+id/sp43" />
 
@@ -500,7 +588,9 @@
         android:background="@drawable/box_shape_siapa"
         android:gravity="center"
         android:text="A"
+        android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/sp44"
         app:layout_constraintTop_toTopOf="@+id/sp44" />
 </androidx.constraintlayout.widget.ConstraintLayout>
