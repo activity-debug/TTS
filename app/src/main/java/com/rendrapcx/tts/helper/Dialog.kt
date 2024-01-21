@@ -20,13 +20,11 @@ import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
-import com.rendrapcx.tts.databinding.DialogExitAppBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogUserProfileBinding
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listUser
-import kotlin.system.exitProcess
 
 
 open class Dialog {
@@ -48,9 +46,7 @@ open class Dialog {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
-
-
-        UserRef().loadUserPref(context, lifecycle)
+        UserRef().checkUserPref(context, lifecycle)
 
         var isSound = UserRef().getIsSound()
         if (isSound) binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_enable)
@@ -64,14 +60,14 @@ open class Dialog {
                 UserRef().setIsSound("0", true, context, lifecycle)
             }
             isSound = UserRef().getIsSound()
-            Sound().doorOpen(context)
+            Sound().soundClickSetting(context)
             YoYo.with(Techniques.Bounce).playOn(it)
         }
 
         binding.swSettingKeyboard.isChecked = UserRef().getIntKey()
         binding.swSettingKeyboard.setOnClickListener() {
             UserRef().setIntKey("0", binding.swSettingKeyboard.isChecked, context, lifecycle)
-            Sound().doorOpen(context)
+            Sound().soundClickSetting(context)
             YoYo.with(Techniques.Wave).playOn(it)
         }
 

@@ -35,6 +35,8 @@ class Const {
         var currentCategory = ""
         var inputMode = ""
 
+//        var isSound = true
+
         val strRight = "➡\uFE0F"
         val strDown = "⬇\uFE0F"
     }

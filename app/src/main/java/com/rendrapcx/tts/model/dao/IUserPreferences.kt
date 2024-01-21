@@ -44,4 +44,7 @@ interface IUserPreferences{
             "   SET is_sound = :isSound " +
             "   WHERE `id` = :id;")
     suspend fun updateIsSound(id: String, isSound: Boolean)
+
+    @Query("SELECT is_sound FROM user_preferences")
+    suspend fun getIsSoundDB(): Boolean
 }

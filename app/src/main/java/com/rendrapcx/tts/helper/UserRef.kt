@@ -3,7 +3,6 @@ package com.rendrapcx.tts.helper
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
@@ -11,12 +10,12 @@ import kotlinx.coroutines.launch
 
 class UserRef {
 
-    fun writeUserStateTTS(){
+    fun writeUserStateTTS() {
         //currentlevel
         //
     }
 
-    fun writeUserStateTBK(){
+    fun writeUserStateTBK() {
         //currentSoal
         //
     }
@@ -37,11 +36,11 @@ class UserRef {
         }
     }
 
-    fun getIsSound():Boolean {
+    fun getIsSound(): Boolean {
         return listUserPreferences[0].isSound
     }
 
-    fun setIsSound(id: String = "0", isSound : Boolean, context: Context, lifecycle: Lifecycle) {
+    fun setIsSound(id: String = "0", isSound: Boolean, context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
             listUserPreferences[0].isSound = isSound
             DB.getInstance(context.applicationContext).userPreferences().updateIsSound(
@@ -51,11 +50,11 @@ class UserRef {
         }
     }
 
-    fun getIntKey():Boolean{
+    fun getIntKey(): Boolean {
         return listUserPreferences[0].integratedKeyboard
     }
 
-    fun setIntKey(id: String = "0", intKey : Boolean, context: Context, lifecycle: Lifecycle){
+    fun setIntKey(id: String = "0", intKey: Boolean, context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
             listUserPreferences[0].integratedKeyboard = intKey
             DB.getInstance(context.applicationContext).userPreferences().updateIntegratedKeyboard(
@@ -65,8 +64,7 @@ class UserRef {
         }
     }
 
-
-    fun loadUserPref(context: Context, lifecycle: Lifecycle){
+    fun checkUserPref(context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
             val isEmpty =
                 DB.getInstance(context)
@@ -75,8 +73,9 @@ class UserRef {
             if (isEmpty) UserRef().writeDefaultPreferences(context, lifecycle)
 
             listUserPreferences =
-                DB.getInstance(context)
-                    .userPreferences().getAllUserPreferences()
+                DB.getInstance(context.applicationContext).userPreferences().getAllUserPreferences()
         }
     }
+
+
 }

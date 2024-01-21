@@ -297,7 +297,7 @@ class BoardActivity : AppCompatActivity() {
         /*GAME HELPER ACTIONS*/
         binding.includeGameHelperBottom.apply {
             btnShowPicture.setOnClickListener() {
-                Sound().dingDong(this@BoardActivity)
+                Sound().soundCheckBoxPass(this@BoardActivity)
                 checkWinCondition()
             }
         }
@@ -536,7 +536,7 @@ class BoardActivity : AppCompatActivity() {
         }
         if (pass) {
             // TODO: 1. win dialog, 2. next question or back to list, 3. update score 4. update user data level finished
-            Sound().tepukTangan(this)
+            Sound().soundWinning(this)
             winDialog(this)
         }
     }

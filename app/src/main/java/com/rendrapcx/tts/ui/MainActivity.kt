@@ -15,10 +15,6 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -66,8 +62,9 @@ import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.listTebakKata
 import com.rendrapcx.tts.model.Data.Companion.listUser
+import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
 import com.rendrapcx.tts.ui.trial.TestActivity
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
 import java.io.File
@@ -80,6 +77,7 @@ import kotlin.system.exitProcess
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var resultQRDecoded = ""
     private val viewModelNet: NetworkStatusViewModel by lazy {
         ViewModelProvider(
             this,
@@ -92,9 +90,6 @@ class MainActivity : AppCompatActivity() {
             },
         )[NetworkStatusViewModel::class.java]
     }
-
-
-    private var resultQRDecoded = ""
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.R)
@@ -116,15 +111,23 @@ class MainActivity : AppCompatActivity() {
         }
         binding.textView7.text = "error"
 
-        UserRef().loadUserPref(this, lifecycle)
+        lifecycleScope.launch {
+            val job1 = async {
+                UserRef().checkUserPref(this@MainActivity, lifecycle)
+                //ini perlu untuk pembacaan Sound, walaupun di UserRef pun ada, krn itu dibutuhkan diyang lainnya
+                listUserPreferences =
+                    DB.getInstance(applicationContext).userPreferences().getAllUserPreferences()
+            }
+            job1.await()
 
-        loadCurrentUser()
+            loadCurrentUser()
 
-        getDataLevel() //init for playMenuTTS
-        getDataTebakKata() //init For PlayTBK
+            getDataLevel() //init for playMenuTTS
+            getDataTebakKata() //init For PlayTBK
 
-        animLogo()
+            animLogo()
 
+        }
         binding.apply {
             btnGoListQuestion.setOnClickListener() {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
@@ -165,6 +168,15 @@ class MainActivity : AppCompatActivity() {
                 exitDialog()
             }
         }
+    }
+
+    private fun animLogo() {
+        YoYo.with(Techniques.Tada).duration(1000)
+            .onEnd {
+                Sound().soundOpeningApp(this@MainActivity)
+                YoYo.with(Techniques.RubberBand).duration(2000).playOn(binding.imgLogo)
+            }
+            .playOn(binding.imgLogo)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -295,11 +307,15 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
     private fun loadCurrentUser() {
         lifecycle.coroutineScope.launch {
-            listUser = DB.getInstance(applicationContext).user().getAllUser()
-            if (listUser.isEmpty()) {
+            var isEmpty = true
+            val job1 =
+                async { isEmpty = DB.getInstance(applicationContext).user().getAllUser().isEmpty() }
+            job1.await()
+            if (isEmpty) {
                 loginDialog()
                 return@launch
             } else {
+                listUser = DB.getInstance(applicationContext).user().getAllUser()
                 val guest = listUser[0].isGuest
                 if (guest) binding.btnLogin.text = "Guest"
                 else binding.btnLogin.text = listUser[0].username
@@ -309,13 +325,6 @@ class MainActivity : AppCompatActivity() {
                 isSignedIn = true
             }
         }
-    }
-
-    private fun animLogo() {
-        YoYo.with(Techniques.Tada)
-            .duration(2000)
-            .playOn(binding.imgLogo)
-        Sound().logo(this)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -367,15 +376,17 @@ class MainActivity : AppCompatActivity() {
             val id = UUID.randomUUID().toString().substring(0, 10)
             val name = "Guest-$id"
             lifecycle.coroutineScope.launch {
-                DB.getInstance(applicationContext).user().insertUser(
-                    Data.User(
-                        id = id,
-                        username = name,
-                        password = "secret",
-                        isGuest = true
+                val job = async {
+                    DB.getInstance(applicationContext).user().insertUser(
+                        Data.User(
+                            id = id,
+                            username = name,
+                            password = "secret",
+                            isGuest = true
+                        )
                     )
-                )
-                delay(1000L)
+                }
+                job.await()
                 loadCurrentUser()
             }
         }
@@ -402,6 +413,7 @@ class MainActivity : AppCompatActivity() {
     private fun getDataTebakKata() {
         lifecycleScope.launch {
             listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
+                .ifEmpty { return@launch }
         }
     }
 
