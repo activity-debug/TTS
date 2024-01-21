@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.text.InputFilter
@@ -84,6 +83,7 @@ class BoardActivity : AppCompatActivity() {
 
     private var isNew = true
     private var finishedId = arrayListOf<String>() //ganti nanti
+
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.R)
@@ -177,34 +177,30 @@ class BoardActivity : AppCompatActivity() {
                 onPressBackSpace()
                 YoYo.with(Techniques.Landing)
                     .duration(500)
-                    //.repeat(1)
                     .playOn(btnBackSpace);
             }
             btnShuffle.setOnClickListener() {
                 showAnswerKeypad()
                 YoYo.with(Techniques.Landing)
                     .duration(500)
-                    //.repeat(1)
                     .playOn(btnShuffle);
             }
+
             //KEYBOARD PRESS
             for (i in 0 until intKey.size) {
                 intKey[i].setOnTouchListener(View.OnTouchListener() { _, motionEvent ->
                     when (motionEvent.action) {
                         MotionEvent.ACTION_DOWN -> {
                             box[position].text = intKey[i].text
-                            onPressAbjabMove()
-                            checkWinCondition(false)
                             YoYo.with(Techniques.Landing)
                                 .duration(1000)
-                                .repeat(0)
                                 .playOn(box[position]);
+                            onPressAbjabMove()
+                            checkWinCondition(false)
                         }
 
                         MotionEvent.ACTION_UP -> {
                             YoYo.with(Techniques.Landing)
-                                .duration(500)
-                                .repeat(0)
                                 .playOn(intKey[i]);
                         }
                     }
@@ -236,11 +232,6 @@ class BoardActivity : AppCompatActivity() {
                     position = i
                     getInputAnswerDirection()
                     onClickBox()
-
-                    YoYo.with(Techniques.RubberBand)
-                        .duration(1000)
-                        .repeat(0)
-                        .playOn(box[i]);
 
                     when (boardSet) {
                         BoardSet.EDITOR_NEW, BoardSet.EDITOR_EDIT -> {
@@ -284,12 +275,11 @@ class BoardActivity : AppCompatActivity() {
                 fillText()
                 getRequestQuestions(SelectRequest.NEXT)
                 onClickBox()
-                YoYo.with(Techniques.ZoomIn)
-                    .duration(500)
-                    .playOn(btnNextQuestion);
-                YoYo.with(Techniques.FadeInLeft)
-                    .duration(500)
-                    .playOn(tvSpanQuestion);
+
+                YoYo.with(Techniques.RubberBand).duration(300).playOn(btnNextQuestion)
+                YoYo.with(Techniques.FadeOutRight).duration(300)
+                    .onEnd { YoYo.with(Techniques.FadeInLeft).duration(300).playOn(tvSpanQuestion) }
+                    .playOn(tvSpanQuestion)
             }
             btnPrevQuestion.setOnClickListener() {
                 if (isNew && boardSet == BoardSet.EDITOR_NEW) return@setOnClickListener
@@ -297,14 +287,10 @@ class BoardActivity : AppCompatActivity() {
                 fillText()
                 getRequestQuestions(SelectRequest.PREV)
                 onClickBox()
-                YoYo.with(Techniques.ZoomIn)
-                    .duration(500)
-                    //.repeat(1)
-                    .playOn(btnPrevQuestion);
-                YoYo.with(Techniques.FadeInRight)
-                    .duration(500)
-                    //.repeat(1)
-                    .playOn(tvSpanQuestion);
+                YoYo.with(Techniques.RubberBand).duration(300).playOn(btnPrevQuestion)
+                YoYo.with(Techniques.FadeOutLeft).duration(300)
+                    .onEnd { YoYo.with(Techniques.FadeInRight).duration(300).playOn(tvSpanQuestion) }
+                    .playOn(tvSpanQuestion)
             }
         }
 
@@ -313,7 +299,6 @@ class BoardActivity : AppCompatActivity() {
             btnShowPicture.setOnClickListener() {
                 Sound().dingDong(this@BoardActivity)
                 checkWinCondition()
-                //playNext() //hapus aku
             }
         }
 
@@ -466,6 +451,9 @@ class BoardActivity : AppCompatActivity() {
                 box[x].text = s.toString()
                 onPressAbjabMove()
                 checkWinCondition(false)
+                YoYo.with(Techniques.Landing)
+                    .duration(1000)
+                    .playOn(box[x]);
             }
 
             67 -> {
@@ -486,12 +474,18 @@ class BoardActivity : AppCompatActivity() {
         if (inputAnswerDirection == InputAnswerDirection.ROW) {
             position = x - 1
             if (position in currentRange) {
+                YoYo.with(Techniques.Landing)
+                    .duration(1000)
+                    .playOn(box[x]);
                 setOnSelectedColor()
             } else position = currentRange[0]
         }
         if (inputAnswerDirection == InputAnswerDirection.COLUMN) {
             position = x - xLen
             if (position in currentRange) {
+                YoYo.with(Techniques.Landing)
+                    .duration(1000)
+                    .playOn(box[x]);
                 setOnSelectedColor()
             } else position = currentRange[0]
         }
@@ -504,12 +498,18 @@ class BoardActivity : AppCompatActivity() {
         if (inputAnswerDirection == InputAnswerDirection.ROW) {
             position = selectNextRow()
             if (position in currentRange) {
+                YoYo.with(Techniques.Wave)
+                    .duration(1000)
+                    .playOn(box[x]);
                 setOnSelectedColor()
             } else position = x
         }
         if (inputAnswerDirection == InputAnswerDirection.COLUMN) {
             position = selectNextColumn()
             if (position in currentRange) {
+                YoYo.with(Techniques.Wave)
+                    .duration(1000)
+                    .playOn(box[x])
                 setOnSelectedColor()
             } else position = x
         }
@@ -522,13 +522,10 @@ class BoardActivity : AppCompatActivity() {
         if (boardSet == BoardSet.EDITOR_EDIT || boardSet == BoardSet.EDITOR_NEW) return
         var pass = true
         for (i in tag) {
-//            if (box[i].text == box[i].tag) {
-//                // TODO: if setting enable to cek colorize then do this
-//                box[i].setBackgroundColor(getColor(this, R.color.pass))
-//            }
             if (box[i].text != box[i].tag) {
                 if (color) {
-                    box[i].setBackgroundColor(getColor(this, R.color.not_pass))
+                    //box[i].setBackgroundColor(getColor(this, R.color.not_pass))
+                    box[i].setBackgroundResource(R.drawable.box_shape_not_pass)
                     YoYo.with(Techniques.Flash)
                         .duration(1000)
                         .repeat(0)
@@ -906,7 +903,6 @@ class BoardActivity : AppCompatActivity() {
                             box[i].text = it.charStr
                             box[i].tag = it.charStr
                             tag.add(it.charAt)
-                            //tagMap.put(it.charAt, it.charStr)
                         }
                     }
                 }
@@ -921,7 +917,6 @@ class BoardActivity : AppCompatActivity() {
                             box[i].text = ""
                             box[i].tag = it.charStr
                             tag.add(it.charAt)
-                            //tagMap.put(it.charAt, it.charStr)
                         }
                     }
                 }
@@ -940,7 +935,8 @@ class BoardActivity : AppCompatActivity() {
             for (i in range.indices) {
                 val x = range[i]
                 if (x == current) continue
-                box[x].setBackgroundColor(getColor(this, R.color.selected_range))
+                box[x].setBackgroundResource(R.drawable.box_shape_range)
+                YoYo.with(Techniques.RubberBand).playOn(box[x])
             }
         }
     }
@@ -971,7 +967,8 @@ class BoardActivity : AppCompatActivity() {
         resetBoxColor()
         val i = position
         box[i].setTextColor(getColor(this, R.color.white))
-        box[i].setBackgroundColor(getColor(this, R.color.selected))
+        box[i].setBackgroundResource(R.drawable.box_shape_selected)
+        YoYo.with(Techniques.Bounce).playOn(box[i])
     }
 
     private fun fillText() {
@@ -995,30 +992,8 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
             box[i].setTextColor(getColor(this, R.color.button))
-            box[i].setBackgroundColor(getColor(this, R.color.white))
+            box[i].setBackgroundResource(R.drawable.box_shape_active)
         }
-    }
-
-    /************************************************************************
-     * INITIAL LAYOUT AND COMPONENTS
-     * ***********************************************************************/
-    private fun initLayoutPlay() {
-        binding.includeEditor.mainContainer.visibility = View.GONE
-
-        binding.includeQuestionSpan.tvSpanQuestion.text = ""
-        binding.includeHeader.tvLabelTop.text = listLevel.first() { it.id == currentLevel }.title
-    }
-
-    private fun initLayoutEditor() {
-        binding.includeEditor.mainContainer.visibility = View.VISIBLE
-        binding.includeKeyboard.integratedKeyboard.visibility = View.GONE
-
-        binding.includeHeader.tvLabelTop.text = "TERKA EDITOR"
-        binding.includeQuestionSpan.tvSpanQuestion.text = ""
-
-        binding.includeEditor.containerInfo.visibility = View.GONE
-        binding.includeEditor.containerPartial.visibility = View.GONE
-        binding.includeHeader.tvLabelTop.text = listLevel.first() { it.id == currentLevel }.title
     }
 
     private fun initIntKeyChild() {
@@ -1039,6 +1014,7 @@ class BoardActivity : AppCompatActivity() {
                 box.add(child)
                 box[i].text = ""
                 box[i].tag = ""
+                box[i].setBackgroundResource(R.drawable.box_shape_active)
             }
         }
     }
@@ -1205,8 +1181,8 @@ class BoardActivity : AppCompatActivity() {
         rowAvailable: List<Int>,
         colAvailable: List<Int>
     ) {
-        val levelId = Const.currentLevel
-        val part = Data.listPartial
+        val levelId = currentLevel
+        val part = listPartial
         val boxAvailable = if (direction == InputQuestionDirection.HORIZONTAL.name) {
             rowAvailable
         } else {
@@ -1215,7 +1191,7 @@ class BoardActivity : AppCompatActivity() {
 
         val slot = boxAvailable.subList(0, answerText.length)
         var prevSlot = mutableListOf<Int>()
-        Data.listQuestion.filter { it.levelId == levelId }
+        listQuestion.filter { it.levelId == levelId }
             .map { it }.forEach() {
                 prevSlot = it.slot
             }

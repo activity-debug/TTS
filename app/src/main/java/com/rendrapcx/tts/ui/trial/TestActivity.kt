@@ -1,5 +1,6 @@
 package com.rendrapcx.tts.ui.trial
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
@@ -13,11 +14,13 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.MediaStore.Images.Media
 import android.util.Log
+import android.view.MotionEvent
+import android.view.VelocityTracker
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.LuminanceSource
@@ -28,7 +31,6 @@ import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.integration.android.IntentIntegrator
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.rendrapcx.tts.databinding.ActivityTestBinding
-import com.rendrapcx.tts.helper.Utils
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -43,15 +45,21 @@ enum class RequestCode {
     CAMERA_PERMISSION_CODE,
 }
 
-open class TestActivity : AppCompatActivity() {
+private const val DEBUG_TAG = "Velocity"
+
+class TestActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTestBinding
     private lateinit var tvResult: TextView
     private var fileUrl = ""
     private var imgUri = ""
+    private var mVelocityTracker: VelocityTracker? = null
+
 
     private var WRITE_EXTERNAL_STORAGE_PERMISSION_CODE: Int = 1
     private var READ_EXTERNAL_STORAGE_PERMISSION_CODE: Int = 2
     private var CAMERA_PERMISSION_CODE: Int = 3
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTestBinding.inflate(layoutInflater)
@@ -79,37 +87,18 @@ open class TestActivity : AppCompatActivity() {
             }
 
             btnShare1.setOnClickListener() {
-//                val filename = binding.editInputContent.text.toString()
-//                Toast.makeText(this@TestActivity, "${uri}", Toast.LENGTH_SHORT).show()
-////                val path = uri +".png"
-//                val shareIntent: Intent = Intent().apply {
-//                    action = Intent.ACTION_SEND
-//                    // Example: content://com.google.android.apps.photos.contentprovider/...
-//                    ///sdcard/Pictures/1705435063572.png
-//                    putExtra(Intent.EXTRA_STREAM, path.toUri())
-//                    type = "image/jpeg"
-//                }
-//                startActivity(Intent.createChooser(shareIntent, null))
 
             }
 
             btnShare2.setOnClickListener() {
-//                val path =
-//                    Toast.makeText(this@TestActivity, "${path}", Toast.LENGTH_SHORT).show()
-//                val shareIntent: Intent = Intent().apply {
-//                    action = Intent.ACTION_SEND
-//                    // Example: content://com.google.android.apps.photos.contentprovider/...
-//                    ///sdcard/Pictures/1705435063572.png
-//                    putExtra(Intent.EXTRA_STREAM, path)
-//                    type = "image/jpeg"
-//                }
-//                startActivity(Intent.createChooser(shareIntent, null))
+
             }
         }
 
     }
 
-    open val resultLauncherGallery =
+
+    val resultLauncherGallery =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data

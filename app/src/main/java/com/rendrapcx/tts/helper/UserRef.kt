@@ -11,6 +11,16 @@ import kotlinx.coroutines.launch
 
 class UserRef {
 
+    fun writeUserStateTTS(){
+        //currentlevel
+        //
+    }
+
+    fun writeUserStateTBK(){
+        //currentSoal
+        //
+    }
+
     private fun writeDefaultPreferences(context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
             DB.getInstance(context).userPreferences().insertUserPref(

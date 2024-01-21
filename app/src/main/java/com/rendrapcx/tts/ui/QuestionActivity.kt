@@ -389,6 +389,7 @@ class QuestionActivity : AppCompatActivity() {
                         hint5 = bind.etHint5.text.toString(),
                     )
                 )
+                activeTab(1)
                 dialog.dismiss()
             }
         }

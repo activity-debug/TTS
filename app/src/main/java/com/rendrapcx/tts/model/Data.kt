@@ -65,14 +65,21 @@ class Data {
         @ColumnInfo(name = "is_guest") var isGuest : Boolean,
     )
 
-    @Entity(tableName = "user_answer")
-    data class UserAnswer(
+    @Entity(tableName = "user_answer_tts")
+    data class UserAnswerTTS(
         @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "id") var id : Int,
         @ColumnInfo(name = "user_id") var userId: Int,
         @ColumnInfo(name = "level_id") var levelId: String,
         @ColumnInfo(name = "answer") var answer: String,
         @ColumnInfo(name = "status") var status: AnswerStatus,
+    )
+
+    @Entity(tableName = "user_answer_tbk")
+    data class UserAnswerTBK(
+        @PrimaryKey(autoGenerate = false)
+        @ColumnInfo(name = "id") var id : Int,
+        @ColumnInfo(name = "tbk_id") var tbkId : String,
     )
 
     @Entity(tableName = "user_preferences")
