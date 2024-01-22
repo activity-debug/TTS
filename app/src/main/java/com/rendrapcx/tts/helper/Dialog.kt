@@ -7,6 +7,7 @@ import android.os.Build
 import android.text.InputFilter
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -152,20 +153,19 @@ open class Dialog {
         val dialog = builder.create()
         extracted(dialog)
 
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
         /* INIT KOMPONEN */
         binding.apply {
-            editLevelId.isEnabled = false
             editCategory.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(50))
             editTitle.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(50))
             editCreator.setText(currentUser)
         }
 
-
         Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {
-            binding.editLevelId.setText(it.id)
             binding.editCategory.setText(it.category)
             binding.editTitle.setText(it.title)
             binding.editCreator.setText(it.userId)
@@ -174,7 +174,6 @@ open class Dialog {
         fun updateList() {
             Data.listLevel.filter { it.id == Const.currentLevel }.map { it }.forEach() {
                 boardBinding.apply {
-                    it.id = binding.editLevelId.text.toString()
                     it.category = binding.editCategory.text.toString()
                     it.title = binding.editTitle.text.toString()
                     it.userId = binding.editCreator.text.toString()
@@ -185,7 +184,6 @@ open class Dialog {
         fun fillText() {
             Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {
                 boardBinding.includeEditor.apply {
-                    textLevelId.text = it.id
                     textCategory.text = it.category
                     textTitle.text = it.title
                     textCreator.text = it.userId

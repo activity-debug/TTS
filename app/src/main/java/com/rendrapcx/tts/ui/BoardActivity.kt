@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.text.InputFilter
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -53,6 +54,7 @@ import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -81,7 +83,6 @@ class BoardActivity : AppCompatActivity() {
     private var curCharAt = 0
     private var curCharStr = ""
 
-    private var isNew = true
     private var finishedId = arrayListOf<String>() //ganti nanti
 
 
@@ -99,51 +100,58 @@ class BoardActivity : AppCompatActivity() {
 
         when (boardSet) {
             BoardSet.EDITOR_NEW -> {
-                currentLevel = UUID.randomUUID().toString().substring(0, 20)
-                listLevel.add(
-                    Data.Level(currentLevel, "2024", "Title", "Admin")
-                )
+                lifecycleScope.launch {
+                    currentLevel = UUID.randomUUID().toString().substring(0, 20)
+                    listLevel.add(
+                        Data.Level(currentLevel, "2024", "Title", "Admin")
+                    )
 
-                binding.apply {
-                    includeEditor.mainContainer.visibility = View.VISIBLE
-                    includeKeyboard.integratedKeyboard.visibility = View.GONE
-                    includeQuestionSpan.tvSpanQuestion.text = ""
-                    includeEditor.containerInfo.visibility = View.GONE
-                    includeEditor.containerPartial.visibility = View.GONE
-                    includeGameHelperBottom.bottomHelper.visibility = View.GONE
-                    includeHeader.tvLabelTop.text =
-                        listLevel.first() { it.id == currentLevel }.title
+                    binding.apply {
+                        includeEditor.mainContainer.visibility = View.VISIBLE
+                        includeKeyboard.integratedKeyboard.visibility = View.GONE
+                        includeQuestionSpan.tvSpanQuestion.text = ""
+                        includeGameHelperBottom.bottomHelper.visibility = View.GONE
+                        includeHeader.tvLabelTop.text =
+                            listLevel.first() { it.id == currentLevel }.title
+                    }
+
+                    listPartial.clear()
+
+                    position = 0
+                    setBoxTagText()
+                    getInputAnswerDirection()
+                    onClickBox()
+                    fillTextDescription()
+                    setOnSelectedColor()
+                    Dialog().apply { inputDescription(binding) }
                 }
-
-                position = 0
-                setBoxTagText()
-                getInputAnswerDirection()
-                onClickBox()
-
-                fillTextDescription()
-                setOnSelectedColor()
-                Dialog().apply { inputDescription(binding) }
             }
 
             BoardSet.EDITOR_EDIT -> {
-                binding.apply {
-                    includeEditor.mainContainer.visibility = View.VISIBLE
-                    includeKeyboard.integratedKeyboard.visibility = View.GONE
-                    includeQuestionSpan.tvSpanQuestion.text = ""
-                    includeEditor.containerInfo.visibility = View.GONE
-                    includeEditor.containerPartial.visibility = View.GONE
-                    includeGameHelperBottom.bottomHelper.visibility = View.GONE
-                    includeHeader.tvLabelTop.text =
-                        listLevel.first() { it.id == currentLevel }.title
+                lifecycleScope.launch {
+
+                    binding.apply {
+                        includeEditor.mainContainer.visibility = View.VISIBLE
+                        includeKeyboard.integratedKeyboard.visibility = View.GONE
+                        includeQuestionSpan.tvSpanQuestion.text = ""
+                        includeGameHelperBottom.bottomHelper.visibility = View.GONE
+                        includeHeader.tvLabelTop.text =
+                            listLevel.first() { it.id == currentLevel }.title
+                    }
+
+                    val job1 = async { listPartial = getPartialData() }
+                    job1.await()
+
+                    position = listPartial.first { it.levelId == currentLevel }.charAt
+
+                    setBoxTagText()
+                    fillTextDescription()
+                    getInputAnswerDirection()
+                    onClickBox()
+                    Dialog().apply { inputDescription(binding) }
                 }
 
-                position = listPartial.first { it.levelId == currentLevel }.charAt
 
-                setBoxTagText()
-                fillTextDescription()
-                getInputAnswerDirection()
-                onClickBox()
-                Dialog().apply { inputDescription(binding) }
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
@@ -270,8 +278,8 @@ class BoardActivity : AppCompatActivity() {
         /* SELECT QUESTION BY ARROW */
         binding.includeQuestionSpan.apply {
             btnNextQuestion.setOnClickListener() {
-                if (isNew && boardSet == BoardSet.EDITOR_NEW) return@setOnClickListener
-                resetBoxColor()
+                if (listPartial.isEmpty()) return@setOnClickListener
+                resetBoxStyle()
                 fillText()
                 getRequestQuestions(SelectRequest.NEXT)
                 onClickBox()
@@ -282,14 +290,16 @@ class BoardActivity : AppCompatActivity() {
                     .playOn(tvSpanQuestion)
             }
             btnPrevQuestion.setOnClickListener() {
-                if (isNew && boardSet == BoardSet.EDITOR_NEW) return@setOnClickListener
-                resetBoxColor()
+                if (listPartial.isEmpty()) return@setOnClickListener
+                resetBoxStyle()
                 fillText()
                 getRequestQuestions(SelectRequest.PREV)
                 onClickBox()
                 YoYo.with(Techniques.RubberBand).duration(300).playOn(btnPrevQuestion)
                 YoYo.with(Techniques.FadeOutLeft).duration(300)
-                    .onEnd { YoYo.with(Techniques.FadeInRight).duration(300).playOn(tvSpanQuestion) }
+                    .onEnd {
+                        YoYo.with(Techniques.FadeInRight).duration(300).playOn(tvSpanQuestion)
+                    }
                     .playOn(tvSpanQuestion)
             }
         }
@@ -309,7 +319,6 @@ class BoardActivity : AppCompatActivity() {
                 if (listQuestion.isEmpty()) {
                     Dialog().showDialog(this@BoardActivity, "Data masih kosong")
                 } else {
-                    isNew = false
                     saveAndApply()
                 }
             }
@@ -332,6 +341,36 @@ class BoardActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun getPartialData(): MutableList<Data.Partial> {
+        val levelId = currentLevel
+        val part = mutableListOf<Data.Partial>()
+        val soal = listQuestion
+
+        for (i in soal.indices) {
+            for (x in soal[i].slot.indices) {
+                val slotPart = part.indexOfFirst { it.charAt == soal[i].slot[x] }
+                var prevId = ""
+                if (slotPart != -1) prevId =
+                    part[slotPart].rowQuestionId.ifEmpty { part[slotPart].colQuestionId }
+                        .ifEmpty { "" }
+                part.add(
+                    Data.Partial(
+                        levelId = levelId,
+                        id = UUID.randomUUID().toString(),
+                        charAt = soal[i].slot[x],
+                        charStr = soal[i].answer[x].toString(),
+                        rowQuestionId = if (soal[i].direction == InputQuestionDirection.HORIZONTAL.name) soal[i].id
+                        else prevId,
+                        colQuestionId = if (soal[i].direction == InputQuestionDirection.VERTICAL.name) soal[i].id
+                        else prevId,
+                    )
+                )
+            }
+        }
+
+        return part
     }
 
     private fun fillTextDescription() {
@@ -387,7 +426,8 @@ class BoardActivity : AppCompatActivity() {
 
         setOnSelectedColor()
         setOnRangeColor()
-        showPartInfo()
+        //showPartInfo()
+        showAnswerKeypad()
         binding.includeQuestionSpan.tvSpanQuestion.text = selectedQuestion
     }
 
@@ -425,7 +465,7 @@ class BoardActivity : AppCompatActivity() {
         }
 
         lifecycle.coroutineScope.launch {
-            Data.listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
+            listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
                 DB.getInstance(applicationContext).partial().insertPartial(
                     Data.Partial(
                         id = it.id,
@@ -873,40 +913,18 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-    private fun showPartInfo() {
-        binding.includeEditor.apply {
-            listPartial.filter { it.levelId == currentLevel && it.charAt == position }.forEach() {
-                curPartId = it.id
-                curCharAt = it.charAt
-                curCharStr = it.charStr
-                curRowId = it.rowQuestionId
-                curColId = it.colQuestionId
-            }
-        }
-        showAnswerKeypad()
-    }
-
     private fun setBoxTagText() {
         when (boardSet) {
             BoardSet.EDITOR_NEW -> {
                 for (i in 0 until box.size) {
                     box[i].text = ""
                 }
-                resetBoxColor()
+                resetBoxStyle()
             }
 
             BoardSet.EDITOR_EDIT -> {
                 tag.clear()
-                listPartial.filter { it.levelId == currentLevel }.forEach() {
-                    for (i in 0 until box.size) {
-                        if (i == it.charAt) {
-                            box[i].text = it.charStr
-                            box[i].tag = it.charStr
-                            tag.add(it.charAt)
-                        }
-                    }
-                }
-                resetBoxColor()
+                resetBoxStyle()
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
@@ -920,7 +938,7 @@ class BoardActivity : AppCompatActivity() {
                         }
                     }
                 }
-                resetBoxColor()
+                resetBoxStyle()
             }
 
             BoardSet.PLAY_NEXT -> {
@@ -964,7 +982,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun setOnSelectedColor() {
-        resetBoxColor()
+        resetBoxStyle()
         val i = position
         box[i].setTextColor(getColor(this, R.color.white))
         box[i].setBackgroundResource(R.drawable.box_shape_selected)
@@ -984,7 +1002,7 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-    private fun resetBoxColor() {
+    private fun resetBoxStyle() {
         for (i in 0 until box.size) {
             if (box[i].tag == "") {
                 if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY) {
@@ -1037,23 +1055,12 @@ class BoardActivity : AppCompatActivity() {
         val bind = DialogInputSoalBinding.inflate(inflater)
         val builder = AlertDialog.Builder(this).setView(bind.root)
         val dialog = builder.create()
-        val window = dialog.window
 
-        val windowInsetsController =
-            WindowCompat.getInsetsController(window!!, window.decorView)
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        extracted(dialog)
 
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-            }
-            view.onApplyWindowInsets(windowInsets)
-        }
-
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
         //TODO: INITIAL NEW
@@ -1066,8 +1073,9 @@ class BoardActivity : AppCompatActivity() {
         bind.tvSlotPreview.text = "${rowAvailable}"
         bind.swDirection.text = InputQuestionDirection.HORIZONTAL.name
 
-        //NEW QUESTION ID
-        bind.tvIdInput.text = UUID.randomUUID().toString()
+        bind.textView16.visibility = View.INVISIBLE
+        bind.tvIdInput.visibility = View.INVISIBLE
+        bind.tvSlotPreview.visibility = View.INVISIBLE
 
         //FIXME: ACTIONS LISTENER
         bind.swDirection.setOnClickListener() {
@@ -1102,20 +1110,24 @@ class BoardActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val id: String = bind.tvIdInput.text.toString()
+            val id: String = UUID.randomUUID().toString()
             val number: Int = bind.etNoInput.text.toString().toInt()
             val asking: String = bind.etAskInput.text.toString().trim()
             val answer: String = bind.etAnswerInput.text.toString().uppercase()
             val direction: String = bind.swDirection.text.toString()
 
-            addQuestion(id, number, asking, answer, direction, rowAvailable, colAvailable)
-            addPartial(id, answer, direction, rowAvailable, colAvailable)
+            lifecycle.coroutineScope.launch {
+                val job1 = async { addQuestion(id, number, asking, answer, direction, rowAvailable, colAvailable) }
+                job1.await()
+                val job2 = async { addPartial(id, answer, direction, rowAvailable, colAvailable) }
+                job2.await()
 
-
-            getInputAnswerDirection()
-            onClickBox()
-            dialog.dismiss()
+                getInputAnswerDirection()
+                onClickBox()
+                dialog.dismiss()
+            }
         }
+
         bind.btnCancelInput.setOnClickListener() {
             dialog.dismiss()
         }
@@ -1190,27 +1202,20 @@ class BoardActivity : AppCompatActivity() {
         }
 
         val slot = boxAvailable.subList(0, answerText.length)
-        var prevSlot = mutableListOf<Int>()
-        listQuestion.filter { it.levelId == levelId }
-            .map { it }.forEach() {
-                prevSlot = it.slot
-            }
-        var sama = ""
-        for (i in 0 until slot.size) {
-            if (slot[i] in prevSlot) {
-                sama = sama + slot[i] + ", "
-            }
-        }
 
-        for (i in answerText.indices) {
+        for (i in slot.indices) {
+            val slotPart = part.indexOfFirst { it.charAt == slot[i] }
+            var prevId = ""
+            if (slotPart != -1) prevId =
+                part[slotPart].rowQuestionId.ifEmpty { part[slotPart].colQuestionId }.ifEmpty { "" }
             part.add(
                 Data.Partial(
                     levelId = levelId,
                     id = UUID.randomUUID().toString(),
                     charAt = boxAvailable[i],
                     charStr = answerText[i].toString(),
-                    rowQuestionId = if (direction == InputQuestionDirection.HORIZONTAL.name) questionId else "",
-                    colQuestionId = if (direction == InputQuestionDirection.VERTICAL.name) questionId else "",
+                    rowQuestionId = if (direction == InputQuestionDirection.HORIZONTAL.name) questionId else prevId,
+                    colQuestionId = if (direction == InputQuestionDirection.VERTICAL.name) questionId else prevId,
                 )
             )
         }
