@@ -10,7 +10,7 @@ import com.rendrapcx.tts.model.Data.*
 class Const {
     enum class BoardSet { PLAY, PLAY_USER, PLAY_NEXT, EDITOR_NEW, EDITOR_EDIT }
     enum class InputQuestionDirection { HORIZONTAL, VERTICAL }
-    enum class InputAnswerDirection { ROW, COLUMN }
+    enum class InputAnswerDirection { ROW, COLUMN, UNKNOWN }
 
     enum class QrAction {READ, CREATE}
 

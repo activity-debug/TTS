@@ -60,9 +60,8 @@ import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
-import com.rendrapcx.tts.model.Data.Companion.listTebakKata
 import com.rendrapcx.tts.model.Data.Companion.listUser
-import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
+import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import com.rendrapcx.tts.ui.trial.TestActivity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -114,8 +113,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val job1 = async {
                 UserRef().checkUserPref(this@MainActivity, lifecycle)
-                //ini perlu untuk pembacaan Sound, walaupun di UserRef pun ada, krn itu dibutuhkan diyang lainnya
-                listUserPreferences =
+                userPreferences =
                     DB.getInstance(applicationContext).userPreferences().getAllUserPreferences()
             }
             job1.await()
@@ -123,7 +121,6 @@ class MainActivity : AppCompatActivity() {
             loadCurrentUser()
 
             getDataLevel() //init for playMenuTTS
-            getDataTebakKata() //init For PlayTBK
 
             animLogo()
 
@@ -150,16 +147,6 @@ class MainActivity : AppCompatActivity() {
 
             btnGoWiw.setOnClickListener() {
                 val intent = Intent(this@MainActivity, TestActivity::class.java)
-                startActivity(intent)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            }
-
-            btnGoTBK.setOnClickListener() {
-                if (listTebakKata.isEmpty()) {
-                    Dialog().showDialog(this@MainActivity, "Belum ada data Tebak kata")
-                    return@setOnClickListener
-                }
-                val intent = Intent(this@MainActivity, TebakKataActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
@@ -406,13 +393,6 @@ class MainActivity : AppCompatActivity() {
     private fun getDataLevel() {
         lifecycleScope.launch {
             listLevel = DB.getInstance(applicationContext).level().getAllLevel()
-                .ifEmpty { return@launch }
-        }
-    }
-
-    private fun getDataTebakKata() {
-        lifecycleScope.launch {
-            listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
                 .ifEmpty { return@launch }
         }
     }

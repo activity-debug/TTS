@@ -15,7 +15,6 @@ import androidx.room.TypeConverters
         Data.UserAnswerTTS::class,
         Data.UserAnswerTBK::class,
         Data.UserPreferences::class,
-        Data.TebakKata::class,
     ],
     version = 2,
     exportSchema = false
@@ -28,7 +27,6 @@ abstract class DB : RoomDatabase() {
     abstract fun user(): Dao.User
     abstract fun userAnswerTTS(): Dao.UserAnswerTTS
     abstract fun userPreferences(): Dao.UserPreferences
-    abstract fun tebakKata(): Dao.TebakKata
 
 
     companion object {

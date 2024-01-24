@@ -92,11 +92,11 @@ class QuestionActivity : AppCompatActivity() {
             }
         }
 
-        binding.switch1.isChecked = Data.listUserPreferences[0].showFinished
+        binding.switch1.isChecked = Data.userPreferences[0].showFinished
         binding.switch1.setOnClickListener() {
             lifecycleScope.launch {
                 val data = binding.switch1.isChecked
-                Data.listUserPreferences[0].showFinished = data
+                Data.userPreferences[0].showFinished = data
                 DB.getInstance(applicationContext).userPreferences()
                     .updateShowFinished("0", data)
             }

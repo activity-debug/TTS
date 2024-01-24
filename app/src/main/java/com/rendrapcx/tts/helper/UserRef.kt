@@ -5,7 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
-import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
+import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.launch
 
 class UserRef {
@@ -37,12 +37,12 @@ class UserRef {
     }
 
     fun getIsSound(): Boolean {
-        return listUserPreferences[0].isSound
+        return userPreferences[0].isSound
     }
 
     fun setIsSound(id: String = "0", isSound: Boolean, context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
-            listUserPreferences[0].isSound = isSound
+            userPreferences[0].isSound = isSound
             DB.getInstance(context.applicationContext).userPreferences().updateIsSound(
                 id = id,
                 isSound = isSound
@@ -51,12 +51,12 @@ class UserRef {
     }
 
     fun getIntKey(): Boolean {
-        return listUserPreferences[0].integratedKeyboard
+        return userPreferences[0].integratedKeyboard
     }
 
     fun setIntKey(id: String = "0", intKey: Boolean, context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
-            listUserPreferences[0].integratedKeyboard = intKey
+            userPreferences[0].integratedKeyboard = intKey
             DB.getInstance(context.applicationContext).userPreferences().updateIntegratedKeyboard(
                 id = id,
                 integratedKeyboard = intKey
@@ -72,7 +72,7 @@ class UserRef {
 
             if (isEmpty) UserRef().writeDefaultPreferences(context, lifecycle)
 
-            listUserPreferences =
+            userPreferences =
                 DB.getInstance(context.applicationContext).userPreferences().getAllUserPreferences()
         }
     }

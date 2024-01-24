@@ -29,7 +29,4 @@ class Dao {
     @Dao
     interface UserPreferences : IUserPreferences {}
 
-    @Dao
-    interface TebakKata : ITebakKata {}
-
 }

@@ -3,7 +3,6 @@ package com.rendrapcx.tts.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.AnswerStatus
 
 class Data {
@@ -41,20 +40,6 @@ class Data {
     {
         constructor() : this("",0,"","","","")
     }
-
-    @Entity(tableName = "tebak_kata")
-    data class TebakKata(
-        @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id: String,
-        @ColumnInfo(name = "image_url") var imageUrl: String,
-        @ColumnInfo(name = "asking") var asking: String,
-        @ColumnInfo(name = "answer") var answer: String,
-        @ColumnInfo(name = "hint_1") var hint1: String,
-        @ColumnInfo(name = "hint_2") var hint2: String,
-        @ColumnInfo(name = "hint_3") var hint3: String,
-        @ColumnInfo(name = "hint_4") var hint4: String,
-        @ColumnInfo(name = "hint_5") var hint5: String,
-    )
 
     @Entity(tableName = "user")
     data class User(
@@ -99,7 +84,6 @@ class Data {
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
         var listUser = mutableListOf<User>()
-        var listUserPreferences = mutableListOf<UserPreferences>()
-        var listTebakKata = mutableListOf<TebakKata>()
+        var userPreferences = mutableListOf<UserPreferences>()
     }
 }

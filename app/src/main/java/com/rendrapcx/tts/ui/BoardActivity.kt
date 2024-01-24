@@ -14,7 +14,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -26,7 +25,6 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
-import com.google.android.material.snackbar.Snackbar
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
@@ -38,7 +36,6 @@ import com.rendrapcx.tts.constant.Const.Companion.position
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
 import com.rendrapcx.tts.constant.Const.InputQuestionDirection
 import com.rendrapcx.tts.constant.Direction
-import com.rendrapcx.tts.constant.InputDirection
 import com.rendrapcx.tts.constant.InputMode
 import com.rendrapcx.tts.constant.SelectRequest
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
@@ -53,7 +50,7 @@ import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
-import com.rendrapcx.tts.model.Data.Companion.listUserPreferences
+import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,14 +62,13 @@ class BoardActivity : AppCompatActivity() {
     private var intKey = arrayListOf<TextView>()
     private var inputAnswerDirection = InputAnswerDirection.ROW
     private var tipTop = true
+    private var pickByArrow = false
     private val xLen = 10
     private val yLen = 10
     private var countXY = (xLen * yLen)
     private var currentQuestId = ""
     private var currentRange = arrayListOf<Int>()
-    private var pickByArrow = false
     private var tag = arrayListOf<Int>()
-    private var clip = ""
 
     private var selectedQuestion = ""
     private var onType = false
@@ -82,9 +78,8 @@ class BoardActivity : AppCompatActivity() {
     private var curColId = ""
     private var curCharAt = 0
     private var curCharStr = ""
-
     private var finishedId = arrayListOf<String>() //ganti nanti
-
+    private var salah = arrayListOf<Int>()
 
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.R)
@@ -119,7 +114,8 @@ class BoardActivity : AppCompatActivity() {
 
                     position = 0
                     setBoxTagText()
-                    getInputAnswerDirection()
+                    pickByArrow = false
+                    setInputAnswerDirection()
                     onClickBox()
                     fillTextDescription()
                     setOnSelectedColor()
@@ -144,9 +140,12 @@ class BoardActivity : AppCompatActivity() {
 
                     position = listPartial.first { it.levelId == currentLevel }.charAt
 
+
                     setBoxTagText()
                     fillTextDescription()
-                    getInputAnswerDirection()
+                    fillText()
+                    pickByArrow = false
+                    setInputAnswerDirection()
                     onClickBox()
                     Dialog().apply { inputDescription(binding) }
                 }
@@ -161,9 +160,10 @@ class BoardActivity : AppCompatActivity() {
                         listLevel.first() { it.id == currentLevel }.title
                 }
 
-                position = listPartial.first { it.levelId == currentLevel }.charAt
                 setBoxTagText()
-                getInputAnswerDirection()
+                position = listPartial.first { it.levelId == currentLevel }.charAt
+                pickByArrow = false
+                setInputAnswerDirection()
                 onClickBox()
             }
 
@@ -183,18 +183,28 @@ class BoardActivity : AppCompatActivity() {
             btnBackSpace.setOnClickListener() {
                 box[position].text = ""
                 onPressBackSpace()
+                Sound().soundTyping(this@BoardActivity)
                 YoYo.with(Techniques.Landing)
                     .duration(500)
                     .playOn(btnBackSpace);
             }
             btnShuffle.setOnClickListener() {
-                showAnswerKeypad()
+                for (i in 0 until intKey.size) {
+                    YoYo.with(Techniques.Hinge).duration(1000)
+                        .onEnd {
+                            YoYo.with(Techniques.RotateInDownLeft).duration(300).playOn(intKey[i])
+                            showAnswerKeypad()
+                        }
+                        .playOn((intKey[i]))
+
+                }
+                Sound().soundShuffle(this@BoardActivity)
                 YoYo.with(Techniques.Landing)
                     .duration(500)
                     .playOn(btnShuffle);
             }
 
-            //KEYBOARD PRESS
+            /* KEYBOARD PRESS */
             for (i in 0 until intKey.size) {
                 intKey[i].setOnTouchListener(View.OnTouchListener() { _, motionEvent ->
                     when (motionEvent.action) {
@@ -205,11 +215,13 @@ class BoardActivity : AppCompatActivity() {
                                 .playOn(box[position]);
                             onPressAbjabMove()
                             checkWinCondition(false)
+                            Sound().soundTyping(this@BoardActivity)
                         }
 
                         MotionEvent.ACTION_UP -> {
                             YoYo.with(Techniques.Landing)
                                 .playOn(intKey[i]);
+                            //check = false
                         }
                     }
                     return@OnTouchListener true
@@ -236,18 +248,15 @@ class BoardActivity : AppCompatActivity() {
         binding.includeBoard.boardTen.setOnClickListener() {
             for (i in 0 until box.size) {
                 box[i].setOnClickListener() {
+                    Sound().soundOnClickBox(this)
                     pickByArrow = false
                     position = i
-                    getInputAnswerDirection()
+                    setInputAnswerDirection()
                     onClickBox()
 
                     when (boardSet) {
-                        BoardSet.EDITOR_NEW, BoardSet.EDITOR_EDIT -> {
-                            if (clip.isNotEmpty()) pasteId()
-                        }
-
                         BoardSet.PLAY, BoardSet.PLAY_USER -> {
-                            if (listUserPreferences[0].integratedKeyboard) {
+                            if (userPreferences[0].integratedKeyboard) {
                                 Keypad().showSoftKeyboard(window, it)
                             }
                         }
@@ -255,52 +264,44 @@ class BoardActivity : AppCompatActivity() {
                         else -> {}
                     }
                 }
-
-                box[i].setOnLongClickListener() {
-                    //if (clip.isEmpty()) {
-                    clip = curRowId.ifEmpty { curColId }
-                    Snackbar.make(
-                        binding.boardActivityRoot,
-                        "Pilih box sibling untuk menempelkan",
-                        Snackbar.LENGTH_INDEFINITE
-                    )
-                        .setAction("Clear", View.OnClickListener {
-                            clip = ""
-                            Toast.makeText(this, "clip dikosongkan", Toast.LENGTH_SHORT).show()
-                        })
-                        .show()
-                    //}
-                    return@setOnLongClickListener true
-                }
             }
         }
 
         /* SELECT QUESTION BY ARROW */
         binding.includeQuestionSpan.apply {
+            /*ARROW NEXT QUESTION*/
             btnNextQuestion.setOnClickListener() {
                 if (listPartial.isEmpty()) return@setOnClickListener
-                resetBoxStyle()
-                fillText()
+                Sound().soundNextQuestion(this@BoardActivity)
                 getRequestQuestions(SelectRequest.NEXT)
-                onClickBox()
-
-                YoYo.with(Techniques.RubberBand).duration(300).playOn(btnNextQuestion)
-                YoYo.with(Techniques.FadeOutRight).duration(300)
-                    .onEnd { YoYo.with(Techniques.FadeInLeft).duration(300).playOn(tvSpanQuestion) }
+                moveToRequestedQuestion()
+                YoYo.with(Techniques.RubberBand).duration(1300).playOn(btnNextQuestion)
+                YoYo.with(Techniques.FadeOutRight).duration(1000)
+                    .onEnd {
+                        YoYo.with(Techniques.FadeInLeft).duration(300)
+                            .playOn(tvSpanQuestion)
+                    }
                     .playOn(tvSpanQuestion)
             }
+
             btnPrevQuestion.setOnClickListener() {
                 if (listPartial.isEmpty()) return@setOnClickListener
-                resetBoxStyle()
-                fillText()
+                Sound().soundNextQuestion(this@BoardActivity)
                 getRequestQuestions(SelectRequest.PREV)
-                onClickBox()
-                YoYo.with(Techniques.RubberBand).duration(300).playOn(btnPrevQuestion)
-                YoYo.with(Techniques.FadeOutLeft).duration(300)
+                moveToRequestedQuestion()
+                YoYo.with(Techniques.RubberBand).duration(1300).playOn(btnPrevQuestion)
+                YoYo.with(Techniques.FadeOutLeft).duration(1000)
                     .onEnd {
                         YoYo.with(Techniques.FadeInRight).duration(300).playOn(tvSpanQuestion)
                     }
                     .playOn(tvSpanQuestion)
+            }
+
+            tvSpanQuestion.setOnClickListener() {
+                Sound().soundOnClickBox(this@BoardActivity)
+                YoYo.with(Techniques.RubberBand).duration(1300).playOn(tvSpanQuestion)
+                pickByArrow = false
+                onClickBox()
             }
         }
 
@@ -308,7 +309,68 @@ class BoardActivity : AppCompatActivity() {
         binding.includeGameHelperBottom.apply {
             btnShowPicture.setOnClickListener() {
                 Sound().soundCheckBoxPass(this@BoardActivity)
-                checkWinCondition()
+                checkWinCondition(color = true)
+                YoYo.with(Techniques.Shake).duration(1000).playOn(btnShowPicture)
+                YoYo.with(Techniques.RotateIn).playOn(btnShowPicture)
+            }
+
+            /*GOTO EMPTY FILE QUESTION*/
+            btnSuffleKey.setOnClickListener() {
+                val filled = arrayListOf<Int>()
+                for (i in tag.indices) {
+                    if (box[tag[i]].text.isNotEmpty()) filled.add(i)
+                }
+                if (tag.size == filled.size) {
+                    YoYo.with(Techniques.Shake).duration(1000).playOn(btnSuffleKey)
+                    Sound().soundCheckBoxPass(this@BoardActivity)
+                    return@setOnClickListener
+                }
+
+                if (listQuestion.isEmpty()) return@setOnClickListener
+
+                val index = if (currentIndex < 0) {
+                    listQuestion.indexOfFirst { it.levelId == currentLevel && it.id == currentQuestId }
+                } else currentIndex
+
+                val count = listQuestion.count()
+                val req = if (index < count - 1) index + 1 else 0
+
+
+                val reqId = listQuestion[req].id
+                var range = listQuestion[req].slot
+                var dir = listQuestion[req].direction
+
+                val arr = arrayListOf<Int>()
+                for (i in 0 until range.size) {
+                    arr.add(i)
+                    if (box[range[i]].text.isEmpty()) {
+                        position = range[i]
+                        break
+                    }
+                }
+                if (arr.size == range.size) {
+                    position = range[range.size - 1]
+                    for (i in range.indices) {
+                        YoYo.with(Techniques.Wave).repeat(1).duration(1000).playOn(box[range[i]])
+                    }
+                }
+
+                currentQuestId = reqId
+                currentIndex = req
+                currentRange = range
+
+                inputAnswerDirection =
+                    if (dir == Direction.HORIZONTAL.name) InputAnswerDirection.ROW
+                    else InputAnswerDirection.COLUMN
+
+                pickByArrow = false
+                setOnSelectedColor()
+                setColorizeRange(position, range)
+
+                showAnswerKeypad()
+                binding.includeQuestionSpan.tvSpanQuestion.text = listQuestion[req].asking
+                YoYo.with(Techniques.RotateIn).playOn(btnSuffleKey)
+                Sound().soundShuffle(this@BoardActivity)
             }
         }
 
@@ -321,6 +383,35 @@ class BoardActivity : AppCompatActivity() {
                 } else {
                     saveAndApply()
                 }
+            }
+
+            btnClear.setOnClickListener() {
+                val builder: AlertDialog.Builder = AlertDialog.Builder(this@BoardActivity)
+                builder
+                    .setMessage("Yakin mau balikan dari awal?")
+                    .setTitle("Info")
+                    .setPositiveButton("YA") { dialog, which ->
+                        listPartial.clear()
+                        position = 0
+                        setBoxTagText()
+                        fillTextDescription()
+                        setInputAnswerDirection()
+                        onClickBox()
+                        Dialog().apply { inputDescription(binding) }
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("Batal") { dialog, which ->
+                        dialog.dismiss()
+                    }
+
+                val dialog: AlertDialog = builder.create()
+                extracted(dialog)
+
+                dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+                dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
+                dialog.setCancelable(true)
+
+                dialog.show()
             }
 
             btnAdd.setOnClickListener() {
@@ -341,6 +432,29 @@ class BoardActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun moveToRequestedQuestion() {
+        val arr = arrayListOf<Int>()
+
+        if (boardSet == BoardSet.PLAY) {
+            for (i in 0 until currentRange.size) {
+                arr.add(i)
+                if (box[currentRange[i]].text.isEmpty()) {
+                    position = currentRange[i]
+                    break
+                }
+            }
+            if (arr.size == currentRange.size) {
+                position = currentRange[currentRange.size - 1]
+            }
+        } else position = currentRange[0]
+
+        pickByArrow = false
+        setOnSelectedColor()
+        setColorizeRange(position, currentRange)
+        showAnswerKeypad()
+        binding.includeQuestionSpan.tvSpanQuestion.text = getQuestion()
     }
 
     private fun getPartialData(): MutableList<Data.Partial> {
@@ -386,47 +500,25 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-    private fun pasteId() {
-        if (boardSet == BoardSet.EDITOR_NEW || boardSet == BoardSet.EDITOR_EDIT) {
-            if (curRowId.isEmpty()) {
-                listPartial.filter { it.levelId == currentLevel }
-                    .filter { it.id == curPartId }
-                    .map {
-                        it.rowQuestionId = clip
-                    }
-            }
-            if (curColId.isEmpty()) {
-                listPartial.filter { it.levelId == currentLevel }
-                    .filter { it.id == curPartId }
-                    .map {
-                        it.colQuestionId = clip
-                    }
-            }
-            fillText()
-            clip = ""
-            Snackbar.make(binding.boardActivityRoot, "berhasil menempelkan", Snackbar.LENGTH_SHORT)
-                .setAction("Undo", View.OnClickListener {
-                    Toast.makeText(
-                        this@BoardActivity,
-                        "No Actions",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                })
-                .show()
-        }
-    }
-
-    private fun getInputAnswerDirection() {
+    private fun setInputAnswerDirection() {
         if (getColumnId() != "") inputAnswerDirection = InputAnswerDirection.COLUMN
         else if (getRowId() != "") inputAnswerDirection = InputAnswerDirection.ROW
     }
 
-    private fun onClickBox() {
-        fillText() //ONLY when edit
+    private fun setTiptopRangeDirection() {
+        if (getColumnId() != "" && getRowId() == "") InputAnswerDirection.COLUMN //InputDirection.COLUMN
+        else if (getColumnId() == "" && getRowId() != "") InputAnswerDirection.ROW //InputDirection.ROW
+        //else if (getColumnId() == "" && getRowId() == "") InputAnswerDirection.UNKNOWN //InputDirection.UNKNOWN
+        else {
+            inputAnswerDirection =
+                if (tipTop) InputAnswerDirection.COLUMN
+                else InputAnswerDirection.ROW
+        }
+    }
 
+    private fun onClickBox() {
         setOnSelectedColor()
-        setOnRangeColor()
-        //showPartInfo()
+        setOnRangeStyle()
         showAnswerKeypad()
         binding.includeQuestionSpan.tvSpanQuestion.text = selectedQuestion
     }
@@ -561,21 +653,32 @@ class BoardActivity : AppCompatActivity() {
     private fun checkWinCondition(color: Boolean = true) {
         if (boardSet == BoardSet.EDITOR_EDIT || boardSet == BoardSet.EDITOR_NEW) return
         var pass = true
+        salah.clear()
         for (i in tag) {
             if (box[i].text != box[i].tag) {
                 if (color) {
-                    //box[i].setBackgroundColor(getColor(this, R.color.not_pass))
+                    salah.add(i)
+                    box[i].setTextColor(getColor(this, R.color.button))
                     box[i].setBackgroundResource(R.drawable.box_shape_not_pass)
-                    YoYo.with(Techniques.Flash)
-                        .duration(1000)
-                        .repeat(0)
-                        .playOn(box[i]);
+                    YoYo.with(Techniques.Shake).repeat(1).duration(1000)
+                        .onEnd {
+                            val x = salah[0]
+                            pickByArrow = false
+                            position = x
+                            setInputAnswerDirection()
+                            onClickBox()
+                            YoYo.with(Techniques.Bounce).playOn(box[x])
+                            showAnswerKeypad()
+                            binding.includeQuestionSpan.tvSpanQuestion.text = getQuestion()
+                        }
+                        .playOn(box[i])
                 }
                 pass = false
             }
         }
+
+        //onClickBox()
         if (pass) {
-            // TODO: 1. win dialog, 2. next question or back to list, 3. update score 4. update user data level finished
             Sound().soundWinning(this)
             winDialog(this)
         }
@@ -593,7 +696,8 @@ class BoardActivity : AppCompatActivity() {
 
         extracted(dialog)
 
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(false)
 
         bind.btnNext.setOnClickListener() {
@@ -674,7 +778,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             setBoxTagText()
-            getInputAnswerDirection()
+            setInputAnswerDirection()
             onClickBox()
         }
     }
@@ -724,17 +828,6 @@ class BoardActivity : AppCompatActivity() {
             }
         currentQuestId = colId
         return colId
-    }
-
-    private fun setInputRangeDirection() {
-        if (getColumnId() != "" && getRowId() == "") InputDirection.COLUMN
-        else if (getRowId() != "" && getColumnId() == "") InputDirection.ROW
-        else if (getColumnId() == "" && getColumnId() == "") InputDirection.UNKNOWN
-        else {
-            inputAnswerDirection =
-                if (tipTop) InputAnswerDirection.COLUMN
-                else InputAnswerDirection.ROW
-        }
     }
 
     private fun getRowRange(): ArrayList<Int> {
@@ -877,15 +970,20 @@ class BoardActivity : AppCompatActivity() {
                 range = it.slot
             }
 
+        inputAnswerDirection =
+            if (dir == Direction.HORIZONTAL.name) InputAnswerDirection.ROW
+            else InputAnswerDirection.COLUMN
+
         currentQuestId = reqId
-
-        inputAnswerDirection = if (dir == Direction.HORIZONTAL.name) InputAnswerDirection.ROW
-        else InputAnswerDirection.COLUMN
-
         currentRange = range
-        position = range[0]
+    }
 
-        pickByArrow = true
+
+    private fun hasBothId(): Boolean {
+        val row = listPartial.filter { it.charAt == position }.first().rowQuestionId
+        val col = listPartial.filter { it.charAt == position }.first().colQuestionId
+        if (row.isNotEmpty() && col.isNotEmpty()) return true
+        else return false
     }
 
     private fun showAnswerKeypad() {
@@ -942,7 +1040,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY_NEXT -> {
-                // TODO: ISI PLAY NEXT 
+                // TODO: ISI PLAY NEXT
             }
         }
     }
@@ -954,17 +1052,25 @@ class BoardActivity : AppCompatActivity() {
                 val x = range[i]
                 if (x == current) continue
                 box[x].setBackgroundResource(R.drawable.box_shape_range)
-                YoYo.with(Techniques.RubberBand).playOn(box[x])
+                if (box[x].text.isEmpty()) {
+                    YoYo.with(Techniques.RubberBand)
+                        .repeat(1)
+                        .playOn(box[x])
+                } else {
+                    YoYo.with(Techniques.Wave)
+                        .onEnd { YoYo.with(Techniques.RubberBand).playOn(box[x]) }
+                        .playOn(box[x])
+                }
             }
         }
     }
 
-    private fun setOnRangeColor() {
+    private fun setOnRangeStyle() {
         val range: ArrayList<Int>
 
         if (!pickByArrow) {
             tipTop = tipTop != true
-            setInputRangeDirection()
+            setTiptopRangeDirection()
         }
 
         if (inputAnswerDirection == InputAnswerDirection.COLUMN) {
@@ -986,7 +1092,9 @@ class BoardActivity : AppCompatActivity() {
         val i = position
         box[i].setTextColor(getColor(this, R.color.white))
         box[i].setBackgroundResource(R.drawable.box_shape_selected)
-        YoYo.with(Techniques.Bounce).playOn(box[i])
+        YoYo.with(Techniques.Bounce)
+            .onEnd { YoYo.with(Techniques.RubberBand).playOn(box[i]) }
+            .playOn(box[i])
     }
 
     private fun fillText() {
@@ -1051,7 +1159,8 @@ class BoardActivity : AppCompatActivity() {
         colAvailable: List<Int>,
     ) {
 
-        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater =
+            this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val bind = DialogInputSoalBinding.inflate(inflater)
         val builder = AlertDialog.Builder(this).setView(bind.root)
         val dialog = builder.create()
@@ -1117,12 +1226,24 @@ class BoardActivity : AppCompatActivity() {
             val direction: String = bind.swDirection.text.toString()
 
             lifecycle.coroutineScope.launch {
-                val job1 = async { addQuestion(id, number, asking, answer, direction, rowAvailable, colAvailable) }
+                val job1 = async {
+                    addQuestion(
+                        id,
+                        number,
+                        asking,
+                        answer,
+                        direction,
+                        rowAvailable,
+                        colAvailable
+                    )
+                }
                 job1.await()
-                val job2 = async { addPartial(id, answer, direction, rowAvailable, colAvailable) }
+                val job2 =
+                    async { addPartial(id, answer, direction, rowAvailable, colAvailable) }
                 job2.await()
 
-                getInputAnswerDirection()
+                fillText()
+                setInputAnswerDirection()
                 onClickBox()
                 dialog.dismiss()
             }
@@ -1207,7 +1328,8 @@ class BoardActivity : AppCompatActivity() {
             val slotPart = part.indexOfFirst { it.charAt == slot[i] }
             var prevId = ""
             if (slotPart != -1) prevId =
-                part[slotPart].rowQuestionId.ifEmpty { part[slotPart].colQuestionId }.ifEmpty { "" }
+                part[slotPart].rowQuestionId.ifEmpty { part[slotPart].colQuestionId }
+                    .ifEmpty { "" }
             part.add(
                 Data.Partial(
                     levelId = levelId,
