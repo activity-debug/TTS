@@ -16,12 +16,18 @@ class Const {
 
     enum class AnswerStatus {DONE, PROGRESS}
 
+    enum class FilterStatus {ALL, DRAFT, POST}
+
     companion object {
+        var pubCaAppId = "ca-app-pub-5609246517650629~7589046483"
+        var bannerCaAppId = "ca-app-pub-5609246517650629/2803623664"
+        var intersCaAppId = "ca-app-pub-5609246517650629/9483231011"
+
         var qrAction = QrAction.CREATE
 
         var isSignedIn = false
         var currentUserId = "ADMIN"
-        var currentUser = ""
+        var currentUser = -1
         var currentUserRefId = ""
 
         var gameState = GameState.CREATOR
@@ -36,7 +42,10 @@ class Const {
         var inputMode = ""
 
 //        var isSound = true
-
+        val strGreen = "🟢"
+        val strYellow = "🟡"
+        val strRed = "🔴"
+        val strDone = "✅"
         val strRight = "➡\uFE0F"
         val strDown = "⬇\uFE0F"
     }

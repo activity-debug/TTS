@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.icu.text.DecimalFormat
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.os.Build
@@ -23,6 +24,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
 class Helper {
+
+    fun format(amount:Int):String{
+//        val numberFormat = DecimalFormat("#,###.00")
+        val numberFormat = DecimalFormat("000")
+        return numberFormat.format(amount)
+    }
 
     fun abjadKapital():List<String>{
         var c : Char = 'A'

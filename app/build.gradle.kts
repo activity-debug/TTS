@@ -42,8 +42,8 @@ android {
 
 dependencies {
 
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
+    //implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
+    //implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
 
     //splashscreen
     implementation("androidx.core:core-splashscreen:1.0.1")
@@ -75,6 +75,7 @@ dependencies {
     //room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")

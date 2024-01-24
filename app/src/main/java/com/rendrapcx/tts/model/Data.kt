@@ -3,7 +3,9 @@ package com.rendrapcx.tts.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.AnswerStatus
+import com.rendrapcx.tts.constant.Const.FilterStatus
 
 class Data {
     @Entity(tableName = "level")
@@ -13,6 +15,7 @@ class Data {
         @ColumnInfo(name = "category") var category: String,
         @ColumnInfo(name = "title") var title: String,
         @ColumnInfo(name = "user_id") var userId: String,
+        @ColumnInfo(name = "status") var status: FilterStatus,
     )
 
     @Entity(tableName = "question")
@@ -56,7 +59,7 @@ class Data {
         @ColumnInfo(name = "id") var id : Int,
         @ColumnInfo(name = "user_id") var userId: Int,
         @ColumnInfo(name = "level_id") var levelId: String,
-        @ColumnInfo(name = "answer") var answer: String,
+        @ColumnInfo(name = "answer_slot") var answerSlot: ArrayList<String>,
         @ColumnInfo(name = "status") var status: AnswerStatus,
     )
 
@@ -71,8 +74,9 @@ class Data {
     data class UserPreferences(
         @PrimaryKey(autoGenerate = false)
         @ColumnInfo(name = "id") var id : String,
+        @ColumnInfo(name = "current_user") var currentUser : Int,
         @ColumnInfo(name = "is_login") var isLogin: Boolean,
-        @ColumnInfo(name = "show_finished") var showFinished : Boolean,
+        @ColumnInfo(name = "active_filter_tab") var activeFilterTab : FilterStatus ,
         @ColumnInfo(name = "sort_order_by_author") var sortOrderByAuthor : Boolean,
         @ColumnInfo(name = "integrated_keyboard") var integratedKeyboard : Boolean,
         @ColumnInfo(name = "is_music") var isMusic : Boolean,

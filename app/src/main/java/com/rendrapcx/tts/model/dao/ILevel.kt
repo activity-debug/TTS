@@ -30,4 +30,9 @@ interface ILevel {
 
     @Query("DELETE FROM level WHERE `id` = :id;")
     suspend fun deleteLevelById(id: String)
+
+    @Query(value =  "UPDATE level " +
+            "   SET status =:status " +
+            "       WHERE id = :id;")
+    suspend fun updateStatus(id: String, status: String)
 }

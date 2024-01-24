@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Dist. "
+            android:text="Cat. "
             app:layout_constraintStart_toStartOf="@+id/textView6"
             app:layout_constraintTop_toBottomOf="@+id/tvItemId" />
 
@@ -50,9 +50,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginEnd="8dp"
+            android:background="@drawable/shape_list_item_text"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="5dp"
             android:text="EF4SD34-5"
-            app:layout_constraintEnd_toStartOf="@+id/btnItemEdit"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textView6"
             app:layout_constraintTop_toTopOf="@+id/textView6" />
 
@@ -70,6 +72,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:background="@drawable/shape_list_item_text"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="5dp"
             android:text="Umum"
             app:layout_constraintEnd_toEndOf="@+id/tvItemId"
             app:layout_constraintStart_toStartOf="@+id/tvItemId"
@@ -80,6 +85,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:background="@drawable/shape_list_item_text"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="5dp"
             android:text="10x10"
             app:layout_constraintEnd_toEndOf="@+id/tvItemCategory"
             app:layout_constraintStart_toStartOf="@+id/tvItemCategory"
@@ -90,6 +98,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:background="@drawable/shape_list_item_text"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="5dp"
             android:text="Admin"
             app:layout_constraintEnd_toEndOf="@+id/tvItemTitle"
             app:layout_constraintStart_toStartOf="@+id/tvItemTitle"
@@ -100,40 +111,60 @@
             style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             app:icon="@drawable/pen_to_square_solid"
-            app:layout_constraintEnd_toStartOf="@+id/btnCloudUp"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/btnItemDelete"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView14" />
 
         <Button
             android:id="@+id/btnItemDelete"
             style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             app:icon="@drawable/trash_solid"
             app:layout_constraintEnd_toStartOf="@+id/btnShareAsQR"
-            app:layout_constraintTop_toBottomOf="@+id/btnItemEdit" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnItemEdit"
+            app:layout_constraintTop_toTopOf="@+id/btnItemEdit" />
 
         <Button
             android:id="@+id/btnShareAsQR"
             style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             app:icon="@drawable/square_share_nodes_solid"
-            app:layout_constraintEnd_toEndOf="@+id/btnCloudUp"
-            app:layout_constraintStart_toEndOf="@+id/btnItemEdit"
-            app:layout_constraintTop_toBottomOf="@+id/btnItemEdit" />
+            app:layout_constraintEnd_toStartOf="@+id/btnCloudUp"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnItemDelete"
+            app:layout_constraintTop_toTopOf="@+id/btnItemDelete" />
 
         <Button
             android:id="@+id/btnCloudUp"
             style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             app:icon="@drawable/cloud_arrow_up_solid"
+            app:layout_constraintEnd_toStartOf="@+id/swPublish"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnShareAsQR"
+            app:layout_constraintTop_toTopOf="@+id/btnShareAsQR" />
+
+        <Switch
+            android:id="@+id/swPublish"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/shape_list_item_text"
+            android:gravity="center"
+            android:paddingHorizontal="5dp"
+            android:text="Switch"
+            app:layout_constraintBottom_toBottomOf="@+id/btnCloudUp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnCloudUp"
+            app:layout_constraintTop_toTopOf="@+id/btnCloudUp"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

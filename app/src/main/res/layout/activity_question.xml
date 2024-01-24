@@ -115,58 +115,57 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <Switch
-            android:id="@+id/switch1"
+        <TextView
+            android:id="@+id/swAll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/box_shape"
-            android:paddingStart="10sp"
-            android:text="Published"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="HardcodedText,UseSwitchCompatOrMaterialXml" />
-
-        <TextView
-            android:id="@+id/tab_tts"
-            android:layout_width="42sp"
-            android:layout_height="36sp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="80dp"
             android:background="@drawable/tabs_active_shape"
             android:gravity="center"
-            android:text="TTS"
-            android:textColor="@color/white"
-            android:textStyle="bold"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:text="ALL"
+            android:textColor="@color/button_text"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/switch1"
+            app:layout_constraintEnd_toStartOf="@+id/swDraft"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tab_tbk"
-            android:layout_width="42sp"
-            android:layout_height="36sp"
+            android:id="@+id/swDraft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
             android:background="@drawable/tabs_disable_shape"
             android:gravity="center"
-            android:text="TBK"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/tab_tts"
-            app:layout_constraintTop_toTopOf="@+id/tab_tts" />
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:text="Draft"
+            android:textColor="@color/button_text"
+            app:layout_constraintEnd_toStartOf="@+id/swPosted"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/swAll"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tab_wiw"
-            android:layout_width="42sp"
-            android:layout_height="36sp"
+            android:id="@+id/swPosted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="80dp"
             android:background="@drawable/tabs_disable_shape"
             android:gravity="center"
-            android:text="WIW"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/tab_tbk"
-            app:layout_constraintTop_toTopOf="@+id/tab_tbk" />
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:text="Posted"
+            android:textColor="@color/button_text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/swDraft"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

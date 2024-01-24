@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
-import android.text.InputFilter
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -31,31 +30,29 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.rendrapcx.tts.R
-import com.rendrapcx.tts.R.drawable.*
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
+import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
-import com.rendrapcx.tts.databinding.DialogInputTbkBinding
-import com.rendrapcx.tts.databinding.DialogSelectInputBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
-import com.rendrapcx.tts.model.Data.Companion.listTebakKata
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-import java.util.UUID
 
 class QuestionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuestionBinding
     private var questionAdapter = QuestionAdapter()
-    private var tebakKataAdapter = TebakKataAdapter()
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,15 +61,30 @@ class QuestionActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
+        binding.headerPanel.tvLabelTop.text = "Editor"
+
+        lifecycleScope.launch {
+            val job1 = async {
+                UserRef().checkUserPref(this@QuestionActivity, lifecycle)
+                Data.userPreferences =
+                    DB.getInstance(applicationContext).userPreferences().getAllUserPreferences()
+            }
+            job1.await()
+            activeFilterTab(UserRef().getActiveTabFilter())
+            questionAdapterActions()
+        }
+
+
         binding.apply {
             rcViewQuestioner.layoutManager = LinearLayoutManager(this@QuestionActivity)
             rcViewQuestioner.adapter = questionAdapter
         }
 
-        activeTab(1)
-
         binding.btnNewLevel.setOnClickListener() {
-            createSoalDialog(this)
+            boardSet = BoardSet.EDITOR_NEW
+            val i = Intent(this, BoardActivity::class.java)
+            startActivity(i)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
@@ -92,110 +104,47 @@ class QuestionActivity : AppCompatActivity() {
             }
         }
 
-        binding.switch1.isChecked = Data.userPreferences[0].showFinished
-        binding.switch1.setOnClickListener() {
-            lifecycleScope.launch {
-                val data = binding.switch1.isChecked
-                Data.userPreferences[0].showFinished = data
-                DB.getInstance(applicationContext).userPreferences()
-                    .updateShowFinished("0", data)
-            }
+        binding.swAll.setOnClickListener() {
+            activeFilterTab(FilterStatus.ALL)
+            UserRef().setActiveTabFilter("0", FilterStatus.ALL, this, lifecycle)
         }
-
-        /*Tabs Switch*/
-        binding.apply {
-            tabTts.setOnClickListener() {
-                activeTab(0)
-            }
-            tabTbk.setOnClickListener() {
-                activeTab(1)
-            }
-            tabWiw.setOnClickListener() {
-                activeTab(2)
-            }
+        binding.swDraft.setOnClickListener() {
+            activeFilterTab(FilterStatus.DRAFT)
+            UserRef().setActiveTabFilter("0", FilterStatus.DRAFT, this, lifecycle)
+        }
+        binding.swPosted.setOnClickListener() {
+            activeFilterTab(FilterStatus.POST)
+            UserRef().setActiveTabFilter("0", FilterStatus.POST, this, lifecycle)
         }
     }
 
-    private fun activeTab(tab: Int = 0) {
-        binding.apply {
-            when (tab) {
-                0 -> {
-                    tabTts.setBackgroundResource(tabs_active_shape)
-                    tabTbk.setBackgroundResource(tabs_disable_shape)
-                    tabWiw.setBackgroundResource(tabs_disable_shape)
-                    btnSelectFilter.visibility = View.VISIBLE
-                    binding.headerPanel.tvLabelTop.text = "TTS"
-                    questionAdapterActions()
-                    binding.rcViewQuestioner.adapter = questionAdapter
-                }
+    private fun activeFilterTab(filterStatus: FilterStatus) {
+        when (filterStatus) {
+            FilterStatus.ALL -> {
+                binding.swAll.setBackgroundResource(R.drawable.tabs_active_shape)
+                binding.swDraft.setBackgroundResource(R.drawable.tabs_disable_shape)
+                binding.swPosted.setBackgroundResource(R.drawable.tabs_disable_shape)
 
-                1 -> {
-                    tabTts.setBackgroundResource(tabs_disable_shape)
-                    tabTbk.setBackgroundResource(tabs_active_shape)
-                    tabWiw.setBackgroundResource(tabs_disable_shape)
-                    btnSelectFilter.visibility = View.GONE
-                    binding.headerPanel.tvLabelTop.text = "Tebak Kata"
-                    tebakKataAdapterActions()
-                    binding.rcViewQuestioner.adapter = tebakKataAdapter
-                }
-
-                2 -> {
-                    tabTts.setBackgroundResource(tabs_disable_shape)
-                    tabTbk.setBackgroundResource(tabs_disable_shape)
-                    tabWiw.setBackgroundResource(tabs_active_shape)
-                    binding.headerPanel.tvLabelTop.text = "Kata Bermakna"
-                }
-            }
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun tebakKataAdapterActions() {
-        binding.apply {
-            listTebakKata.clear()
-            lifecycleScope.launch {
-                try {
-                    listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
-                        .ifEmpty { return@launch }
-                } finally {
-                    etSearch.hint = "Data Kosong"
-                }
-                tebakKataAdapter.setListItem(listTebakKata)
-                etSearch.hint = tebakKataAdapter.itemCount.toString()
+                questionAdapter.setListItem(listLevel)
             }
 
-            tebakKataAdapter.setOnClickShare {
-                val string =
-                    it.id + ";" + it.imageUrl + ";" + it.answer + ";" + it.hint1 + ";" + it.hint2 + ";" + it.hint3 + ";" + it.hint4 + ";" + it.hint5
-                shareQRDialog(this@QuestionActivity, string)
+            FilterStatus.DRAFT -> {
+                binding.swAll.setBackgroundResource(R.drawable.tabs_disable_shape)
+                binding.swDraft.setBackgroundResource(R.drawable.tabs_active_shape)
+                binding.swPosted.setBackgroundResource(R.drawable.tabs_disable_shape)
+
+                val fil = listLevel.filter { it.status == FilterStatus.DRAFT }.toMutableList()
+                questionAdapter.setListItem(fil)
             }
 
-            tebakKataAdapter.setOnClickDelete {tbk->
-                lifecycleScope.launch {
-                    val id = tbk.id
-                    lifecycleScope.launch {
-                        DB.getInstance(applicationContext).tebakKata().deleteTbkById(id)
-                    }
-                    lifecycleScope.launch {
-                        listTebakKata.clear()
-                        listTebakKata = DB.getInstance(applicationContext).tebakKata().getAllTbk()
-                        tebakKataAdapter.setListItem(listTebakKata)
-                        tebakKataAdapter.notifyDataSetChanged()
-                        binding.etSearch.hint = tebakKataAdapter.itemCount.toString()
-                    }
-                    Snackbar.make(binding.questionLayout, "Tbk Deleted", Snackbar.LENGTH_SHORT)
-                        .setAction("Undo", View.OnClickListener {
-                            Toast.makeText(
-                                this@QuestionActivity,
-                                "KASIH KODE DISINI",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        })
-                        .show()
-                }
-            }
+            FilterStatus.POST -> {
+                binding.swAll.setBackgroundResource(R.drawable.tabs_disable_shape)
+                binding.swDraft.setBackgroundResource(R.drawable.tabs_disable_shape)
+                binding.swPosted.setBackgroundResource(R.drawable.tabs_active_shape)
 
+                val fil = listLevel.filter { it.status == FilterStatus.POST }.toMutableList()
+                questionAdapter.setListItem(fil)
+            }
         }
     }
 
@@ -271,133 +220,6 @@ class QuestionActivity : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    fun createSoalDialog(context: Context) {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val bind = DialogSelectInputBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(bind.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
-        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(true)
-
-        bind.btnCreateTBK.setOnClickListener() {
-            dialogInputTbk(this)
-            dialog.dismiss()
-        }
-
-        bind.btnCreateTTS.setOnClickListener() {
-            boardSet = BoardSet.EDITOR_NEW
-            val i = Intent(this, BoardActivity::class.java)
-            startActivity(i)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-        }
-
-        bind.btnCreateWiw.setOnClickListener() {
-            Toast.makeText(this, "Bikin Soal WIW", Toast.LENGTH_SHORT).show()
-        }
-
-        dialog.show()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun dialogInputTbk(context: Context) {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val bind = DialogInputTbkBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(bind.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
-        dialog.window!!.attributes.gravity = Gravity.TOP
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(false)
-
-        bind.etId.isEnabled = false
-        bind.etId.setText(UUID.randomUUID().toString())
-        bind.etImgUrl.isEnabled = false
-        bind.tvPreview.text = ""
-        bind.etQuestion.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
-        bind.etAnswer.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(45))
-        bind.etHint1.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
-        bind.etHint2.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
-        bind.etHint3.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
-        bind.etHint4.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
-        bind.etHint5.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
-
-        bind.etQuestion.requestFocus()
-
-        @SuppressLint("SetTextI18n")
-        fun previewAnswer(string: String) {
-            val xLen = 15
-            val yLen = 3
-            val size = 45
-            val rightMargin = arrayListOf<Int>()
-            for (i in 0 until yLen) {
-                rightMargin.add((i * xLen) - 1)
-            }
-            var pre = ""
-            for (i in 0 until size) {
-                if (i in rightMargin) {
-                    if (i >= string.length) {
-                        pre += "_"
-                        continue
-                    } else if (string[i] == ' ') pre += "_" + "\n"
-                    else pre += string[i] + "\n"
-                } else {
-                    if (i >= string.length) {
-                        pre += "_"
-                        continue
-                    } else if (string[i] == ' ') pre += "_"
-                    else pre += string[i]
-                }
-            }
-            bind.tvPreview.text = pre
-        }
-
-        bind.etAnswer.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                previewAnswer(s.toString())
-            }
-
-        })
-
-        bind.btnCancelAddTbk.setOnClickListener() {
-            dialog.dismiss()
-        }
-
-        bind.btnSaveTbk.setOnClickListener() {
-            lifecycleScope.launch {
-                DB.getInstance(applicationContext).tebakKata().insertTbk(
-                    Data.TebakKata(
-                        id = bind.etId.text.toString(),
-                        imageUrl = bind.etImgUrl.text.toString(),
-                        asking = bind.etQuestion.text.toString(),
-                        answer = bind.etAnswer.text.toString(),
-                        hint1 = bind.etHint1.text.toString(),
-                        hint2 = bind.etHint2.text.toString(),
-                        hint3 = bind.etHint3.text.toString(),
-                        hint4 = bind.etHint4.text.toString(),
-                        hint5 = bind.etHint5.text.toString(),
-                    )
-                )
-                activeTab(1)
-                dialog.dismiss()
-            }
-        }
-
-        dialog.show()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun extracted(dialog: AlertDialog) {
         val window = dialog.window
 
@@ -420,7 +242,8 @@ class QuestionActivity : AppCompatActivity() {
     private fun filter(str: String) {
         if (listLevel.isEmpty()) return
         val listLevelFilter = listLevel
-        val result = listLevelFilter.filter { it.category.contains(str) }.toMutableList()
+        val result = listLevelFilter.filter { it.category.lowercase().contains(str.lowercase()) }
+            .toMutableList()
 
         if (result.isEmpty()) {
             questionAdapter.setListItem(listLevel)
@@ -454,9 +277,9 @@ class QuestionActivity : AppCompatActivity() {
                         DB.getInstance(applicationContext).level().getLevel(currentLevel)
                     Data.listQuestion =
                         DB.getInstance(applicationContext).question().getQuestion(currentLevel)
-                    Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                        currentLevel
-                    )
+                    //Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
+                        //currentLevel
+                    //)
 
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
@@ -513,6 +336,18 @@ class QuestionActivity : AppCompatActivity() {
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                }
+            }
+
+            questionAdapter.setOnClickStatus {
+                if (it.status == FilterStatus.POST) it.status = FilterStatus.DRAFT
+                else it.status = FilterStatus.POST
+                lifecycleScope.launch {
+                    DB.getInstance(applicationContext).level().updateStatus(
+                        id = it.id,
+                        status = it.status.name
+                    )
+                    questionAdapter.notifyDataSetChanged()
                 }
             }
 

@@ -15,6 +15,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -32,6 +33,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.LuminanceSource
 import com.google.zxing.MultiFormatReader
@@ -90,6 +96,10 @@ class MainActivity : AppCompatActivity() {
         )[NetworkStatusViewModel::class.java]
     }
 
+
+    private lateinit var mAdView: AdView
+
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,6 +109,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         Helper().apply { hideSystemUI() }
+
+        loadBannerAds()
+
+        binding.btnScanQRCode.visibility = View.GONE
+        binding.btnExitApp.visibility = View.GONE
+        binding.btnShop.visibility = View.GONE
+        binding.btnTrophy.visibility = View.GONE
+        binding.btnUserSecret.visibility = View.GONE
+        binding.btnDatabase.visibility = View.GONE
+        binding.textView7.visibility = View.GONE
+
 
         viewModelNet.state.observe(this) { state ->
             binding.apply {
@@ -115,6 +136,8 @@ class MainActivity : AppCompatActivity() {
                 UserRef().checkUserPref(this@MainActivity, lifecycle)
                 userPreferences =
                     DB.getInstance(applicationContext).userPreferences().getAllUserPreferences()
+                listUser = DB.getInstance(applicationContext).user().getAllUser()
+                currentUser = UserRef().getCurrentUser()
             }
             job1.await()
 
@@ -137,15 +160,25 @@ class MainActivity : AppCompatActivity() {
             btnUserSecret.setOnClickListener() {
                 Dialog().apply { userProfile(this@MainActivity) }
             }
+
             btnLogin.setOnClickListener() {
                 if (currentUserId.isNotEmpty()) signOutDialog()
                 else loginDialog()
             }
+
             btnGoTTS.setOnClickListener() {
                 playMenuTTSDialog()
             }
 
+            btnGoTBK.setOnClickListener() {
+                Toast.makeText(this@MainActivity, "Belum tersedia", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             btnGoWiw.setOnClickListener() {
+                Toast.makeText(this@MainActivity, "Belum tersedia", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+
                 val intent = Intent(this@MainActivity, TestActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -153,8 +186,46 @@ class MainActivity : AppCompatActivity() {
 
             btnExitApp.setOnClickListener() {
                 exitDialog()
+                loadBannerAds()
             }
         }
+    }
+
+    private fun loadBannerAds() {
+        MobileAds.initialize(this@MainActivity) {}
+        mAdView = binding.adView
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
+        mAdView.adListener = object : AdListener() {
+            override fun onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            override fun onAdClosed() {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+            }
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Toast.makeText(this@MainActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onAdImpression() {
+                // Code to be executed when an impression is recorded
+                // for an ad.
+            }
+
+            override fun onAdLoaded() {
+                Toast.makeText(this@MainActivity, "adLoaded", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+            }
+        }
+
     }
 
     private fun animLogo() {
@@ -212,7 +283,8 @@ class MainActivity : AppCompatActivity() {
             binding.apply {
 
                 val filteredList =
-                    listLevel.sortedBy { it.title }.filter { it.category == category }
+                    listLevel.sortedBy { it.title }
+                        .filter { it.category == category && it.status == Const.FilterStatus.POST }
                         .toMutableList()
                 val adapter = PlayMenuTitleAdapter()
                 myRecView.layoutManager = GridLayoutManager(this@MainActivity, 3)
@@ -291,6 +363,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun loadCurrentUser() {
         lifecycle.coroutineScope.launch {
@@ -302,18 +375,29 @@ class MainActivity : AppCompatActivity() {
                 loginDialog()
                 return@launch
             } else {
-                listUser = DB.getInstance(applicationContext).user().getAllUser()
-                val guest = listUser[0].isGuest
-                if (guest) binding.btnLogin.text = "Guest"
-                else binding.btnLogin.text = listUser[0].username
+                val load = async {
+                    listUser = DB.getInstance(applicationContext).user().getAllUser()
+                }
+                load.await()
 
-                currentUserId = listUser[0].id
-                currentUser = listUser[0].username
+                currentUser = UserRef().getCurrentUser()
+
+                val guest = listUser[currentUser].isGuest
+                if (guest) {
+                    binding.btnLogin.text = "Guest"
+                    binding.btnGoListQuestion.visibility = View.INVISIBLE
+                } else {
+                    binding.btnLogin.text = listUser[currentUser].username
+                    binding.btnGoListQuestion.visibility = View.VISIBLE
+                }
+
+                currentUserId = listUser[currentUser].id
                 isSignedIn = true
             }
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun signOutDialog(
     ) {
@@ -361,30 +445,58 @@ class MainActivity : AppCompatActivity() {
 
         fun createUserGuest() {
             val id = UUID.randomUUID().toString().substring(0, 10)
-            val name = "Guest-$id"
+            val username = "Guest-$id"
             lifecycle.coroutineScope.launch {
                 val job = async {
                     DB.getInstance(applicationContext).user().insertUser(
                         Data.User(
                             id = id,
-                            username = name,
+                            username = username,
                             password = "secret",
                             isGuest = true
                         )
                     )
+                    listUser = DB.getInstance(applicationContext).user().getAllUser()
                 }
                 job.await()
+                currentUser = listUser.indexOfFirst { it.id == id }
+                UserRef().setCurrentUser("0", currentUser, this@MainActivity, lifecycle)
                 loadCurrentUser()
+                dialog.dismiss()
             }
         }
 
         bind.btnLogin.setOnClickListener() {
-            dialog.dismiss()
+            lifecycleScope.launch {
+                val username = bind.editUser.text.toString()
+                val password = bind.editPassword.text.toString()
+
+                if (username.isEmpty()) {
+                    bind.editUser.error = "silakan lengkapi data"
+                }
+                if (password.isEmpty()) {
+                    bind.editPassword.error = "silakan isi password"
+                }
+
+                val job = async {
+                    listUser = DB.getInstance(applicationContext).user().getAllUser()
+                }
+                job.await()
+
+                val index = listUser.indexOfFirst { it.username == username && it.password == password  }
+                if (index == -1) {
+                    bind.editPassword.error = "Tidak ada ada"
+                } else {
+                    currentUser = index
+                    UserRef().setCurrentUser("0", currentUser, this@MainActivity, lifecycle)
+                    loadCurrentUser()
+                    dialog.dismiss()
+                }
+            }
         }
 
         bind.btnLoginGuest.setOnClickListener() {
             createUserGuest()
-            dialog.dismiss()
         }
 
         dialog.show()

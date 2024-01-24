@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,7 @@ import com.rendrapcx.tts.constant.Const.Companion.currentCategory
 import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.position
+import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
 import com.rendrapcx.tts.constant.Const.InputQuestionDirection
 import com.rendrapcx.tts.constant.Direction
@@ -98,7 +100,7 @@ class BoardActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     currentLevel = UUID.randomUUID().toString().substring(0, 20)
                     listLevel.add(
-                        Data.Level(currentLevel, "2024", "Title", "Admin")
+                        Data.Level(currentLevel, "2024", "Title", "Admin", FilterStatus.DRAFT)
                     )
 
                     binding.apply {
@@ -221,7 +223,6 @@ class BoardActivity : AppCompatActivity() {
                         MotionEvent.ACTION_UP -> {
                             YoYo.with(Techniques.Landing)
                                 .playOn(intKey[i]);
-                            //check = false
                         }
                     }
                     return@OnTouchListener true
@@ -283,7 +284,7 @@ class BoardActivity : AppCompatActivity() {
                     }
                     .playOn(tvSpanQuestion)
             }
-
+            /*ARROR PREV QUESTION*/
             btnPrevQuestion.setOnClickListener() {
                 if (listPartial.isEmpty()) return@setOnClickListener
                 Sound().soundNextQuestion(this@BoardActivity)
@@ -300,6 +301,7 @@ class BoardActivity : AppCompatActivity() {
             tvSpanQuestion.setOnClickListener() {
                 Sound().soundOnClickBox(this@BoardActivity)
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(tvSpanQuestion)
+                Toast.makeText(this@BoardActivity, "$currentRange", Toast.LENGTH_SHORT).show()
                 pickByArrow = false
                 onClickBox()
             }
@@ -307,6 +309,7 @@ class BoardActivity : AppCompatActivity() {
 
         /*GAME HELPER ACTIONS*/
         binding.includeGameHelperBottom.apply {
+            /*NINJA*/
             btnShowPicture.setOnClickListener() {
                 Sound().soundCheckBoxPass(this@BoardActivity)
                 checkWinCondition(color = true)
@@ -314,61 +317,37 @@ class BoardActivity : AppCompatActivity() {
                 YoYo.with(Techniques.RotateIn).playOn(btnShowPicture)
             }
 
-            /*GOTO EMPTY FILE QUESTION*/
+            /*CURSOR FIRST OR LAST*/
             btnSuffleKey.setOnClickListener() {
-                val filled = arrayListOf<Int>()
-                for (i in tag.indices) {
-                    if (box[tag[i]].text.isNotEmpty()) filled.add(i)
-                }
-                if (tag.size == filled.size) {
-                    YoYo.with(Techniques.Shake).duration(1000).playOn(btnSuffleKey)
-                    Sound().soundCheckBoxPass(this@BoardActivity)
-                    return@setOnClickListener
-                }
-
-                if (listQuestion.isEmpty()) return@setOnClickListener
-
-                val index = if (currentIndex < 0) {
-                    listQuestion.indexOfFirst { it.levelId == currentLevel && it.id == currentQuestId }
-                } else currentIndex
-
-                val count = listQuestion.count()
-                val req = if (index < count - 1) index + 1 else 0
-
-
-                val reqId = listQuestion[req].id
-                var range = listQuestion[req].slot
-                var dir = listQuestion[req].direction
-
-                val arr = arrayListOf<Int>()
-                for (i in 0 until range.size) {
-                    arr.add(i)
-                    if (box[range[i]].text.isEmpty()) {
-                        position = range[i]
-                        break
+                lifecycle.coroutineScope.launch {
+                    binding.includeQuestionSpan.btnNextQuestion.isEnabled = false
+                    binding.includeQuestionSpan.btnPrevQuestion.isEnabled = false
+                    if (position == currentRange[0]) {
+                        val arr = currentRange
+                        for (i in currentRange.indices) {
+                            position = currentRange[i]
+                            pickByArrow = false
+                            setOnSelectedColor()
+                            setColorizeRange(position, arr)
+                            YoYo.with(Techniques.RubberBand).duration(300)
+                                .playOn(box[currentRange[i]])
+                            delay(150)
+                        }
+                    } else {
+                        var arr = currentRange
+                        val arrDesc = currentRange.sortedDescending()
+                        for (i in arrDesc.indices) {
+                            position = arrDesc[i]
+                            pickByArrow = false
+                            setOnSelectedColor()
+                            setColorizeRange(position, arr)
+                            YoYo.with(Techniques.RubberBand).duration(300).playOn(box[arrDesc[i]])
+                            delay(150)
+                        }
                     }
+                    binding.includeQuestionSpan.btnNextQuestion.isEnabled = true
+                    binding.includeQuestionSpan.btnPrevQuestion.isEnabled = true
                 }
-                if (arr.size == range.size) {
-                    position = range[range.size - 1]
-                    for (i in range.indices) {
-                        YoYo.with(Techniques.Wave).repeat(1).duration(1000).playOn(box[range[i]])
-                    }
-                }
-
-                currentQuestId = reqId
-                currentIndex = req
-                currentRange = range
-
-                inputAnswerDirection =
-                    if (dir == Direction.HORIZONTAL.name) InputAnswerDirection.ROW
-                    else InputAnswerDirection.COLUMN
-
-                pickByArrow = false
-                setOnSelectedColor()
-                setColorizeRange(position, range)
-
-                showAnswerKeypad()
-                binding.includeQuestionSpan.tvSpanQuestion.text = listQuestion[req].asking
                 YoYo.with(Techniques.RotateIn).playOn(btnSuffleKey)
                 Sound().soundShuffle(this@BoardActivity)
             }
@@ -376,7 +355,10 @@ class BoardActivity : AppCompatActivity() {
 
         /* EDITOR BINDING ACTION                                                                 */
         binding.includeEditor.apply {
+
             if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER) return
+
+            /*SAVE QUESTION*/
             btnSave.setOnClickListener() {
                 if (listQuestion.isEmpty()) {
                     Dialog().showDialog(this@BoardActivity, "Data masih kosong")
@@ -385,6 +367,7 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
 
+            /* CLEAR BOXES RESET QUESTION*/
             btnClear.setOnClickListener() {
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this@BoardActivity)
                 builder
@@ -393,7 +376,11 @@ class BoardActivity : AppCompatActivity() {
                     .setPositiveButton("YA") { dialog, which ->
                         listPartial.clear()
                         position = 0
-                        setBoxTagText()
+                        currentRange.clear()
+                        currentIndex = -1
+                        currentQuestId = ""
+                        tag.clear()
+                        resetBoxStyle()
                         fillTextDescription()
                         setInputAnswerDirection()
                         onClickBox()
@@ -437,7 +424,7 @@ class BoardActivity : AppCompatActivity() {
     private fun moveToRequestedQuestion() {
         val arr = arrayListOf<Int>()
 
-        if (boardSet == BoardSet.PLAY) {
+        if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER) {
             for (i in 0 until currentRange.size) {
                 arr.add(i)
                 if (box[currentRange[i]].text.isEmpty()) {
@@ -453,6 +440,7 @@ class BoardActivity : AppCompatActivity() {
         pickByArrow = false
         setOnSelectedColor()
         setColorizeRange(position, currentRange)
+
         showAnswerKeypad()
         binding.includeQuestionSpan.tvSpanQuestion.text = getQuestion()
     }
@@ -533,7 +521,8 @@ class BoardActivity : AppCompatActivity() {
                     id = levelId,
                     category = binding.includeEditor.textCategory.text.toString(),
                     title = binding.includeEditor.textTitle.text.toString(),
-                    userId = binding.includeEditor.textCreator.text.toString()
+                    userId = binding.includeEditor.textCreator.text.toString(),
+                    status = FilterStatus.DRAFT
                 )
             )
             delay(1000L)
@@ -648,7 +637,7 @@ class BoardActivity : AppCompatActivity() {
         onType = false
     }
 
-    /* TODO: CHECK WIN*/
+    /* CHECK WIN*/
     @RequiresApi(Build.VERSION_CODES.R)
     private fun checkWinCondition(color: Boolean = true) {
         if (boardSet == BoardSet.EDITOR_EDIT || boardSet == BoardSet.EDITOR_NEW) return
@@ -1057,9 +1046,7 @@ class BoardActivity : AppCompatActivity() {
                         .repeat(1)
                         .playOn(box[x])
                 } else {
-                    YoYo.with(Techniques.Wave)
-                        .onEnd { YoYo.with(Techniques.RubberBand).playOn(box[x]) }
-                        .playOn(box[x])
+                    YoYo.with(Techniques.RubberBand).repeat(1).playOn(box[x])
                 }
             }
         }

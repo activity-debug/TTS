@@ -3,8 +3,10 @@ package com.rendrapcx.tts.helper
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
+import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.launch
 
@@ -25,13 +27,39 @@ class UserRef {
             DB.getInstance(context).userPreferences().insertUserPref(
                 Data.UserPreferences(
                     id = "0",
+                    currentUser = 0,
                     isLogin = false,
-                    showFinished = false,
+                    activeFilterTab = FilterStatus.ALL,
                     sortOrderByAuthor = false,
                     integratedKeyboard = false,
                     isMusic = true,
                     isSound = true,
                 )
+            )
+        }
+    }
+
+
+    fun getCurrentUser():Int {
+        return userPreferences[0].currentUser
+    }
+
+    fun setCurrentUser(id: String = "0", currentUser: Int, context: Context, lifecycle: Lifecycle) {
+        lifecycle.coroutineScope.launch {
+            userPreferences[0].currentUser = currentUser
+            DB.getInstance(context.applicationContext).userPreferences().updateCurrentUser("0", currentUser)
+        }
+    }
+
+    fun getActiveTabFilter(): FilterStatus {
+        return userPreferences[0].activeFilterTab
+    }
+
+    fun setActiveTabFilter(id: String = "0", activeTab: FilterStatus, context: Context, lifecycle: Lifecycle) {
+        lifecycle.coroutineScope.launch {
+            userPreferences[0].activeFilterTab = activeTab
+            DB.getInstance(context.applicationContext).userPreferences().updateActiveFilterTab(
+                id, activeTab
             )
         }
     }

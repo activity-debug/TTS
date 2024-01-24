@@ -1,10 +1,10 @@
 package com.rendrapcx.tts.model.dao
 
-import androidx.room.ColumnInfo
-import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.model.Data
 
 
@@ -15,10 +15,16 @@ interface IUserPreferences{
     @Query("SELECT * FROM user_preferences")
     suspend fun getAllUserPreferences(): MutableList<Data.UserPreferences>
 
+
     @Query("UPDATE user_preferences " +
-            "   SET show_finished = :showFinished " +
+            "   SET current_user = :currentUser " +
             "   WHERE `id` = :id;")
-    suspend fun updateShowFinished(id: String, showFinished: Boolean)
+    suspend fun updateCurrentUser(id: String, currentUser: Int)
+
+    @Query("UPDATE user_preferences " +
+            "   SET active_filter_tab = :activeTab " +
+            "   WHERE `id` = :id;")
+    suspend fun updateActiveFilterTab(id: String, activeTab: FilterStatus)
 
     @Query("UPDATE user_preferences " +
             "   SET sort_order_by_author = :sortOrderByAuthor " +

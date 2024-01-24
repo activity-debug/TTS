@@ -38,7 +38,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/terka_box" />
+                    app:srcCompat="@drawable/terka_bg_img" />
 
                 <TextView
                     android:id="@+id/textUsername"

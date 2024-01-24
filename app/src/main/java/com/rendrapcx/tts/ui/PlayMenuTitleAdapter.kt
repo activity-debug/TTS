@@ -1,9 +1,13 @@
 package com.rendrapcx.tts.ui
 
+import android.annotation.SuppressLint
+import android.icu.text.DecimalFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.databinding.DialogMenuItemTitleBinding
+import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.Data
 
 class PlayMenuTitleAdapter : RecyclerView.Adapter<PlayMenuTitleAdapter.PlayViewHolder>() {
@@ -36,15 +40,16 @@ class PlayMenuTitleAdapter : RecyclerView.Adapter<PlayMenuTitleAdapter.PlayViewH
         return listLevel.size
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: PlayViewHolder, position: Int) {
         val level = listLevel[position]
 
-        holder.binding.tvTitleLevel.text = level.title
+        val pos = Helper().format(position+1)
+        holder.binding.tvTitleLevel.text = pos + " " + Const.strRed
 
         holder.binding.root.setOnClickListener {
             onClickView?.invoke(level)
         }
-
 
     }
 }

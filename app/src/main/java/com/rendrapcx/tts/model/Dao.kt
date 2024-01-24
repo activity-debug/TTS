@@ -4,7 +4,6 @@ import androidx.room.Dao
 import com.rendrapcx.tts.model.dao.ILevel
 import com.rendrapcx.tts.model.dao.IPartial
 import com.rendrapcx.tts.model.dao.IQuestion
-import com.rendrapcx.tts.model.dao.ITebakKata
 import com.rendrapcx.tts.model.dao.IUser
 import com.rendrapcx.tts.model.dao.IUserAnswerTTS
 import com.rendrapcx.tts.model.dao.IUserPreferences

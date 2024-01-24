@@ -48,7 +48,7 @@
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/lemon_reguler"
-        android:text="TTS"
+        android:text="Main"
         android:textColor="@color/button"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoListQuestion"
@@ -63,7 +63,7 @@
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/lemon_reguler"
-        android:text="TBK"
+        android:text="Acak"
         android:textColor="@color/button"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoTTS"
@@ -77,7 +77,7 @@
         android:layout_height="64dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/lemon_reguler"
-        android:text="WIW"
+        android:text="Scan"
         android:textColor="@color/button"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoTBK"
@@ -101,10 +101,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="32dp"
         app:icon="@drawable/power_off_solid"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnScanQRCode" />
 
     <Button
         android:id="@+id/btnUserSecret"
@@ -112,7 +111,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="80dp"
         app:icon="@drawable/user_secret_solid"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -147,7 +146,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/terka_no_bg" />
+        app:srcCompat="@drawable/terka_banner" />
 
     <Button
         android:id="@+id/btnScanQRCode"
@@ -164,8 +163,19 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="176dp"
         android:layout_marginEnd="177dp"
-        android:layout_marginBottom="2dp"
         android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGoWiw" />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        app:adSize="BANNER"
+        app:adUnitId="@string/banner"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
