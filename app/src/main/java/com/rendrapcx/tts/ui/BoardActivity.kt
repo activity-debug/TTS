@@ -14,7 +14,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -279,6 +278,7 @@ class BoardActivity : AppCompatActivity() {
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(btnNextQuestion)
                 YoYo.with(Techniques.FadeOutRight).duration(1000)
                     .onEnd {
+                        binding.includeQuestionSpan.tvSpanQuestion.text = getQuestion()
                         YoYo.with(Techniques.FadeInLeft).duration(300)
                             .playOn(tvSpanQuestion)
                     }
@@ -293,6 +293,7 @@ class BoardActivity : AppCompatActivity() {
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(btnPrevQuestion)
                 YoYo.with(Techniques.FadeOutLeft).duration(1000)
                     .onEnd {
+                        binding.includeQuestionSpan.tvSpanQuestion.text = getQuestion()
                         YoYo.with(Techniques.FadeInRight).duration(300).playOn(tvSpanQuestion)
                     }
                     .playOn(tvSpanQuestion)
@@ -301,7 +302,6 @@ class BoardActivity : AppCompatActivity() {
             tvSpanQuestion.setOnClickListener() {
                 Sound().soundOnClickBox(this@BoardActivity)
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(tvSpanQuestion)
-                Toast.makeText(this@BoardActivity, "$currentRange", Toast.LENGTH_SHORT).show()
                 pickByArrow = false
                 onClickBox()
             }
@@ -311,45 +311,39 @@ class BoardActivity : AppCompatActivity() {
         binding.includeGameHelperBottom.apply {
             /*NINJA*/
             btnShowPicture.setOnClickListener() {
-                Sound().soundCheckBoxPass(this@BoardActivity)
-                checkWinCondition(color = true)
-                YoYo.with(Techniques.Shake).duration(1000).playOn(btnShowPicture)
-                YoYo.with(Techniques.RotateIn).playOn(btnShowPicture)
+                lifecycleScope.launch {
+                    skipActions(0)
+                    btnShowPicture.isEnabled = true
+                    val job = async {
+                        Sound().soundCheckBoxPass(this@BoardActivity)
+                        checkWinCondition(color = true)
+                        YoYo.with(Techniques.Shake).duration(1000)
+                            .onEnd {
+                                YoYo.with(Techniques.RotateIn)
+                                    .onEnd { skipActions(1) }
+                                    .playOn(btnShowPicture)
+                            }
+                            .playOn(btnShowPicture)
+                    }
+                    job.await()
+                }
             }
 
             /*CURSOR FIRST OR LAST*/
             btnSuffleKey.setOnClickListener() {
-                lifecycle.coroutineScope.launch {
-                    binding.includeQuestionSpan.btnNextQuestion.isEnabled = false
-                    binding.includeQuestionSpan.btnPrevQuestion.isEnabled = false
-                    if (position == currentRange[0]) {
-                        val arr = currentRange
-                        for (i in currentRange.indices) {
-                            position = currentRange[i]
-                            pickByArrow = false
-                            setOnSelectedColor()
-                            setColorizeRange(position, arr)
-                            YoYo.with(Techniques.RubberBand).duration(300)
-                                .playOn(box[currentRange[i]])
-                            delay(150)
-                        }
-                    } else {
-                        var arr = currentRange
-                        val arrDesc = currentRange.sortedDescending()
-                        for (i in arrDesc.indices) {
-                            position = arrDesc[i]
-                            pickByArrow = false
-                            setOnSelectedColor()
-                            setColorizeRange(position, arr)
-                            YoYo.with(Techniques.RubberBand).duration(300).playOn(box[arrDesc[i]])
-                            delay(150)
-                        }
-                    }
-                    binding.includeQuestionSpan.btnNextQuestion.isEnabled = true
-                    binding.includeQuestionSpan.btnPrevQuestion.isEnabled = true
-                }
+                cursorFirstOrLast()
                 YoYo.with(Techniques.RotateIn).playOn(btnSuffleKey)
                 Sound().soundShuffle(this@BoardActivity)
+            }
+
+            btnHideEmpty.setOnClickListener() {
+                Sound().soundOnRandomFill(this@BoardActivity)
+                YoYo.with(Techniques.Wave).duration(1000)
+                    .onEnd {
+                        randomFillAText()
+                        YoYo.with(Techniques.Bounce).playOn(btnHideEmpty)
+                    }
+                    .playOn(btnHideEmpty)
             }
         }
 
@@ -421,6 +415,125 @@ class BoardActivity : AppCompatActivity() {
 
     }
 
+    private fun randomFillAText() {
+        lifecycle.coroutineScope.launch {
+            skipActions(0)
+            val arr = arrayListOf<Int>()
+            val job = async {
+                Sound().soundOnRandom(this@BoardActivity)
+                for (i in tag.indices) {
+                    if (box[tag[i]].text.isEmpty()) {
+                        arr.add(tag[i])
+                        resetBoxStyle()
+                        position = tag[i]
+                        setOnSelectedColor()
+                        delay(100)
+                    }
+                }
+            }
+            job.await()
+
+            Sound().soundOnGetRandomValue(this@BoardActivity)
+
+            val x = arr.random()
+
+            val job1 = async {
+                for (i in arr.indices) {
+                    resetBoxStyle()
+                    position = arr[i]
+                    setOnSelectedColor()
+                    delay(100)
+                    if (arr[i] == x) break
+                }
+            }
+            job1.await()
+
+            YoYo.with(Techniques.Wave).repeat(1).duration(300)
+                .onEnd {
+                    Sound().soundSuccess(this@BoardActivity)
+                    position = x
+                    pickByArrow = false
+                    setInputAnswerDirection()
+                    onClickBox()
+                    box[x].text = box[x].tag.toString()
+                }
+                .playOn(binding.includeGameHelperBottom.btnHideEmpty)
+            skipActions(1)
+        }
+    }
+
+
+    private fun cursorFirstOrLast() {
+        lifecycle.coroutineScope.launch {
+            skipActions(0)
+            val job = async {
+                if (position == currentRange[0]) {
+                    val arr = currentRange
+                    for (i in currentRange.indices) {
+                        position = currentRange[i]
+                        pickByArrow = false
+                        setOnSelectedColor()
+                        setColorizeRange(position, arr)
+                        YoYo.with(Techniques.RubberBand)
+                            .duration(300)
+                            .playOn(box[currentRange[i]])
+                        delay(150)
+                    }
+                } else {
+                    var arr = currentRange
+                    val arrDesc = currentRange.sortedDescending()
+                    for (i in arrDesc.indices) {
+                        position = arrDesc[i]
+                        pickByArrow = false
+                        setOnSelectedColor()
+                        setColorizeRange(position, arr)
+                        YoYo.with(Techniques.RubberBand)
+                            .duration(300)
+                            .playOn(box[arrDesc[i]])
+                        delay(150)
+                    }
+                }
+                delay(1000)
+            }
+            job.await()
+            skipActions(1)
+        }
+    }
+
+    private fun skipActions(int: Int) {
+        when (int) {
+            0 -> {
+                binding.includeQuestionSpan.tvSpanQuestion.isEnabled = false
+                binding.includeQuestionSpan.btnPrevQuestion.isEnabled = false
+                binding.includeQuestionSpan.btnNextQuestion.isEnabled = false
+                binding.includeGameHelperBottom.btnGetHint.isEnabled = false
+                binding.includeGameHelperBottom.btnShowPicture.isEnabled = false
+                binding.includeGameHelperBottom.btnSuffleKey.isEnabled = false
+                binding.includeGameHelperBottom.btnHideEmpty.isEnabled = false
+                binding.includeKeyboard.btnBackSpace.isEnabled = false
+                binding.includeKeyboard.btnShuffle.isEnabled = false
+                for (i in 0 until intKey.size) {
+                    intKey[i].isEnabled = false
+                }
+            }
+
+            1 -> {
+                binding.includeQuestionSpan.tvSpanQuestion.isEnabled = true
+                binding.includeQuestionSpan.btnPrevQuestion.isEnabled = true
+                binding.includeQuestionSpan.btnNextQuestion.isEnabled = true
+                binding.includeGameHelperBottom.btnGetHint.isEnabled = true
+                binding.includeGameHelperBottom.btnShowPicture.isEnabled = true
+                binding.includeGameHelperBottom.btnSuffleKey.isEnabled = true
+                binding.includeGameHelperBottom.btnHideEmpty.isEnabled = true
+                binding.includeKeyboard.btnBackSpace.isEnabled = true
+                binding.includeKeyboard.btnShuffle.isEnabled = true
+                for (i in 0 until intKey.size) {
+                    intKey[i].isEnabled = true
+                }
+            }
+        }
+    }
+
     private fun moveToRequestedQuestion() {
         val arr = arrayListOf<Int>()
 
@@ -442,7 +555,6 @@ class BoardActivity : AppCompatActivity() {
         setColorizeRange(position, currentRange)
 
         showAnswerKeypad()
-        binding.includeQuestionSpan.tvSpanQuestion.text = getQuestion()
     }
 
     private fun getPartialData(): MutableList<Data.Partial> {

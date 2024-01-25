@@ -55,4 +55,28 @@ class Sound {
         val mp = MediaPlayer.create(context.applicationContext, R.raw.door_opening)
         mp.start()
     }
+
+    fun soundOnRandomFill(context: Context) {
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.robot_voice_let)
+        mp.start()
+    }
+
+    fun soundOnRandom(context: Context) {
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.computer_beeping)
+        mp.start()
+    }
+
+    fun soundOnGetRandomValue(context: Context) {
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.cyber_punk)
+        mp.start()
+    }
+
+    fun soundSuccess(context: Context) {
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.success)
+        mp.start()
+    }
 }

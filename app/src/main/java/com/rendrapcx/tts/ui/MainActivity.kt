@@ -217,7 +217,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onAdLoaded() {
-                Toast.makeText(this@MainActivity, "adLoaded", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@MainActivity, "adLoaded", Toast.LENGTH_SHORT).show()
             }
 
             override fun onAdOpened() {
