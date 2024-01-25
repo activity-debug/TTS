@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,11 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
@@ -82,6 +88,8 @@ class BoardActivity : AppCompatActivity() {
     private var finishedId = arrayListOf<String>() //ganti nanti
     private var salah = arrayListOf<Int>()
 
+    private lateinit var mAdView: AdView
+
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,6 +98,8 @@ class BoardActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         Helper().apply { hideSystemUI() }
+
+        loadBannerAds()
 
         initBoardChild()
         initIntKeyChild()
@@ -155,6 +165,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
+                Sound().soundStartGame(this)
                 binding.apply {
                     includeEditor.mainContainer.visibility = View.GONE
                     includeHeader.tvLabelTop.text =
@@ -169,6 +180,10 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY_NEXT -> {
+
+            }
+
+            BoardSet.PLAY_RANDOM -> {
 
             }
         }
@@ -313,7 +328,7 @@ class BoardActivity : AppCompatActivity() {
             btnShowPicture.setOnClickListener() {
                 lifecycleScope.launch {
                     skipActions(0)
-                    btnShowPicture.isEnabled = true
+                    //btnShowPicture.isEnabled = true
                     val job = async {
                         Sound().soundCheckBoxPass(this@BoardActivity)
                         checkWinCondition(color = true)
@@ -335,7 +350,7 @@ class BoardActivity : AppCompatActivity() {
                 YoYo.with(Techniques.RotateIn).playOn(btnSuffleKey)
                 Sound().soundShuffle(this@BoardActivity)
             }
-
+            /*ISI SOAL*/
             btnHideEmpty.setOnClickListener() {
                 Sound().soundOnRandomFill(this@BoardActivity)
                 YoYo.with(Techniques.Wave).duration(1000)
@@ -344,6 +359,12 @@ class BoardActivity : AppCompatActivity() {
                         YoYo.with(Techniques.Bounce).playOn(btnHideEmpty)
                     }
                     .playOn(btnHideEmpty)
+            }
+            /*Kasih tau jawaban 1 row atau kolom*/
+            btnGetHint.setOnClickListener() {
+                Sound().soundDingDong(this@BoardActivity)
+                YoYo.with(Techniques.Wave).repeat(2).playOn(btnGetHint)
+                randomFillAQuestion()
             }
         }
 
@@ -367,7 +388,7 @@ class BoardActivity : AppCompatActivity() {
                 builder
                     .setMessage("Yakin mau balikan dari awal?")
                     .setTitle("Info")
-                    .setPositiveButton("YA") { dialog, which ->
+                    .setPositiveButton("YA") { dialog, _ ->
                         listPartial.clear()
                         position = 0
                         currentRange.clear()
@@ -381,7 +402,7 @@ class BoardActivity : AppCompatActivity() {
                         Dialog().apply { inputDescription(binding) }
                         dialog.dismiss()
                     }
-                    .setNegativeButton("Batal") { dialog, which ->
+                    .setNegativeButton("Batal") { dialog, _ ->
                         dialog.dismiss()
                     }
 
@@ -415,50 +436,141 @@ class BoardActivity : AppCompatActivity() {
 
     }
 
+    private fun loadBannerAds() {
+        MobileAds.initialize(this@BoardActivity) {}
+        mAdView = binding.adView
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
+        mAdView.adListener = object : AdListener() {
+            override fun onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            override fun onAdClosed() {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+            }
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Toast.makeText(this@BoardActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onAdImpression() {
+                // Code to be executed when an impression is recorded
+                // for an ad.
+            }
+
+            override fun onAdLoaded() {
+                //Toast.makeText(this@MainActivity, "adLoaded", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+            }
+        }
+
+    }
+
+    /*Random isi soal Telunjuk*/
+    private fun randomFillAQuestion() {
+        lifecycle.coroutineScope.launch {
+            skipActions(0)
+//            Sound().soundOnGetRandomQuestion(this@BoardActivity)
+
+            //kasih jawaban
+            val job = async {
+                for (i in currentRange.indices) {
+                    val x = currentRange[i]
+                    Sound().soundTyping(this@BoardActivity)
+                    if (inputAnswerDirection == InputAnswerDirection.ROW) {
+                        YoYo.with(Techniques.Hinge)
+                            .onEnd {
+                                box[x].text = box[x].tag.toString()
+                                YoYo.with(Techniques.RollIn)
+                                    .onEnd {
+                                        YoYo.with(Techniques.Bounce).playOn(box[x])
+                                        YoYo.with(Techniques.RubberBand).repeat(1).playOn(box[x])
+                                    }
+                                    .playOn(box[x])
+                            }
+                            .playOn(box[x])
+                    } else {
+                        YoYo.with(Techniques.Hinge)
+                            .onEnd {
+                                box[x].text = box[x].tag.toString()
+                                YoYo.with(Techniques.SlideInUp)
+                                    .onEnd {
+                                        YoYo.with(Techniques.Bounce).playOn(box[x])
+                                        YoYo.with(Techniques.RubberBand).repeat(1).playOn(box[x])
+                                    }
+                                    .playOn(box[x])
+                            }
+                            .playOn(box[x])
+                    }
+                    delay(400)
+                }
+            }
+            job.await()
+            Sound().soundOnFinger(this@BoardActivity)
+            skipActions(1)
+        }
+    }
+
+    /*RANDOM ISI TEXT ROBOT*/
     private fun randomFillAText() {
         lifecycle.coroutineScope.launch {
             skipActions(0)
+            val lastPos = position
             val arr = arrayListOf<Int>()
             val job = async {
                 Sound().soundOnRandom(this@BoardActivity)
                 for (i in tag.indices) {
-                    if (box[tag[i]].text.isEmpty()) {
-                        arr.add(tag[i])
-                        resetBoxStyle()
-                        position = tag[i]
-                        setOnSelectedColor()
-                        delay(100)
-                    }
+                    resetBoxStyle()
+                    position = tag[i]
+                    setOnSelectedColor()
+                    //if (box[tag[i]].text.isEmpty()) arr.add(tag[i])
+                    if (box[tag[i]].text != box[tag[i]].tag) arr.add(tag[i])
+
+                    delay(100)
                 }
             }
             job.await()
 
             Sound().soundOnGetRandomValue(this@BoardActivity)
 
-            val x = arr.random()
-
-            val job1 = async {
-                for (i in arr.indices) {
-                    resetBoxStyle()
-                    position = arr[i]
-                    setOnSelectedColor()
-                    delay(100)
-                    if (arr[i] == x) break
+            var x: Int
+            if (arr.isNotEmpty()) {
+                x = arr.random()
+                val job1 = async {
+                    for (i in arr.indices) {
+                        resetBoxStyle()
+                        position = arr[i]
+                        setOnSelectedColor()
+                        delay(100)
+                        if (arr[i] == x) break
+                    }
                 }
+                job1.await()
+            } else {
+                x = lastPos
             }
-            job1.await()
 
             YoYo.with(Techniques.Wave).repeat(1).duration(300)
                 .onEnd {
                     Sound().soundSuccess(this@BoardActivity)
                     position = x
+                    box[x].text = box[x].tag.toString()
                     pickByArrow = false
                     setInputAnswerDirection()
                     onClickBox()
-                    box[x].text = box[x].tag.toString()
+                    checkWinCondition(color = false)
                 }
                 .playOn(binding.includeGameHelperBottom.btnHideEmpty)
+
             skipActions(1)
+
         }
     }
 
@@ -1141,7 +1253,11 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY_NEXT -> {
-                // TODO: ISI PLAY NEXT
+
+            }
+
+            BoardSet.PLAY_RANDOM -> {
+
             }
         }
     }

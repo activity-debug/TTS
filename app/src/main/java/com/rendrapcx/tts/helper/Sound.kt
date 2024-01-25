@@ -18,7 +18,7 @@ class Sound {
     fun soundClickSetting(context: Context) {
         if (!isSound) return
         val mp = MediaPlayer.create(context.applicationContext, R.raw.door_opening)
-        mp.reset()
+        mp.start()
     }
 
     fun soundNextQuestion(context: Context){
@@ -40,7 +40,7 @@ class Sound {
 
     fun soundOpeningApp(context: Context) {
         if (!isSound) return
-        val mp = MediaPlayer.create(context.applicationContext, R.raw.crystal_logo)
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.crystal_logo) //.crystal_logo
         mp.start()
     }
 
@@ -79,4 +79,24 @@ class Sound {
         val mp = MediaPlayer.create(context.applicationContext, R.raw.success)
         mp.start()
     }
+
+    fun soundOnFinger(context: Context) {
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.game_bonus)
+        mp.reset()
+        mp.start()
+    }
+
+    fun soundDingDong(context: Context) {
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.doorbell)
+        mp.start()
+    }
+
+    fun soundStartGame(context: Context){
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.vozrobotr) //.hybrid_logo //.crystal_logo
+        mp.start()
+    }
+
 }
