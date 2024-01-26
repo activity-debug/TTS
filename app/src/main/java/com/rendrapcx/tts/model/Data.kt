@@ -3,11 +3,12 @@ package com.rendrapcx.tts.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.AnswerStatus
 import com.rendrapcx.tts.constant.Const.FilterStatus
+import kotlinx.serialization.Serializable
 
 class Data {
+    @Serializable
     @Entity(tableName = "level")
     data class Level(
         @PrimaryKey(autoGenerate = false)
@@ -18,6 +19,7 @@ class Data {
         @ColumnInfo(name = "status") var status: FilterStatus,
     )
 
+    @Serializable
     @Entity(tableName = "question")
     data class Question(
         @PrimaryKey(autoGenerate = false)
@@ -83,11 +85,18 @@ class Data {
         @ColumnInfo(name = "is_sound") var isSound : Boolean,
     )
 
+    @Serializable
+    data class QRShare(
+        var level : MutableList<Level>,
+        var question : MutableList<Question>
+    )
+
     companion object {
         var listLevel = mutableListOf<Level>()
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
         var listUser = mutableListOf<User>()
         var userPreferences = mutableListOf<UserPreferences>()
+        var qrShare = mutableListOf<QRShare>()
     }
 }

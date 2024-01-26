@@ -1,12 +1,16 @@
 package com.rendrapcx.tts.helper
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Build
 import android.text.InputFilter
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -21,6 +25,7 @@ import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
+import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogUserProfileBinding
@@ -32,6 +37,60 @@ import kotlinx.coroutines.launch
 
 
 open class Dialog {
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun aboutDialog(
+        context: Context
+    ) {
+        val inflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = DialogAboutBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(context).setView(binding.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
+        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        binding.imageView4.setImageResource(R.drawable.rendrapcx3)
+
+        YoYo.with(Techniques.Bounce).duration(1500)
+            .onEnd {
+                binding.imageView4.setImageResource(R.drawable.rendrapcx2)
+                YoYo.with(Techniques.Wave).duration(1500)
+                    .onEnd {
+                        YoYo.with(Techniques.Flash).duration(1500).playOn(binding.imageView4)
+                        binding.imageView4.setImageResource(R.drawable.rendrapcx)
+                    }
+                    .playOn(binding.imageView4)
+            }
+            .playOn(binding.imageView4)
+
+        YoYo.with(Techniques.FlipInY).duration(3000).playOn(binding.textView19)
+
+
+        YoYo.with(Techniques.RubberBand).repeat(5).playOn(binding.btnHireMe)
+
+
+        binding.btnHireMe.setOnClickListener() {
+            val emailIntent = Intent(
+                Intent.ACTION_SENDTO, Uri.fromParts(
+                    "mailto", "rendra@gmail.com", null
+                )
+            )
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Terka TTS")
+            emailIntent.putExtra(
+                Intent.EXTRA_TEXT,
+                "Hi Am a Terka TTS User, Im Interest to Hire You"
+            )
+            context.startActivity(Intent.createChooser(emailIntent, "Please select App"))
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun settingDialog(
@@ -49,6 +108,8 @@ open class Dialog {
         dialog.window!!.attributes.gravity = Gravity.TOP
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
+
+        binding.btnSettingDisableAds.visibility = View.INVISIBLE
 
         lifecycle.coroutineScope.launch {
             val job1 = async {
@@ -86,7 +147,7 @@ open class Dialog {
                     DB.getInstance(context.applicationContext).user().insertUser(
                         Data.User(
                             id = "Admin2024",
-                            username = "Admin",
+                            username = "Andra",
                             password = "bismillah",
                             isGuest = false
                         ),
@@ -170,6 +231,7 @@ open class Dialog {
         dialog.show()
     }
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     fun Context.inputDescription(boardBinding: ActivityBoardBinding) {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -187,7 +249,6 @@ open class Dialog {
         binding.apply {
             editCategory.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(50))
             editTitle.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(50))
-            editCreator.setText(listUser[currentUser].username)
         }
 
         Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {

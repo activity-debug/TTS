@@ -42,15 +42,21 @@ import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.model.Data.Companion.listQuestion
+import com.rendrapcx.tts.model.Data.Companion.qrShare
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.util.Base64
 
 class QuestionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuestionBinding
     private var questionAdapter = QuestionAdapter()
+    private var levelShareIndexId = -1
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
@@ -182,8 +188,11 @@ class QuestionActivity : AppCompatActivity() {
         val barcodeEncoder = BarcodeEncoder()
         val bitmap: Bitmap =
             barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
-
-        val filename = "${System.currentTimeMillis()}.png"
+        val x = levelShareIndexId
+        val lvl = listLevel[x].category.trim().uppercase()
+        //val tit = listLevel[x].title.trim().uppercase()
+        val index = Helper().format(x)
+        val filename = "${lvl}-${index}-${System.currentTimeMillis()}.png"
         var outputStream: OutputStream? = null
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -275,11 +284,8 @@ class QuestionActivity : AppCompatActivity() {
 
                     listLevel =
                         DB.getInstance(applicationContext).level().getLevel(currentLevel)
-                    Data.listQuestion =
+                    listQuestion =
                         DB.getInstance(applicationContext).question().getQuestion(currentLevel)
-                    //Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                        //currentLevel
-                    //)
 
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
@@ -291,23 +297,26 @@ class QuestionActivity : AppCompatActivity() {
                 lifecycleScope.launch {
 
                     val levelId = it.id
-                    lifecycleScope.launch {
+                    val job1 = async {
                         DB.getInstance(applicationContext).level().deleteLevelById(levelId)
                     }
-                    lifecycleScope.launch {
+                    job1.await()
+                    val job2 = async {
                         DB.getInstance(applicationContext).question()
                             .deleteQuestionByLevelId(levelId)
                     }
-                    lifecycleScope.launch {
-                        DB.getInstance(applicationContext).partial().deletePartialByLevelId(levelId)
-                    }
-                    lifecycleScope.launch {
+                    job2.await()
+
+                    val job3 = async {
                         listLevel.clear()
                         listLevel = DB.getInstance(applicationContext).level().getAllLevel()
-                        questionAdapter.setListItem(listLevel)
-                        questionAdapter.notifyDataSetChanged()
-                        binding.etSearch.hint = questionAdapter.itemCount.toString()
                     }
+                    job3.await()
+
+                    questionAdapter.setListItem(listLevel)
+                    questionAdapter.notifyDataSetChanged()
+                    binding.etSearch.hint = questionAdapter.itemCount.toString()
+
                     Snackbar.make(binding.questionLayout, "Deleted", Snackbar.LENGTH_SHORT)
                         .setAction("Undo", View.OnClickListener {
                             Toast.makeText(
@@ -327,11 +336,8 @@ class QuestionActivity : AppCompatActivity() {
 
                     listLevel =
                         DB.getInstance(applicationContext).level().getLevel(currentLevel)
-                    Data.listQuestion =
+                    listQuestion =
                         DB.getInstance(applicationContext).question().getQuestion(currentLevel)
-                    Data.listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                        currentLevel
-                    )
 
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
@@ -349,6 +355,33 @@ class QuestionActivity : AppCompatActivity() {
                     )
                     questionAdapter.notifyDataSetChanged()
                 }
+            }
+
+            questionAdapter.setOnClickShare { lvl ->
+                lifecycleScope.launch {
+                    val job = async {
+                        qrShare.clear()
+                        val level = listLevel.filter { it.id == lvl.id }.toMutableList()
+                        val question =
+                            DB.getInstance(applicationContext).question().getQuestion(lvl.id)
+                        qrShare.add(
+                            Data.QRShare(level, question)
+                        )
+                        levelShareIndexId = listLevel.indexOfFirst { it.id == lvl.id }
+                    }
+                    job.await()
+                    //Dialog().showDialog(this@QuestionActivity, "${qrShare}")
+                    var encodeString = ""
+                    val job2 = async {
+                        val json = Json.encodeToString(qrShare)
+
+                        encodeString = Base64.getEncoder().encodeToString(json.toByteArray())
+                    }
+                    job2.await()
+
+                    shareQRDialog(this@QuestionActivity, encodeString)
+                }
+
             }
 
         }

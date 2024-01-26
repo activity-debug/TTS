@@ -1,26 +1,21 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -38,18 +33,15 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.google.zxing.BinaryBitmap
-import com.google.zxing.LuminanceSource
-import com.google.zxing.MultiFormatReader
-import com.google.zxing.RGBLuminanceSource
-import com.google.zxing.Reader
-import com.google.zxing.common.HybridBinarizer
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.Companion.boardSet
+import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.constant.Const.Companion.currentUserId
 import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
 import com.rendrapcx.tts.databinding.ActivityMainBinding
+import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogExitAppBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
@@ -64,17 +56,11 @@ import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
-import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
-import com.rendrapcx.tts.ui.trial.TestActivity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
 import java.util.UUID
 import kotlin.system.exitProcess
 
@@ -82,7 +68,6 @@ import kotlin.system.exitProcess
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private var resultQRDecoded = ""
     private val viewModelNet: NetworkStatusViewModel by lazy {
         ViewModelProvider(
             this,
@@ -115,10 +100,11 @@ class MainActivity : AppCompatActivity() {
         binding.btnScanQRCode.visibility = View.GONE
         binding.btnExitApp.visibility = View.GONE
         binding.btnShop.visibility = View.GONE
-        binding.btnTrophy.visibility = View.GONE
+        //binding.btnTrophy.visibility = View.GONE
         binding.btnUserSecret.visibility = View.GONE
         binding.btnDatabase.visibility = View.GONE
         binding.textView7.visibility = View.GONE
+        binding.btnLogin.visibility = View.INVISIBLE
 
 
         viewModelNet.state.observe(this) { state ->
@@ -141,7 +127,8 @@ class MainActivity : AppCompatActivity() {
             }
             job1.await()
 
-            loadCurrentUser()
+            /*NANTI AKTIFKAN LAGI*/
+            //loadCurrentUser()
 
             getDataLevel() //init for playMenuTTS
 
@@ -149,6 +136,11 @@ class MainActivity : AppCompatActivity() {
 
         }
         binding.apply {
+
+            btnTrophy.setOnClickListener(){
+                Dialog().aboutDialog(this@MainActivity)
+            }
+
             btnGoListQuestion.setOnClickListener() {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
                 startActivity(i)
@@ -170,16 +162,22 @@ class MainActivity : AppCompatActivity() {
                 playMenuTTSDialog()
             }
 
+            /*Play Random*/
             btnGoTBK.setOnClickListener() {
-                Toast.makeText(this@MainActivity, "Belum tersedia", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                if  (listLevel.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "Belum ada data, silakan scan soal terlebih dahulu", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                boardSet = Const.BoardSet.PLAY_RANDOM
+                val intent = Intent(this@MainActivity, BoardActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
-            btnGoWiw.setOnClickListener() {
-                Toast.makeText(this@MainActivity, "Belum tersedia", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
 
-                val intent = Intent(this@MainActivity, TestActivity::class.java)
+            /*BARCODE*/
+            btnGoWiw.setOnClickListener() {
+                val intent = Intent(this@MainActivity, BarcodeActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
@@ -191,6 +189,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /* ADMOB BANNER*/
     private fun loadBannerAds() {
         MobileAds.initialize(this@MainActivity) {}
         mAdView = binding.adView
@@ -208,7 +207,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                Toast.makeText(this@MainActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@MainActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
             }
 
             override fun onAdImpression() {
@@ -293,17 +292,19 @@ class MainActivity : AppCompatActivity() {
 
                 adapter.setOnClickView {
                     lifecycle.coroutineScope.launch {
-                        Const.boardSet = Const.BoardSet.PLAY_USER
-                        Const.currentLevel = it.id
+                        boardSet = Const.BoardSet.PLAY_USER
+                        currentLevel = it.id
 
                         listLevel =
-                            DB.getInstance(applicationContext).level().getLevel(Const.currentLevel)
+                            DB.getInstance(applicationContext).level().getLevel(currentLevel)
                         listQuestion =
                             DB.getInstance(applicationContext).question()
-                                .getQuestion(Const.currentLevel)
-                        listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                            Const.currentLevel
-                        )
+                                .getQuestion(currentLevel)
+
+                        /*ini ganti nanti load dari user setting*/
+                        //listPartial = DB.getInstance(applicationContext).partial().getPartial(
+                        //    Const.currentLevel
+                        //)
 
                         val i = Intent(this@MainActivity, BoardActivity::class.java)
                         startActivity(i)
@@ -507,66 +508,6 @@ class MainActivity : AppCompatActivity() {
             listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                 .ifEmpty { return@launch }
         }
-    }
-
-    private fun getQRContent(file: File): String {
-        val inputStream: InputStream = BufferedInputStream(FileInputStream(file))
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        return decodeQRImage(bitmap)!!
-    }
-
-    private fun decodeQRImage(bMap: Bitmap): String? {
-        var contents: String? = null
-        val intArray = IntArray(bMap.width * bMap.height)
-        bMap.getPixels(intArray, 0, bMap.width, 0, 0, bMap.width, bMap.height)
-        val source: LuminanceSource = RGBLuminanceSource(bMap.width, bMap.height, intArray)
-        val bitmap = BinaryBitmap(HybridBinarizer(source))
-        val reader: Reader = MultiFormatReader()
-        try {
-            val result = reader.decode(bitmap)
-            contents = result.text
-
-        } catch (e: Exception) {
-            Log.e("QrTest", "Error decoding qr code", e)
-            Toast.makeText(
-                this,
-                "Error decoding QR Code, Mohon pilih gambar QR Code yang benar!",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-        return contents
-    }
-
-    private val resultLauncherGallery =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data: Intent? = result.data
-                val imageUri = data!!.data!!
-                //binding.imgCoder.setImageURI(imageUri)
-
-                val imagePath = convertMediaUriToPath(imageUri)
-                val imgFile = File(imagePath)
-                //binding.textResultContent.text = getQRContent(imgFile)
-                resultQRDecoded = getQRContent(imgFile)
-            } else {
-                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show()
-            }
-        }
-
-    private fun openAlbums() {
-        val galleryIntent =
-            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
-        resultLauncherGallery.launch(galleryIntent)
-    }
-
-    private fun convertMediaUriToPath(uri: Uri): String {
-        val proj = arrayOf<String>(MediaStore.Images.Media.DATA)
-        val cursor = contentResolver.query(uri, proj, null, null, null)
-        val columnIndex = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-        cursor.moveToFirst()
-        val path = cursor.getString(columnIndex)
-        cursor.close()
-        return path
     }
 
 }

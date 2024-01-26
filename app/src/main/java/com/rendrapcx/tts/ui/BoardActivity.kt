@@ -107,12 +107,16 @@ class BoardActivity : AppCompatActivity() {
         when (boardSet) {
             BoardSet.EDITOR_NEW -> {
                 lifecycleScope.launch {
-                    currentLevel = UUID.randomUUID().toString().substring(0, 20)
-                    listLevel.add(
-                        Data.Level(currentLevel, "2024", "Title", "Admin", FilterStatus.DRAFT)
-                    )
+                    val job = async {
+                        currentLevel = UUID.randomUUID().toString().substring(0, 20)
+                        listLevel.add(
+                            Data.Level(currentLevel, "2024", "Title", "Andra", FilterStatus.DRAFT)
+                        )
+                    }
+                    job.await()
 
                     binding.apply {
+                        includeEditor.btnClear.visibility = View.INVISIBLE
                         includeEditor.mainContainer.visibility = View.VISIBLE
                         includeKeyboard.integratedKeyboard.visibility = View.GONE
                         includeQuestionSpan.tvSpanQuestion.text = ""
@@ -123,6 +127,8 @@ class BoardActivity : AppCompatActivity() {
 
                     listPartial.clear()
 
+                    Dialog().apply { inputDescription(binding) }
+
                     position = 0
                     setBoxTagText()
                     pickByArrow = false
@@ -130,14 +136,19 @@ class BoardActivity : AppCompatActivity() {
                     onClickBox()
                     fillTextDescription()
                     setOnSelectedColor()
-                    Dialog().apply { inputDescription(binding) }
                 }
             }
 
             BoardSet.EDITOR_EDIT -> {
                 lifecycleScope.launch {
 
+                    val job1 = async { listPartial = getPartialData() }
+                    job1.await()
+
+                    Dialog().apply { inputDescription(binding) }
+
                     binding.apply {
+                        includeEditor.btnClear.visibility = View.INVISIBLE
                         includeEditor.mainContainer.visibility = View.VISIBLE
                         includeKeyboard.integratedKeyboard.visibility = View.GONE
                         includeQuestionSpan.tvSpanQuestion.text = ""
@@ -146,11 +157,7 @@ class BoardActivity : AppCompatActivity() {
                             listLevel.first() { it.id == currentLevel }.title
                     }
 
-                    val job1 = async { listPartial = getPartialData() }
-                    job1.await()
-
                     position = listPartial.first { it.levelId == currentLevel }.charAt
-
 
                     setBoxTagText()
                     fillTextDescription()
@@ -158,25 +165,33 @@ class BoardActivity : AppCompatActivity() {
                     pickByArrow = false
                     setInputAnswerDirection()
                     onClickBox()
-                    Dialog().apply { inputDescription(binding) }
                 }
 
 
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
-                Sound().soundStartGame(this)
-                binding.apply {
-                    includeEditor.mainContainer.visibility = View.GONE
-                    includeHeader.tvLabelTop.text =
-                        listLevel.first() { it.id == currentLevel }.title
-                }
+                lifecycleScope.launch {
 
-                setBoxTagText()
-                position = listPartial.first { it.levelId == currentLevel }.charAt
-                pickByArrow = false
-                setInputAnswerDirection()
-                onClickBox()
+                    val job1 = async { listPartial = getPartialData() }
+                    job1.await()
+
+                    Sound().soundStartGame(this@BoardActivity)
+                    binding.apply {
+                        includeEditor.mainContainer.visibility = View.GONE
+                        val index = listLevel.indexOfFirst { it.id == currentLevel }
+                        val category = listLevel[index].category
+                        val msg = "Level:  ${Helper().format(index + 1)} \n" +
+                                "Category: ${category}"
+                        includeHeader.tvLabelTop.text = msg
+                    }
+
+                    setBoxTagText()
+                    position = listPartial.first { it.levelId == currentLevel }.charAt
+                    pickByArrow = false
+                    setInputAnswerDirection()
+                    onClickBox()
+                }
             }
 
             BoardSet.PLAY_NEXT -> {
@@ -184,8 +199,9 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY_RANDOM -> {
-
+                playRandom()
             }
+
         }
 
         for (i in 0 until box.size) {
@@ -247,7 +263,7 @@ class BoardActivity : AppCompatActivity() {
         /* HEADER ACTIONS*/
         binding.includeHeader.apply {
             btnBack.setOnClickListener() {
-                val intent = if (boardSet == BoardSet.PLAY_USER)
+                val intent = if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY_RANDOM)
                     Intent(this@BoardActivity, MainActivity::class.java)
                 else Intent(this@BoardActivity, QuestionActivity::class.java)
                 startActivity(intent)
@@ -270,7 +286,7 @@ class BoardActivity : AppCompatActivity() {
                     onClickBox()
 
                     when (boardSet) {
-                        BoardSet.PLAY, BoardSet.PLAY_USER -> {
+                        BoardSet.PLAY, BoardSet.PLAY_USER, BoardSet.PLAY_RANDOM -> {
                             if (userPreferences[0].integratedKeyboard) {
                                 Keypad().showSoftKeyboard(window, it)
                             }
@@ -363,15 +379,19 @@ class BoardActivity : AppCompatActivity() {
             /*Kasih tau jawaban 1 row atau kolom*/
             btnGetHint.setOnClickListener() {
                 Sound().soundDingDong(this@BoardActivity)
-                YoYo.with(Techniques.Wave).repeat(2).playOn(btnGetHint)
-                randomFillAQuestion()
+                YoYo.with(Techniques.Wave)
+                    .onEnd {
+                        randomFillAQuestion()
+                        YoYo.with(Techniques.RotateIn).playOn(btnGetHint)
+                    }
+                    .playOn(btnGetHint)
             }
         }
 
         /* EDITOR BINDING ACTION                                                                 */
         binding.includeEditor.apply {
 
-            if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER) return
+            if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY_RANDOM) return
 
             /*SAVE QUESTION*/
             btnSave.setOnClickListener() {
@@ -395,6 +415,9 @@ class BoardActivity : AppCompatActivity() {
                         currentIndex = -1
                         currentQuestId = ""
                         tag.clear()
+                        for (i in 0 until box.size) {
+                            box[i].text = ""
+                        }
                         resetBoxStyle()
                         fillTextDescription()
                         setInputAnswerDirection()
@@ -453,7 +476,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                Toast.makeText(this@BoardActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@BoardActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
             }
 
             override fun onAdImpression() {
@@ -477,7 +500,6 @@ class BoardActivity : AppCompatActivity() {
     private fun randomFillAQuestion() {
         lifecycle.coroutineScope.launch {
             skipActions(0)
-//            Sound().soundOnGetRandomQuestion(this@BoardActivity)
 
             //kasih jawaban
             val job = async {
@@ -487,6 +509,8 @@ class BoardActivity : AppCompatActivity() {
                     if (inputAnswerDirection == InputAnswerDirection.ROW) {
                         YoYo.with(Techniques.Hinge)
                             .onEnd {
+                                position = x
+                                setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
                                 YoYo.with(Techniques.RollIn)
                                     .onEnd {
@@ -499,6 +523,8 @@ class BoardActivity : AppCompatActivity() {
                     } else {
                         YoYo.with(Techniques.Hinge)
                             .onEnd {
+                                position = x
+                                setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
                                 YoYo.with(Techniques.SlideInUp)
                                     .onEnd {
@@ -513,7 +539,16 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
             job.await()
-            Sound().soundOnFinger(this@BoardActivity)
+
+            YoYo.with(Techniques.Wave).repeat(1).duration(300)
+                .onEnd {
+                    Sound().soundOnFinger(this@BoardActivity)
+                    pickByArrow = false
+                    setInputAnswerDirection()
+                    onClickBox()
+                    checkWinCondition(color = false)
+                }
+                .playOn(binding.includeGameHelperBottom.btnHideEmpty)
             skipActions(1)
         }
     }
@@ -530,7 +565,6 @@ class BoardActivity : AppCompatActivity() {
                     resetBoxStyle()
                     position = tag[i]
                     setOnSelectedColor()
-                    //if (box[tag[i]].text.isEmpty()) arr.add(tag[i])
                     if (box[tag[i]].text != box[tag[i]].tag) arr.add(tag[i])
 
                     delay(100)
@@ -649,7 +683,7 @@ class BoardActivity : AppCompatActivity() {
     private fun moveToRequestedQuestion() {
         val arr = arrayListOf<Int>()
 
-        if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER) {
+        if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY_RANDOM) {
             for (i in 0 until currentRange.size) {
                 arr.add(i)
                 if (box[currentRange[i]].text.isEmpty()) {
@@ -737,54 +771,42 @@ class BoardActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun saveAndApply() {
-        val levelId = currentLevel
-        lifecycle.coroutineScope.launch {
-            val level = DB.getInstance(applicationContext).level()
-            level.insertLevel(
-                level = Data.Level(
-                    id = levelId,
-                    category = binding.includeEditor.textCategory.text.toString(),
-                    title = binding.includeEditor.textTitle.text.toString(),
-                    userId = binding.includeEditor.textCreator.text.toString(),
-                    status = FilterStatus.DRAFT
-                )
-            )
-            delay(1000L)
-        }
-
-        lifecycle.coroutineScope.launch {
-            Data.listQuestion.filter { it.levelId == levelId }.map { it }.forEach() {
-                DB.getInstance(applicationContext).question().insertQuestion(
-                    Data.Question(
-                        levelId = it.levelId,
-                        id = it.id,
-                        number = it.number,
-                        direction = it.direction,
-                        asking = it.asking,
-                        answer = it.answer,
-                        slot = it.slot
+        lifecycleScope.launch {
+            val levelId = currentLevel
+            val job1 = async {
+                val level = DB.getInstance(applicationContext).level()
+                level.insertLevel(
+                    level = Data.Level(
+                        id = levelId,
+                        category = binding.includeEditor.textCategory.text.toString(),
+                        title = binding.includeEditor.textTitle.text.toString(),
+                        userId = binding.includeEditor.textCreator.text.toString(),
+                        status = FilterStatus.DRAFT
                     )
                 )
             }
-            delay(1000L)
+            job1.await()
+
+            val job2 = async {
+                Data.listQuestion.filter { it.levelId == levelId }.map { it }.forEach() {
+                    DB.getInstance(applicationContext).question().insertQuestion(
+                        Data.Question(
+                            levelId = it.levelId,
+                            id = it.id,
+                            number = it.number,
+                            direction = it.direction,
+                            asking = it.asking,
+                            answer = it.answer,
+                            slot = it.slot
+                        )
+                    )
+                }
+            }
+            job2.await()
+
+            Dialog().showDialog(this@BoardActivity, "Data berhasil disimpan")
         }
 
-        lifecycle.coroutineScope.launch {
-            listPartial.filter { it.levelId == levelId }.map { it }.forEach() {
-                DB.getInstance(applicationContext).partial().insertPartial(
-                    Data.Partial(
-                        id = it.id,
-                        charAt = it.charAt,
-                        charStr = it.charStr,
-                        rowQuestionId = it.rowQuestionId,
-                        colQuestionId = it.colQuestionId,
-                        levelId = levelId,
-                    )
-                )
-            }
-            delay(1000L)
-        }
-        Dialog().showDialog(this@BoardActivity, "Data berhasil disimpan")
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -913,22 +935,77 @@ class BoardActivity : AppCompatActivity() {
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(false)
 
-        bind.btnNext.setOnClickListener() {
-            playNext()
-            dialog.dismiss()
+        dialog.lifecycleScope.launch {
+            bind.btnNext.setOnClickListener() {
+                if (boardSet == BoardSet.PLAY_RANDOM) {
+                    playRandom()
+                    dialog.dismiss()
+                } else {
+                    playNext()
+                    dialog.dismiss()
+                }
+                //dialog.dismiss()
+            }
+
+            bind.btnBack.setOnClickListener() {
+                val i = Intent(context.applicationContext, MainActivity::class.java)
+                startActivity(i)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                dialog.dismiss()
+            }
+
+            //dialog.dismiss()
         }
 
-        bind.btnBack.setOnClickListener() {
-            val i = Intent(context.applicationContext, MainActivity::class.java)
-            startActivity(i)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            dialog.dismiss()
-        }
+
 
         dialog.show()
     }
 
     /* asdsd ad                                                                              */
+
+    private fun playRandom() {
+        lifecycleScope.launch {
+            val jobLevel = async {
+                listLevel = DB.getInstance(applicationContext).level().getAllLevel()
+                val count = listLevel.size
+                val index = (0 until count).random()
+                currentLevel = listLevel[index].id
+            }
+            jobLevel.await()
+            val jobQuest = async {
+                listQuestion =
+                    DB.getInstance(applicationContext).question().getQuestion(currentLevel)
+            }
+            jobQuest.await()
+
+            val jobPart = async { listPartial = getPartialData() }
+            jobPart.await()
+
+            Sound().soundStartGame(this@BoardActivity)
+            binding.apply {
+                includeEditor.mainContainer.visibility = View.GONE
+                val index = listLevel.indexOfFirst { it.id == currentLevel }
+                val category = listLevel[index].category
+                val msg = "Level:  ${Helper().format(index + 1)} \n" +
+                        "Category: ${category}"
+                includeHeader.tvLabelTop.text = msg
+            }
+
+            for (i in 0 until box.size) {
+                box[i].text = ""
+                box[i].tag = ""
+                box[i].visibility = View.VISIBLE
+            }
+
+            setBoxTagText()
+            position = listPartial.first { it.levelId == currentLevel }.charAt
+            pickByArrow = false
+            setInputAnswerDirection()
+            onClickBox()
+        }
+    }
+
     private fun playNext() {
         lifecycleScope.launch {
             //Get Data Level by Category on Play
@@ -960,22 +1037,30 @@ class BoardActivity : AppCompatActivity() {
             boardSet = BoardSet.PLAY_USER
 
             listLevel.clear()
-            listLevel =
-                DB.getInstance(applicationContext).level().getLevel(currentLevel)
-
             listQuestion.clear()
-            listQuestion =
-                DB.getInstance(applicationContext).question()
-                    .getQuestion(currentLevel)
             listPartial.clear()
-            listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                currentLevel
-            )
 
+            val jobGetDB = async {
+                listLevel =
+                    DB.getInstance(applicationContext).level().getLevel(currentLevel)
+                listQuestion =
+                    DB.getInstance(applicationContext).question()
+                        .getQuestion(currentLevel)
+            }
+            jobGetDB.await()
+
+
+            val jobExtract = async { listPartial = getPartialData() }
+            jobExtract.await()
+
+            Sound().soundStartGame(this@BoardActivity)
             binding.apply {
                 includeEditor.mainContainer.visibility = View.GONE
-                includeHeader.tvLabelTop.text =
-                    listLevel.first() { it.id == currentLevel }.title
+                val index = listLevel.indexOfFirst { it.id == currentLevel }
+                val category = listLevel[index].category
+                val msg = "Level:  ${Helper().format(index + 1)} \n" +
+                        "Category: ${category}"
+                includeHeader.tvLabelTop.text = msg
             }
 
             position = listPartial.first { it.levelId == currentLevel }.charAt
@@ -986,13 +1071,13 @@ class BoardActivity : AppCompatActivity() {
                 box[i].visibility = View.VISIBLE
             }
 
-            binding.apply {
-
-            }
-
             setBoxTagText()
+            position = listPartial.first { it.levelId == currentLevel }.charAt
+            pickByArrow = false
             setInputAnswerDirection()
             onClickBox()
+            //showAnswerKeypad()
+            //binding.includeQuestionSpan.tvSpanQuestion.text = getQuestion()
         }
     }
 
@@ -1238,7 +1323,7 @@ class BoardActivity : AppCompatActivity() {
                 resetBoxStyle()
             }
 
-            BoardSet.PLAY, BoardSet.PLAY_USER -> {
+            BoardSet.PLAY, BoardSet.PLAY_USER, BoardSet.PLAY_RANDOM -> {
                 tag.clear()
                 listPartial.filter { it.levelId == currentLevel }.forEach() {
                     for (i in 0 until box.size) {
@@ -1252,13 +1337,7 @@ class BoardActivity : AppCompatActivity() {
                 resetBoxStyle()
             }
 
-            BoardSet.PLAY_NEXT -> {
-
-            }
-
-            BoardSet.PLAY_RANDOM -> {
-
-            }
+            else -> {}
         }
     }
 
@@ -1328,7 +1407,7 @@ class BoardActivity : AppCompatActivity() {
     private fun resetBoxStyle() {
         for (i in 0 until box.size) {
             if (box[i].tag == "") {
-                if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY) {
+                if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_RANDOM) {
                     box[i].visibility = View.INVISIBLE
                 }
             }
@@ -1401,22 +1480,94 @@ class BoardActivity : AppCompatActivity() {
         bind.tvIdInput.visibility = View.INVISIBLE
         bind.tvSlotPreview.visibility = View.INVISIBLE
 
+        val x = listPartial.indexOfFirst { it.charAt == position }
+        val row = if (x != -1) listPartial[x].rowQuestionId else ""
+        val col = if (x != -1) listPartial[x].colQuestionId else ""
+        val firstChar = box[position].text.toString()
+
+        if (row.isEmpty() && col.isNotEmpty()) {
+            bind.swDirection.isChecked = false
+            bind.swDirection.text = InputQuestionDirection.HORIZONTAL.name
+            bind.etAnswerInput.setText("")
+            bind.etAnswerInput.hint = "available ${rowCount} boxes"
+            bind.etAnswerInput.filters = rowFilter
+            bind.tvSlotPreview.text = "${rowAvailable}"
+        }
+        if (row.isNotEmpty() && col.isEmpty()) {
+            bind.swDirection.isChecked = true
+            bind.swDirection.text = InputQuestionDirection.VERTICAL.name
+            bind.etAnswerInput.setText("")
+            bind.etAnswerInput.hint = "available ${colCount} boxes"
+            bind.etAnswerInput.filters = colFilter
+            bind.tvSlotPreview.text = "${colAvailable}"
+        }
+
         //FIXME: ACTIONS LISTENER
         bind.swDirection.setOnClickListener() {
-
             if (bind.swDirection.isChecked) {
-                bind.swDirection.text = InputQuestionDirection.VERTICAL.name
-                bind.etAnswerInput.setText("")
-                bind.etAnswerInput.hint = "available ${colCount} boxes"
-                bind.etAnswerInput.filters = colFilter
-                bind.tvSlotPreview.text = "${colAvailable}"
+                if (col.isEmpty()) {
+                    bind.swDirection.text = InputQuestionDirection.VERTICAL.name
+                    bind.etAnswerInput.setText("")
+                    bind.etAnswerInput.hint = "available ${colCount} boxes"
+                    bind.etAnswerInput.filters = colFilter
+                    bind.tvSlotPreview.text = "${colAvailable}"
+                } else {
+                    bind.swDirection.isChecked = false
+                    Toast.makeText(this, "Vertical not allowed", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                bind.swDirection.text = InputQuestionDirection.HORIZONTAL.name
-                bind.etAnswerInput.setText("")
-                bind.etAnswerInput.hint = "available ${rowCount} boxes"
-                bind.etAnswerInput.filters = rowFilter
-                bind.tvSlotPreview.text = "${rowAvailable}"
+                if (row.isEmpty()) {
+                    bind.swDirection.text = InputQuestionDirection.HORIZONTAL.name
+                    bind.etAnswerInput.setText("")
+                    bind.etAnswerInput.hint = "available ${rowCount} boxes"
+                    bind.etAnswerInput.filters = rowFilter
+                    bind.tvSlotPreview.text = "${rowAvailable}"
+                } else {
+                    bind.swDirection.isChecked = true
+                    Toast.makeText(this, "Horizontal not allowed", Toast.LENGTH_SHORT).show()
+                }
             }
+        }
+
+        /* Harus ada Checking kalo input berada dalam range, dan nilainya berbeda*/
+        //Toast.makeText(this, "${currentRange}", Toast.LENGTH_SHORT).show()
+
+
+
+        val mapBeda = mutableMapOf<Int, String>()
+        val mapBefore = mutableMapOf<Int, String>()
+        fun cekInputAnswer(): Boolean {
+            val range = if (bind.swDirection.isChecked) colAvailable else rowAvailable
+            val answer = bind.etAnswerInput.text
+            val mapAnswer = mutableMapOf<Int, String>()
+            val isBox = arrayListOf<Int>()
+
+            for (i in 0 until box.size) {
+                if (box[i].text.toString().isNotEmpty()) isBox.add(i)
+            }
+
+            //val ada = mutableMapOf<Int, String>()
+            val ada = arrayListOf<Int>()
+            for (i in 0 until isBox.size) {
+                val key = isBox[i]
+                if (key in range) {
+                    ada.add(key)
+                }
+            }
+
+            for (i in 0 until answer.length) {
+                if (range[i] in ada) mapAnswer.put(range[i], answer[i].toString())
+            }
+
+            for (i in 0 until ada.size) {
+               if (box[ada[i]].text != mapAnswer.getValue(ada[i])) {
+                   mapBeda.put(ada[i], mapAnswer.getValue(ada[i]))
+                   mapBefore.put(ada[i], box[ada[i]].text.toString())
+               }
+            }
+
+            if (mapBeda.isNotEmpty()) return false
+            else return true
         }
 
         bind.btnUpdateInput.setOnClickListener() {
@@ -1431,6 +1582,19 @@ class BoardActivity : AppCompatActivity() {
             if (!bind.etAnswerInput.text.all { it.isLetter() }) {
                 bind.etAnswerInput.error =
                     "hanya huruf kapital, jangan ada spasi, angka atau simbol"
+                return@setOnClickListener
+            }
+
+//            if (firstChar.isNotEmpty()) {
+//                val str = bind.etAnswerInput.text.toString().get(0).toString()
+//                if (str != firstChar) {
+//                    bind.etAnswerInput.error = "Karakter pertama tidak sesuai dengan yang sudah ada"
+//                    return@setOnClickListener
+//                }
+//            }
+
+            if (!cekInputAnswer()) {
+                bind.etAnswerInput.error = "char baru tidak susuai \n ${mapBefore.toString()} \n ${mapBeda.toString()}"
                 return@setOnClickListener
             }
 

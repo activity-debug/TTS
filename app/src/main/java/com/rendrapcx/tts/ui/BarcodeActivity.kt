@@ -1,8 +1,7 @@
-package com.rendrapcx.tts.ui.trial
+package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -10,18 +9,14 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.provider.MediaStore.Images.Media
 import android.util.Log
-import android.view.MotionEvent
-import android.view.VelocityTracker
-import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.google.zxing.BarcodeFormat
+import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.LuminanceSource
 import com.google.zxing.MultiFormatReader
@@ -29,14 +24,22 @@ import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.Reader
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.integration.android.IntentIntegrator
-import com.journeyapps.barcodescanner.BarcodeEncoder
-import com.rendrapcx.tts.databinding.ActivityTestBinding
+import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.databinding.ActivityBarcodeBinding
+import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.model.DB
+import com.rendrapcx.tts.model.Data
+import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.model.Data.Companion.listQuestion
+import com.rendrapcx.tts.model.Data.Companion.qrShare
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.InputStream
-import java.io.OutputStream
+import java.util.Base64
 
 
 enum class RequestCode {
@@ -45,26 +48,31 @@ enum class RequestCode {
     CAMERA_PERMISSION_CODE,
 }
 
-private const val DEBUG_TAG = "Velocity"
 
-class TestActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityTestBinding
-    private lateinit var tvResult: TextView
+class BarcodeActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityBarcodeBinding
     private var fileUrl = ""
     private var imgUri = ""
-    private var mVelocityTracker: VelocityTracker? = null
 
-
-    private var WRITE_EXTERNAL_STORAGE_PERMISSION_CODE: Int = 1
-    private var READ_EXTERNAL_STORAGE_PERMISSION_CODE: Int = 2
-    private var CAMERA_PERMISSION_CODE: Int = 3
-
-    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.R)
+    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTestBinding.inflate(layoutInflater)
+        binding = ActivityBarcodeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Helper().apply { hideSystemUI() }
+
+        binding.textResultContent.text = ""
+
+        binding.includeHeader.apply {
+            tvLabelTop.text = "Scan Soal"
+            btnBack.setOnClickListener() {
+                val i = Intent(this@BarcodeActivity, MainActivity::class.java)
+                startActivity(i)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+        }
 
         binding.apply {
 
@@ -72,55 +80,95 @@ class TestActivity : AppCompatActivity() {
                 openAlbums()
             }
 
-            btnEncode.setOnClickListener() {
-                val content = editInputContent.text.toString()
-                val barcodeEncoder = BarcodeEncoder()
-                val bitmap: Bitmap =
-                    barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
-                saveMediaToStorage(bitmap)
-                imgCoder.setImageBitmap(bitmap)
-                editInputContent.setText(fileUrl)
-            }
-
             btnDecodeFromCamera.setOnClickListener() {
                 openCamera()
             }
 
-            btnShare1.setOnClickListener() {
-
-            }
-
-            btnShare2.setOnClickListener() {
-
+            btnSaveSoal.setOnClickListener() {
+                saveQRToDB()
+                Toast.makeText(this@BarcodeActivity, "Soal tersimpan", Toast.LENGTH_SHORT).show()
             }
         }
 
     }
 
+    private fun saveQRToDB() {
+        lifecycleScope.launch {
+            val levelId = listLevel[0].id
 
-    val resultLauncherGallery =
+            val category = if (binding.editInputContent.text.isNotEmpty()) {
+                binding.editInputContent.text.toString()
+            } else {
+                listLevel[0].category
+            }
+
+            DB.getInstance(applicationContext).level().insertLevel(
+                Data.Level(
+                    id = levelId,
+                    category = category,
+                    title = listLevel[0].title,
+                    userId = listLevel[0].userId,
+                    status = Const.FilterStatus.POST
+                )
+            )
+            //Add Questioner
+            listQuestion.filter { it.levelId == levelId }.map { it }.forEach() {
+                DB.getInstance(applicationContext).question().insertQuestion(
+                    Data.Question(
+                        levelId = it.levelId,
+                        id = it.id,
+                        number = it.number,
+                        direction = it.direction,
+                        asking = it.asking,
+                        answer = it.answer,
+                        slot = it.slot
+                    )
+                )
+            }
+        }
+    }
+
+
+    /* GET QR RESULT GALLERY */
+    @RequiresApi(Build.VERSION_CODES.R)
+    @SuppressLint("SetTextI18n")
+    private val resultLauncherGallery =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
                 val imageUri = data!!.data!!
-                binding.editInputContent.setText(imageUri.path)
                 binding.imgCoder.setImageURI(imageUri)
 
                 val imagePath = convertMediaUriToPath(imageUri)
                 val imgFile = File(imagePath)
-                binding.textResultContent.text = getQRContent(imgFile)
+                val dt = getQRContent(imgFile)
+                //Toast.makeText(this, "$dt", Toast.LENGTH_SHORT).show()
+                val decodeString = String(Base64.getDecoder().decode(dt))
+
+                qrShare.clear()
+                qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
+
+                listLevel = qrShare[0].level
+                listQuestion = qrShare[0].question
+
+                binding.textResultContent.text = "file: ${imgFile} \n" +
+                        "ID: ${listLevel[0].id} \n" +
+                        "Category: ${listLevel[0].category} \n" +
+                        "Title: ${listLevel[0].title} \n" +
+                        "Creator: ${listLevel[0].userId}"
             } else {
-                Toast.makeText(this@TestActivity, "Result Not Found", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@BarcodeActivity, "Result Not Found", Toast.LENGTH_LONG).show()
             }
         }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun openAlbums() {
         val galleryIntent = Intent(Intent.ACTION_PICK, Media.INTERNAL_CONTENT_URI)
         resultLauncherGallery.launch(galleryIntent)
     }
 
     private fun openCamera() {
-        val qrScan = IntentIntegrator(this@TestActivity)
+        val qrScan = IntentIntegrator(this@BarcodeActivity)
         qrScan.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
         qrScan.setPrompt("Scan a QR Code")
         qrScan.setOrientationLocked(false)
@@ -129,25 +177,7 @@ class TestActivity : AppCompatActivity() {
         qrScan.initiateScan()
     }
 
-    //    @Deprecated("Deprecated in Java")
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-//        if (result != null) {
-//            if (result.contents == null) {
-//                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show()
-//            } else {
-//                try {
-//                    val contents = result.contents
-//                    binding.textResultContent.text = contents
-//                } catch (e: JSONException) {
-//                    e.printStackTrace()
-//                    Toast.makeText(this, result.contents, Toast.LENGTH_LONG).show()
-//                }
-//            }
-//        } else {
-//            super.onActivityResult(requestCode, resultCode, data)
-//        }
-//    }
+    @SuppressLint("SetTextI18n")
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -156,49 +186,36 @@ class TestActivity : AppCompatActivity() {
             if (intentResult.contents == null) {
                 Toast.makeText(baseContext, "Cancelled", Toast.LENGTH_SHORT).show()
             } else {
-                binding.textResultContent.text = intentResult.contents
-                binding.editInputContent.setText(intentResult.barcodeImagePath)
+//                val data: Intent? = intentResult.contents
+                //val imageUri = data!!.data!!
+                //binding.imgCoder.setImageURI(intentResult.barcodeImagePath)
+
+//                val imagePath = convertMediaUriToPath(intentResult.barcodeImagePath)
+                val imagePath = intentResult.barcodeImagePath
+                binding.imgCoder.setImageURI(imagePath.toUri())
+                //val imgFile = File(imagePath)
+                // Toast.makeText(this, "${imgFile} | ${imagePath}", Toast.LENGTH_SHORT).show()
+
+                val dt = intentResult.contents //getQRContent(imgFile)
+                val decodeString = String(Base64.getDecoder().decode(dt))
+
+                qrShare.clear()
+                qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
+
+                listLevel.clear()
+                listQuestion.clear()
+                listLevel = qrShare[0].level
+                listQuestion = qrShare[0].question
+
+                binding.textResultContent.text = "file: ${intentResult.barcodeImagePath} \n" +
+                        "ID: ${listLevel[0].id} \n" +
+                        "Category: ${listLevel[0].category} \n" +
+                        "Title: ${listLevel[0].title} \n" +
+                        "Creator: ${listLevel[0].userId}"
+
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-
-    private fun saveMediaToStorage(bitmap: Bitmap) {
-        val filename = "${System.currentTimeMillis()}.png"
-        fileUrl = filename
-
-        var outputStream: OutputStream? = null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            this.contentResolver?.also { resolver ->
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-                }
-                val imageUri: Uri? =
-                    resolver.insert(Media.EXTERNAL_CONTENT_URI, contentValues)
-
-                imgUri = imageUri.toString()
-
-                outputStream = imageUri?.let { resolver.openOutputStream(it) }
-                val shareIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_STREAM, imageUri)
-                    type = "image/jpeg"
-                }
-                startActivity(Intent.createChooser(shareIntent, null))
-            }
-        } else {
-            val imagesDir =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-            val image = File(imagesDir, filename)
-            outputStream = FileOutputStream(image)
-        }
-
-        outputStream?.use {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            Toast.makeText(this, "${imgUri}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -209,9 +226,9 @@ class TestActivity : AppCompatActivity() {
     }
 
     private fun convertMediaUriToPath(uri: Uri): String {
-        val proj = arrayOf<String>(MediaStore.Images.Media.DATA)
+        val proj = arrayOf<String>(Media.DATA)
         val cursor = contentResolver.query(uri, proj, null, null, null)
-        val columnIndex = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        val columnIndex = cursor!!.getColumnIndexOrThrow(Media.DATA)
         cursor.moveToFirst()
         val path = cursor.getString(columnIndex)
         cursor.close()

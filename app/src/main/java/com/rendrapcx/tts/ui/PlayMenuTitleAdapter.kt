@@ -45,7 +45,8 @@ class PlayMenuTitleAdapter : RecyclerView.Adapter<PlayMenuTitleAdapter.PlayViewH
         val level = listLevel[position]
 
         val pos = Helper().format(position+1)
-        holder.binding.tvTitleLevel.text = pos + " " + Const.strRed
+//        holder.binding.tvTitleLevel.text = pos + " " + Const.strRed
+        holder.binding.tvTitleLevel.text = pos
 
         holder.binding.root.setOnClickListener {
             onClickView?.invoke(level)

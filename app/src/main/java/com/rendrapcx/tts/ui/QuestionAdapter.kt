@@ -18,6 +18,7 @@ class QuestionAdapter(
     private var onClickDelete: ((Data.Level) -> Unit)? = null
     private var onClickStatus: ((Data.Level) -> Unit)? = null
     private var onClickUpload: ((Data.Level) -> Unit)? = null
+    private var onClickShare: ((Data.Level) -> Unit)? = null
 
     @SuppressLint("NotifyDataSetChanged")
     fun setListItem(level: MutableList<Data.Level>) {
@@ -25,24 +26,40 @@ class QuestionAdapter(
         this.notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setOnClickView(callback: (Data.Level) -> Unit ){
         this.onClickView = callback
+        this.notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setOnClickEdit(callback: (Data.Level) -> Unit ){
         this.onClickEdit = callback
+        this.notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setOnClickDelete(callback: (Data.Level) -> Unit ){
         this.onClickDelete = callback
+        this.notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setOnClickStatus(callback: (Data.Level) -> Unit ){
         this.onClickStatus = callback
+        this.notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setOnClickUpload(callback: (Data.Level) -> Unit ){
         this.onClickUpload = callback
+        this.notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setOnClickShare(callback: (Data.Level) -> Unit) {
+        this.onClickShare = callback
+        this.notifyDataSetChanged()
     }
 
     class QuestionViewHolder(val binding: QuestionListItemBinding) :
@@ -92,6 +109,10 @@ class QuestionAdapter(
 
         holder.binding.swPublish.setOnClickListener(){
             onClickStatus?.invoke(level)
+        }
+
+        holder.binding.btnShareAsQR.setOnClickListener(){
+            onClickShare?.invoke(level)
         }
 
     }
