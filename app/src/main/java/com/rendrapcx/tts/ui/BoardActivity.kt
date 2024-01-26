@@ -1585,13 +1585,6 @@ class BoardActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-//            if (firstChar.isNotEmpty()) {
-//                val str = bind.etAnswerInput.text.toString().get(0).toString()
-//                if (str != firstChar) {
-//                    bind.etAnswerInput.error = "Karakter pertama tidak sesuai dengan yang sudah ada"
-//                    return@setOnClickListener
-//                }
-//            }
 
             if (!cekInputAnswer()) {
                 bind.etAnswerInput.error = "char baru tidak susuai \n ${mapBefore.toString()} \n ${mapBeda.toString()}"

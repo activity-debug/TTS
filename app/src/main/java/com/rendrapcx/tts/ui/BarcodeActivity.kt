@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore.Images.Media
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -64,9 +65,10 @@ class BarcodeActivity : AppCompatActivity() {
         Helper().apply { hideSystemUI() }
 
         binding.textResultContent.text = ""
+        binding.editInputContent.visibility = View.INVISIBLE
 
         binding.includeHeader.apply {
-            tvLabelTop.text = "Scan Soal"
+            tvLabelTop.text = "Scan Data Questioner"
             btnBack.setOnClickListener() {
                 val i = Intent(this@BarcodeActivity, MainActivity::class.java)
                 startActivity(i)
