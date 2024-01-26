@@ -3,6 +3,7 @@ package com.rendrapcx.tts.ui
 import android.annotation.SuppressLint
 import android.net.http.UrlRequest.Status
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.rendrapcx.tts.constant.Const
@@ -88,6 +89,8 @@ class QuestionAdapter(
         holder.binding.tvItemTitle.text = level.title
         holder.binding.tvItemCreator.text = level.userId
         holder.binding.swPublish.text = level.status.name
+
+        holder.binding.btnCloudUp.visibility = View.INVISIBLE
 
         holder.binding.swPublish.isChecked = holder.binding.swPublish.text == Const.FilterStatus.POST.name
 

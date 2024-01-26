@@ -535,7 +535,7 @@ class BoardActivity : AppCompatActivity() {
                             }
                             .playOn(box[x])
                     }
-                    delay(400)
+                    delay(100)
                 }
             }
             job.await()
@@ -1480,10 +1480,18 @@ class BoardActivity : AppCompatActivity() {
         bind.tvIdInput.visibility = View.INVISIBLE
         bind.tvSlotPreview.visibility = View.INVISIBLE
 
-        val x = listPartial.indexOfFirst { it.charAt == position }
-        val row = if (x != -1) listPartial[x].rowQuestionId else ""
-        val col = if (x != -1) listPartial[x].colQuestionId else ""
-        val firstChar = box[position].text.toString()
+//        val x = listPartial.indexOfFirst { it.charAt == position }
+        val row = getRowId() //if (x != -1) listPartial[x].rowQuestionId else ""
+        val col = getColumnId() // if (x != -1) listPartial[x].colQuestionId else ""
+
+//        Toast.makeText(this, "$row | $col", Toast.LENGTH_SHORT).show()
+
+        if (row.isNotEmpty() && col.isNotEmpty()) {
+            Toast.makeText(this, "rowId dan colomId sudah terpenuhi", Toast.LENGTH_SHORT).show()
+            //dialog.dismiss()
+            return
+        }
+//        val firstChar = box[position].text.toString()
 
         if (row.isEmpty() && col.isNotEmpty()) {
             bind.swDirection.isChecked = false
@@ -1532,13 +1540,16 @@ class BoardActivity : AppCompatActivity() {
         /* Harus ada Checking kalo input berada dalam range, dan nilainya berbeda*/
         //Toast.makeText(this, "${currentRange}", Toast.LENGTH_SHORT).show()
 
-
-
-        val mapBeda = mutableMapOf<Int, String>()
-        val mapBefore = mutableMapOf<Int, String>()
+        var harusnya = arrayListOf<String>()
         fun cekInputAnswer(): Boolean {
-            val range = if (bind.swDirection.isChecked) colAvailable else rowAvailable
-            val answer = bind.etAnswerInput.text
+            val answer = bind.etAnswerInput.text.trim().trimStart().trimEnd()
+            val slot = if (bind.swDirection.isChecked) colAvailable else rowAvailable
+
+            val range = ArrayList<Int>()
+            for (i in 0 until answer.length) {
+                range.add(slot[i])
+            }
+
             val mapAnswer = mutableMapOf<Int, String>()
             val isBox = arrayListOf<Int>()
 
@@ -1559,14 +1570,24 @@ class BoardActivity : AppCompatActivity() {
                 if (range[i] in ada) mapAnswer.put(range[i], answer[i].toString())
             }
 
+            //val mapBeda = mutableMapOf<Int, String>()
+            //val mapBefore = mutableMapOf<Int, String>()
             for (i in 0 until ada.size) {
-               if (box[ada[i]].text != mapAnswer.getValue(ada[i])) {
-                   mapBeda.put(ada[i], mapAnswer.getValue(ada[i]))
-                   mapBefore.put(ada[i], box[ada[i]].text.toString())
-               }
+                if (box[ada[i]].text != mapAnswer.getValue(ada[i])) {
+                    //mapBeda.put(ada[i], mapAnswer.getValue(ada[i]))
+                    //mapBefore.put(ada[i], box[ada[i]].text.toString())
+                    harusnya.add(
+                        "\n box:${ada[i]}=\"${box[ada[i]].text}\" -> \"${
+                            mapAnswer.getValue(
+                                ada[i]
+                            )
+                        }\" \n"
+                    )
+                }
             }
 
-            if (mapBeda.isNotEmpty()) return false
+
+            if (harusnya.isNotEmpty()) return false
             else return true
         }
 
@@ -1587,7 +1608,7 @@ class BoardActivity : AppCompatActivity() {
 
 
             if (!cekInputAnswer()) {
-                bind.etAnswerInput.error = "char baru tidak susuai \n ${mapBefore.toString()} \n ${mapBeda.toString()}"
+                bind.etAnswerInput.error = "char baru tidak susuai \n ${harusnya.toString()}}"
                 return@setOnClickListener
             }
 

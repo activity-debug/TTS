@@ -277,21 +277,22 @@ class QuestionActivity : AppCompatActivity() {
                 binding.etSearch.hint = questionAdapter.itemCount.toString()
             }
 
-            questionAdapter.setOnClickView { it ->
-                lifecycleScope.launch {
-                    boardSet = BoardSet.PLAY
-                    currentLevel = it.id
-
-                    listLevel =
-                        DB.getInstance(applicationContext).level().getLevel(currentLevel)
-                    listQuestion =
-                        DB.getInstance(applicationContext).question().getQuestion(currentLevel)
-
-                    val i = Intent(this@QuestionActivity, BoardActivity::class.java)
-                    startActivity(i)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                }
-            }
+            /*DISABLE DULU INI YAH BIAR GAK PLAY DARI EDITOR, KEBANYAKAN*/
+//            questionAdapter.setOnClickView { it ->
+//                lifecycleScope.launch {
+//                    boardSet = BoardSet.PLAY
+//                    currentLevel = it.id
+//
+//                    listLevel =
+//                        DB.getInstance(applicationContext).level().getLevel(currentLevel)
+//                    listQuestion =
+//                        DB.getInstance(applicationContext).question().getQuestion(currentLevel)
+//
+//                    val i = Intent(this@QuestionActivity, BoardActivity::class.java)
+//                    startActivity(i)
+//                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+//                }
+//            }
 
             questionAdapter.setOnClickDelete {
                 lifecycleScope.launch {

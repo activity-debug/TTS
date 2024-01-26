@@ -83,7 +83,6 @@ class Sound {
     fun soundOnFinger(context: Context) {
         if (!isSound) return
         val mp = MediaPlayer.create(context.applicationContext, R.raw.game_bonus)
-        mp.reset()
         mp.start()
     }
 
