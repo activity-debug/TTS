@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -15,7 +14,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -40,8 +38,8 @@ import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.constant.Const.Companion.currentUserId
 import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
+import com.rendrapcx.tts.constant.Const.Companion.progress
 import com.rendrapcx.tts.databinding.ActivityMainBinding
-import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogExitAppBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
@@ -51,12 +49,12 @@ import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.MyState
 import com.rendrapcx.tts.helper.NetworkStatusTracker
 import com.rendrapcx.tts.helper.NetworkStatusViewModel
+import com.rendrapcx.tts.helper.Progress
 import com.rendrapcx.tts.helper.Sound
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
-import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.async
@@ -97,15 +95,13 @@ class MainActivity : AppCompatActivity() {
 
         loadBannerAds()
 
-        binding.btnScanQRCode.visibility = View.GONE
         binding.btnExitApp.visibility = View.GONE
         binding.btnShop.visibility = View.GONE
-        //binding.btnTrophy.visibility = View.GONE
         binding.btnUserSecret.visibility = View.GONE
         binding.btnDatabase.visibility = View.GONE
         binding.textView7.visibility = View.GONE
         binding.btnLogin.visibility = View.INVISIBLE
-
+        binding.btnGoListQuestion.visibility = View.INVISIBLE
 
         viewModelNet.state.observe(this) { state ->
             binding.apply {
@@ -118,17 +114,30 @@ class MainActivity : AppCompatActivity() {
         binding.textView7.text = "error"
 
         lifecycleScope.launch {
-            val job1 = async {
-                UserRef().checkUserPref(this@MainActivity, lifecycle)
+            val job = async {
+                val isEmpty =
+                    DB.getInstance(applicationContext)
+                        .userPreferences().getAllUserPreferences().isEmpty()
+
+                if (isEmpty) UserRef().writeDefaultPreferences(applicationContext, lifecycle)
+
                 userPreferences =
-                    DB.getInstance(applicationContext).userPreferences().getAllUserPreferences()
+                    DB.getInstance(applicationContext.applicationContext).userPreferences().getAllUserPreferences()
+            }
+            job.await()
+            val job1 = async {
+
                 listUser = DB.getInstance(applicationContext).user().getAllUser()
                 currentUser = UserRef().getCurrentUser()
+
+                progress = Progress().getUserProgress(this@MainActivity, lifecycleScope)
             }
             job1.await()
 
             /*NANTI AKTIFKAN LAGI*/
             //loadCurrentUser()
+
+            initIsEditor()
 
             getDataLevel() //init for playMenuTTS
 
@@ -137,7 +146,11 @@ class MainActivity : AppCompatActivity() {
         }
         binding.apply {
 
-            btnTrophy.setOnClickListener(){
+            btnOnline.setOnClickListener(){
+                Toast.makeText(this@MainActivity, "${progress}", Toast.LENGTH_SHORT).show()
+            }
+            
+            btnTrophy.setOnClickListener() {
                 Dialog().aboutDialog(this@MainActivity)
             }
 
@@ -146,9 +159,12 @@ class MainActivity : AppCompatActivity() {
                 startActivity(i)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
+
             btnSettingMain.setOnClickListener() {
                 Dialog().apply { settingDialog(this@MainActivity, lifecycle) }
+                UserRef().getIsEditor()
             }
+
             btnUserSecret.setOnClickListener() {
                 Dialog().apply { userProfile(this@MainActivity) }
             }
@@ -163,9 +179,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             /*Play Random*/
-            btnGoTBK.setOnClickListener() {
-                if  (listLevel.isEmpty()) {
-                    Toast.makeText(this@MainActivity, "Belum ada data, silakan scan soal terlebih dahulu", Toast.LENGTH_SHORT).show()
+            btnGoAcak.setOnClickListener() {
+                if (listLevel.isEmpty()) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Belum ada data, silakan scan soal terlebih dahulu",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
                 boardSet = Const.BoardSet.PLAY_RANDOM
@@ -176,7 +196,7 @@ class MainActivity : AppCompatActivity() {
 
 
             /*BARCODE*/
-            btnGoWiw.setOnClickListener() {
+            btnGoScan.setOnClickListener() {
                 val intent = Intent(this@MainActivity, BarcodeActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -187,6 +207,12 @@ class MainActivity : AppCompatActivity() {
                 loadBannerAds()
             }
         }
+    }
+
+    private fun initIsEditor() {
+        val isEditor = UserRef().getIsEditor()
+        if (isEditor) binding.btnGoListQuestion.visibility = View.VISIBLE
+        else binding.btnGoListQuestion.visibility = View.INVISIBLE
     }
 
     /* ADMOB BANNER*/
@@ -261,8 +287,18 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
+//    private fun getUserProgress(): ArrayList<String>{
+//        val arr = arrayListOf<String>()
+//        lifecycleScope.launch {
+//            Data.userAnswerTTS = DB.getInstance(applicationContext).userAnswerTTS().getAllUserAnswer()
+//            Data.userAnswerTTS.filter { it.status == Const.AnswerStatus.DONE }.forEach {
+//                arr.add(it.levelId)
+//            }
+//        }
+//        return arr
+//    }
 
-
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun playMenuTTSDialog() {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -277,34 +313,29 @@ class MainActivity : AppCompatActivity() {
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
-
         fun changeListFiltered(category: String) {
             binding.apply {
+                val filteredListLevel = listLevel
+                    .filter { it.category == category && it.status == Const.FilterStatus.POST }
+                    .toMutableList()
 
-                val filteredList =
-                    listLevel.sortedBy { it.title }
-                        .filter { it.category == category && it.status == Const.FilterStatus.POST }
-                        .toMutableList()
                 val adapter = PlayMenuTitleAdapter()
                 myRecView.layoutManager = GridLayoutManager(this@MainActivity, 3)
                 myRecView.adapter = adapter
-                adapter.setListItem(filteredList)
+                adapter.setListItem(filteredListLevel)
 
                 adapter.setOnClickView {
                     lifecycle.coroutineScope.launch {
                         boardSet = Const.BoardSet.PLAY_USER
                         currentLevel = it.id
 
-                        listLevel =
-                            DB.getInstance(applicationContext).level().getLevel(currentLevel)
-                        listQuestion =
-                            DB.getInstance(applicationContext).question()
-                                .getQuestion(currentLevel)
+                        updateUserAnswer(Const.AnswerStatus.PROGRESS)
 
-                        /*ini ganti nanti load dari user setting*/
-                        //listPartial = DB.getInstance(applicationContext).partial().getPartial(
-                        //    Const.currentLevel
-                        //)
+                        /* Kasih dulu pertanyaan */
+//                        if (it.id in progress) {
+//                            Dialog().showDialog(this@MainActivity,
+//                                "Kamu sudah menyelesaikan tahap ini, Mau mengulang?")
+//                        }
 
                         val i = Intent(this@MainActivity, BoardActivity::class.java)
                         startActivity(i)
@@ -333,16 +364,29 @@ class MainActivity : AppCompatActivity() {
         }
 
         //Init Dialog Komponen
-        binding.tvPlayMenuHeader.text = "Select Category"
+        binding.tvPlayMenuHeader.text = "Pilih Kategori"
         showListByCategory()
 
         //Actions
         binding.btnBackToCategoryAdapter.setOnClickListener() {
-            binding.tvPlayMenuHeader.text = "Select Category"
+            binding.tvPlayMenuHeader.text = "Pilih Kategori"
             showListByCategory()
         }
 
         dialog.show()
+    }
+
+    private fun updateUserAnswer(status: Const.AnswerStatus = Const.AnswerStatus.PROGRESS) {
+        lifecycleScope.launch {
+            DB.getInstance(applicationContext).userAnswerTTS().insertUserAnswer(
+                Data.UserAnswerTTS(
+                    id = currentLevel,
+                    userId = "Andra",
+                    levelId = currentLevel,
+                    status = status
+                )
+            )
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -484,7 +528,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 job.await()
 
-                val index = listUser.indexOfFirst { it.username == username && it.password == password  }
+                val index =
+                    listUser.indexOfFirst { it.username == username && it.password == password }
                 if (index == -1) {
                     bind.editPassword.error = "Tidak ada ada"
                 } else {

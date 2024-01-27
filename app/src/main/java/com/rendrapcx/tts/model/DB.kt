@@ -13,10 +13,10 @@ import androidx.room.TypeConverters
         Data.Partial::class,
         Data.User::class,
         Data.UserAnswerTTS::class,
-        Data.UserAnswerTBK::class,
+        Data.UserAnswerSlot::class,
         Data.UserPreferences::class,
     ],
-    version = 4,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -26,6 +26,7 @@ abstract class DB : RoomDatabase() {
     abstract fun partial(): Dao.Partial
     abstract fun user(): Dao.User
     abstract fun userAnswerTTS(): Dao.UserAnswerTTS
+    abstract fun userAnswerSlot(): Dao.UserAnswerSlot
     abstract fun userPreferences(): Dao.UserPreferences
 
 

@@ -4,6 +4,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.model.Data
 
 interface IUserAnswerTTS {
@@ -18,4 +19,11 @@ interface IUserAnswerTTS {
 
     @Query("SELECT * FROM user_answer_tts WHERE level_id=:levelId")
     suspend fun getLevelAnswer(levelId: String) : MutableList<Data.UserAnswerTTS>
+
+    @Query("UPDATE user_answer_tts SET status =:status WHERE id = :id;")
+    suspend fun updateStatus(id:String, status : Const.AnswerStatus)
+
+//    -- Auto-generated SQL script #202401280003
+//    INSERT INTO "level" (id,category,user_id)
+//    VALUES ('zzzzz','zzzz','zzzz');
 }

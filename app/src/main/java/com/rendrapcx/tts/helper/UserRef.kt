@@ -22,7 +22,7 @@ class UserRef {
         //
     }
 
-    private fun writeDefaultPreferences(context: Context, lifecycle: Lifecycle) {
+    fun writeDefaultPreferences(context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
             DB.getInstance(context).userPreferences().insertUserPref(
                 Data.UserPreferences(
@@ -34,11 +34,22 @@ class UserRef {
                     integratedKeyboard = false,
                     isMusic = true,
                     isSound = true,
+                    isEditor = false
                 )
             )
         }
     }
 
+    fun getIsEditor():Boolean {
+        return userPreferences[0].isEditor
+    }
+
+    fun setIsEditor(id: String = "0", isEditor: Boolean, context: Context, lifecycle: Lifecycle) {
+        lifecycle.coroutineScope.launch {
+            userPreferences[0].isEditor = isEditor
+            DB.getInstance(context.applicationContext).userPreferences().updateIsEditor("0", isEditor)
+        }
+    }
 
     fun getCurrentUser():Int {
         return userPreferences[0].currentUser

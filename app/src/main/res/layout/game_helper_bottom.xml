@@ -12,50 +12,50 @@
             android:id="@+id/btnGetHint"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/box_shape_hint"
+            android:background="@drawable/shape_game_helper_not_active"
             android:padding="10dp"
-            android:src="@drawable/hand_point_up_solid"
-            app:layout_constraintEnd_toStartOf="@+id/btnSuffleKey"
+            android:src="@drawable/hand_point_up_solid_not_active"
+            app:layout_constraintEnd_toStartOf="@+id/btnCursor"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/btnSuffleKey"
+            android:id="@+id/btnCursor"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="16dp"
-            android:background="@drawable/box_shape_hint"
+            android:background="@drawable/shape_game_helper_active"
             android:padding="10dp"
             android:src="@drawable/arrows_turn_to_dots_solid"
-            app:layout_constraintEnd_toStartOf="@+id/btnHideEmpty"
+            app:layout_constraintEnd_toStartOf="@+id/btnRobot"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btnGetHint"
             app:layout_constraintTop_toTopOf="@+id/btnGetHint" />
 
         <ImageView
-            android:id="@+id/btnHideEmpty"
+            android:id="@+id/btnRobot"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="16dp"
-            android:background="@drawable/box_shape_hint"
+            android:background="@drawable/shape_game_helper_active"
             android:padding="10dp"
             android:src="@drawable/robot_solid"
-            app:layout_constraintEnd_toStartOf="@+id/btnShowPicture"
+            app:layout_constraintEnd_toStartOf="@+id/btnNinja"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnSuffleKey"
-            app:layout_constraintTop_toTopOf="@+id/btnSuffleKey" />
+            app:layout_constraintStart_toEndOf="@+id/btnCursor"
+            app:layout_constraintTop_toTopOf="@+id/btnCursor" />
 
         <ImageView
-            android:id="@+id/btnShowPicture"
+            android:id="@+id/btnNinja"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="16dp"
-            android:background="@drawable/box_shape_hint"
+            android:background="@drawable/shape_game_helper_active"
             android:padding="10dp"
             android:src="@drawable/user_ninja_solid"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnHideEmpty"
-            app:layout_constraintTop_toTopOf="@+id/btnHideEmpty" />
+            app:layout_constraintStart_toEndOf="@+id/btnRobot"
+            app:layout_constraintTop_toTopOf="@+id/btnRobot" />
 </androidx.constraintlayout.widget.ConstraintLayout>

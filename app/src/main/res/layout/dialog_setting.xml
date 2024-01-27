@@ -84,14 +84,14 @@
                 app:srcCompat="@drawable/volume_high_solid" />
 
             <ImageView
-                android:id="@+id/imageView3"
+                android:id="@+id/btnEditorShow"
                 android:layout_width="48sp"
                 android:layout_height="48sp"
                 android:layout_marginStart="16dp"
                 android:background="@drawable/button_image_disable"
                 app:layout_constraintStart_toEndOf="@+id/imgBtnSound"
                 app:layout_constraintTop_toTopOf="@+id/imgBtnSound"
-                app:srcCompat="@drawable/hand_point_up_solid" />
+                app:srcCompat="@android:drawable/ic_menu_today" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

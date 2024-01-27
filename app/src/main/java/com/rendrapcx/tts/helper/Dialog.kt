@@ -25,6 +25,7 @@ import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
+import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
@@ -99,6 +100,7 @@ open class Dialog {
         val inflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogSettingBinding.inflate(inflater)
+        val mainBinding = ActivityMainBinding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
 
@@ -119,6 +121,7 @@ open class Dialog {
                         .getAllUserPreferences()
             }
             job1.await()
+
             var isSound = UserRef().getIsSound()
             if (isSound) binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_enable)
             else binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_disable)
@@ -140,6 +143,31 @@ open class Dialog {
                 UserRef().setIntKey("0", binding.swSettingKeyboard.isChecked, context, lifecycle)
                 Sound().soundClickSetting(context)
                 YoYo.with(Techniques.Wave).playOn(it)
+            }
+
+            var i = 0
+            var isEditor = UserRef().getIsEditor()
+            if (isEditor) binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_enable)
+            else binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_disable)
+            binding.btnEditorShow.setOnClickListener(){
+                ++i
+                if (i in 7..9) {
+                    Toast.makeText(context, "${10 - i} kali lagi", Toast.LENGTH_SHORT).show()
+                }
+                if (i > 9) { isEditor = true}
+                if (isEditor) {
+                    binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_enable)
+                    UserRef().setIsEditor("0", true, context, lifecycle)
+                }
+                isEditor = UserRef().getIsEditor()
+                Sound().soundClickSetting(context)
+                YoYo.with(Techniques.RubberBand).playOn(it)
+            }
+            binding.btnEditorShow.setOnLongClickListener(){
+                isEditor = false
+                binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_disable)
+                UserRef().setIsEditor("0", false, context, lifecycle)
+                return@setOnLongClickListener true
             }
 
             binding.btnSettingDisableAds.setOnClickListener() {

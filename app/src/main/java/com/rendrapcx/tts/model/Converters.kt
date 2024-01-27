@@ -13,9 +13,16 @@ class Converters {
 //    @TypeConverter
 //    fun jsonToList(value: String) = Gson().fromJson(value, Array<Int>::class.java).toList()
 
+
     @TypeConverter
     fun fromStringToListInt(value: String?): ArrayList<Int> {
         val listType: Type = object : TypeToken<ArrayList<Int?>?>() {}.type
+        return Gson().fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun fromStringToMapIntString(value: String?): MutableMap<Int, String> {
+        val listType: Type = object : TypeToken<MutableMap<Int?, String?>?>() {}.type
         return Gson().fromJson(value, listType)
     }
     @TypeConverter
@@ -32,6 +39,12 @@ class Converters {
 
     @TypeConverter
     fun fromListStringToString(list: ArrayList<String?>?): String {
+        val gson = Gson()
+        return gson.toJson(list)
+    }
+
+    @TypeConverter
+    fun fromMapIntStringToString(list: MutableMap<Int?, String?>?): String {
         val gson = Gson()
         return gson.toJson(list)
     }

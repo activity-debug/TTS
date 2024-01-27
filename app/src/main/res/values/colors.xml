@@ -11,4 +11,6 @@
     <color name="button2_text">#EFE1EE</color>
     <color name="hider">#B388FF</color>
     <color name="hider_intip">#BFB388FF</color>
+    <color name="item_undone">#E1BEE7</color>
+    <color name="item_done">#A5D6A7</color>
 </resources>

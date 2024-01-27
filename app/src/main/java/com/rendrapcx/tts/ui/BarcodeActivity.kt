@@ -140,7 +140,7 @@ class BarcodeActivity : AppCompatActivity() {
                     Toast.makeText(this@BarcodeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
                 } finally {
                     if (error) {
-                        binding.textResultContent.text = "Bukan data soal Terka TTS"
+                        Toast.makeText(applicationContext, "Bukan data soal Terka TTS", Toast.LENGTH_SHORT).show()
                     } else {
                         binding.btnSaveSoal.visibility = View.VISIBLE
                         binding.textResultContent.text =

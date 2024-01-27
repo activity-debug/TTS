@@ -58,18 +58,18 @@ class Data {
     @Entity(tableName = "user_answer_tts")
     data class UserAnswerTTS(
         @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id : Int,
-        @ColumnInfo(name = "user_id") var userId: Int,
+        @ColumnInfo(name = "id") var id : String,
+        @ColumnInfo(name = "user_id") var userId: String,
         @ColumnInfo(name = "level_id") var levelId: String,
-        @ColumnInfo(name = "answer_slot") var answerSlot: ArrayList<String>,
         @ColumnInfo(name = "status") var status: AnswerStatus,
     )
 
-    @Entity(tableName = "user_answer_tbk")
-    data class UserAnswerTBK(
+    @Entity(tableName = "user_answer_slot")
+    data class UserAnswerSlot(
         @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id : Int,
-        @ColumnInfo(name = "tbk_id") var tbkId : String,
+        @ColumnInfo(name = "id") var id : String,
+        @ColumnInfo(name = "level_id") var levelId : String,
+        @ColumnInfo(name = "answer_slot") var answerSlot : MutableMap<Int, String>,
     )
 
     @Entity(tableName = "user_preferences")
@@ -83,6 +83,7 @@ class Data {
         @ColumnInfo(name = "integrated_keyboard") var integratedKeyboard : Boolean,
         @ColumnInfo(name = "is_music") var isMusic : Boolean,
         @ColumnInfo(name = "is_sound") var isSound : Boolean,
+        @ColumnInfo(name = "is_editor") var isEditor : Boolean,
     )
 
     @Serializable
@@ -96,6 +97,7 @@ class Data {
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
         var listUser = mutableListOf<User>()
+        var userAnswerTTS = mutableListOf<UserAnswerTTS>()
         var userPreferences = mutableListOf<UserPreferences>()
         var qrShare = mutableListOf<QRShare>()
     }

@@ -28,7 +28,9 @@ class Const {
         var isSignedIn = false
         var currentUserId = "ADMIN"
         var currentUser = -1
-        var currentUserRefId = ""
+
+        var progress = arrayListOf<String>()
+
 
         var gameState = GameState.CREATOR
         var boardSet = BoardSet.EDITOR_NEW

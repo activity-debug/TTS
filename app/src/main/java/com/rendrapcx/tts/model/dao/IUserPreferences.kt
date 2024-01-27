@@ -1,5 +1,6 @@
 package com.rendrapcx.tts.model.dao
 
+import android.content.SharedPreferences.Editor
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -51,6 +52,11 @@ interface IUserPreferences{
             "   WHERE `id` = :id;")
     suspend fun updateIsSound(id: String, isSound: Boolean)
 
-    @Query("SELECT is_sound FROM user_preferences")
-    suspend fun getIsSoundDB(): Boolean
+//    @Query("SELECT is_sound FROM user_preferences")
+//    suspend fun getIsSoundDB(): Boolean
+
+    @Query("UPDATE user_preferences " +
+            "   SET is_editor = :isEditor " +
+            "   WHERE `id` = :id;")
+    suspend fun updateIsEditor(id: String, isEditor: Boolean)
 }
