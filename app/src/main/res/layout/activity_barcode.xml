@@ -76,10 +76,10 @@
                 android:id="@+id/btnDecodeFromCamera"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
                 android:text="Camera"
-                app:layout_constraintStart_toStartOf="@+id/editInputContent"
+                app:layout_constraintEnd_toStartOf="@+id/btnDecodeGallery"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/editInputContent" />
 
             <TextView
@@ -87,11 +87,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="24dp"
-                android:text=""
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.473"
+                android:layout_marginTop="44dp"
+                android:layout_marginEnd="8dp"
+                android:text="asdasdasd"
+                app:layout_constraintEnd_toStartOf="@+id/btnSaveSoal"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btnDecodeFromCamera"
                 tools:ignore="HardcodedText" />
@@ -100,9 +99,10 @@
                 android:id="@+id/btnDecodeGallery"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:layout_marginEnd="16dp"
                 android:text="Gallery"
-                app:layout_constraintEnd_toEndOf="@+id/editInputContent"
+                app:layout_constraintEnd_toStartOf="@+id/btnPasteSoal"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/btnDecodeFromCamera"
                 app:layout_constraintTop_toTopOf="@+id/btnDecodeFromCamera" />
 
             <EditText
@@ -112,7 +112,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:ems="10"
-                android:hint="ganti nama kategori (optional)"
+                android:hint="Ganti Kategori Soal (opsional)"
                 android:inputType="text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -124,10 +124,29 @@
                 android:id="@+id/btnSaveSoal"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
+                android:layout_marginEnd="24dp"
                 android:text="Save"
-                app:layout_constraintEnd_toStartOf="@+id/btnDecodeGallery"
-                app:layout_constraintStart_toEndOf="@+id/btnDecodeFromCamera"
-                app:layout_constraintTop_toTopOf="@+id/btnDecodeFromCamera" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textResultContent" />
+
+            <Button
+                android:id="@+id/btnPasteSoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Paste"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/btnDecodeGallery"
+                app:layout_constraintTop_toTopOf="@+id/btnDecodeGallery" />
+
+            <EditText
+                android:id="@+id/editPaste"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                app:layout_constraintEnd_toEndOf="@+id/textResultContent"
+                app:layout_constraintStart_toStartOf="@+id/textResultContent"
+                app:layout_constraintTop_toBottomOf="@+id/textResultContent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

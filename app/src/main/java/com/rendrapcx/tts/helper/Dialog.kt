@@ -77,7 +77,7 @@ open class Dialog {
         binding.btnHireMe.setOnClickListener() {
             val emailIntent = Intent(
                 Intent.ACTION_SENDTO, Uri.fromParts(
-                    "mailto", "rendra@gmail.com", null
+                    "mailto", "rendrapc33@gmail.com", null
                 )
             )
             emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Terka TTS")

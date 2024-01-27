@@ -1,6 +1,8 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -53,10 +55,13 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.Base64
 
+
 class QuestionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityQuestionBinding
     private var questionAdapter = QuestionAdapter()
     private var levelShareIndexId = -1
+    private var myClipboard: ClipboardManager? = null
+    private var myClip: ClipData? = null
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
@@ -66,6 +71,8 @@ class QuestionActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         Helper().apply { hideSystemUI() }
+
+        myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?;
 
         binding.headerPanel.tvLabelTop.text = "Editor"
 
@@ -155,6 +162,7 @@ class QuestionActivity : AppCompatActivity() {
     }
 
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun shareQRDialog(context: Context, content: String) {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -169,13 +177,41 @@ class QuestionActivity : AppCompatActivity() {
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
-        val barcodeEncoder = BarcodeEncoder()
-        val bitmap: Bitmap =
-            barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
-        binding.imgQR.setImageBitmap(bitmap)
+        binding.tvWarningInfo.visibility = View.INVISIBLE
+        var error = false
+        try {
+            val barcodeEncoder = BarcodeEncoder()
+            val bitmap: Bitmap =
+                barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 5000, 5000)
+            binding.imgQR.setImageBitmap(bitmap)
+        } catch (e: Exception) {
+            error = true
+            binding.tvWarningInfo.text = "Text terlalu panjang (${content.count()}) " +
+                    "QR Image tidak bisa di generate. \n" +
+                    "kirim soal terinkripsi"
+            Toast.makeText(this, "${e.message}", Toast.LENGTH_SHORT).show()
+        }
+        finally {
+            if (error) {
+                binding.btnShareQr.text = "Share As Text"
+                binding.tvWarningInfo.visibility = View.VISIBLE
+            } else {
+                binding.btnShareQr.text = "Share"
+                binding.tvWarningInfo.visibility = View.INVISIBLE
+            }
+        }
+
 
         binding.btnShareQr.setOnClickListener() {
-            saveAndShareQRTBK(content)
+            if (!error) {
+                saveAndShareQRTBK(content)
+            } else {
+                val i = Intent()
+                i.action = Intent.ACTION_SEND
+                i.type = "text/plain"
+                i.putExtra(Intent.EXTRA_TEXT, content)
+                context.startActivity(Intent.createChooser(i, "Please select App"))
+            }
             dialog.dismiss()
         }
 
@@ -379,7 +415,9 @@ class QuestionActivity : AppCompatActivity() {
                         encodeString = Base64.getEncoder().encodeToString(json.toByteArray())
                     }
                     job2.await()
-
+//                    Toast.makeText(this@QuestionActivity, "${encodeString.count()}", Toast.LENGTH_SHORT).show()
+//                    val myClip = ClipData.newPlainText("encodeString", encodeString);
+                    //myClipboard?.setPrimaryClip(myClip);
                     shareQRDialog(this@QuestionActivity, encodeString)
                 }
 

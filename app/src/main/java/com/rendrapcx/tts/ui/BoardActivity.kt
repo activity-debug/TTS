@@ -543,10 +543,14 @@ class BoardActivity : AppCompatActivity() {
             YoYo.with(Techniques.Wave).repeat(1).duration(300)
                 .onEnd {
                     Sound().soundOnFinger(this@BoardActivity)
-                    pickByArrow = false
-                    setInputAnswerDirection()
-                    onClickBox()
-                    checkWinCondition(color = false)
+                    YoYo.with(Techniques.RubberBand)
+                        .onEnd {
+                            pickByArrow = false
+                            setInputAnswerDirection()
+                            onClickBox()
+                            checkWinCondition(color = false)
+                        }
+                        .playOn(box[position])
                 }
                 .playOn(binding.includeGameHelperBottom.btnHideEmpty)
             skipActions(1)

@@ -2,6 +2,8 @@ package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -34,6 +36,7 @@ import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.qrShare
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
@@ -54,6 +57,8 @@ class BarcodeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBarcodeBinding
     private var fileUrl = ""
     private var imgUri = ""
+    private var myClipboard: ClipboardManager? = null
+    private var myClip: ClipData? = null
 
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
@@ -63,9 +68,12 @@ class BarcodeActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         Helper().apply { hideSystemUI() }
+        myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?;
 
         binding.textResultContent.text = ""
-        binding.editInputContent.visibility = View.INVISIBLE
+        binding.editPaste.setText("")
+        binding.editPaste.visibility = View.INVISIBLE
+        binding.btnSaveSoal.visibility = View.INVISIBLE
 
         binding.includeHeader.apply {
             tvLabelTop.text = "Scan Data Questioner"
@@ -87,9 +95,63 @@ class BarcodeActivity : AppCompatActivity() {
             }
 
             btnSaveSoal.setOnClickListener() {
-                saveQRToDB()
-                Toast.makeText(this@BarcodeActivity, "Soal tersimpan", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    val job = async {
+                        saveQRToDB()
+                        Toast.makeText(this@BarcodeActivity, "Soal tersimpan", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    job.await()
+
+                    val i = Intent(this@BarcodeActivity, MainActivity::class.java)
+                    startActivity(i)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+
+                }
             }
+
+            btnPasteSoal.setOnClickListener() {
+                var error = false
+                try {
+                    val abc = myClipboard?.primaryClip
+                    val item = abc?.getItemAt(0)
+
+                    binding.editPaste.setText("")
+                    binding.editPaste.setText(item?.text.toString())
+
+                    val decodeString =
+                        String(Base64.getDecoder().decode(binding.editPaste.text.toString()))
+
+                    qrShare.clear()
+                    qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
+
+                    listLevel = qrShare[0].level
+                    listQuestion = qrShare[0].question
+
+//                    binding.textResultContent.text =
+//                        "ID: ${listLevel[0].id} \n" +
+//                                "Category: ${listLevel[0].category} \n" +
+//                                "Title: ${listLevel[0].title} \n" +
+//                                "Creator: ${listLevel[0].userId}"
+
+                    //Toast.makeText(applicationContext, "Text Pasted", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    error = true
+                    Toast.makeText(this@BarcodeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
+                } finally {
+                    if (error) {
+                        binding.textResultContent.text = "Bukan data soal Terka TTS"
+                    } else {
+                        binding.btnSaveSoal.visibility = View.VISIBLE
+                        binding.textResultContent.text =
+                            "ID: ${listLevel[0].id} \n" +
+                                    "Category: ${listLevel[0].category} \n" +
+                                    "Title: ${listLevel[0].title} \n" +
+                                    "Creator: ${listLevel[0].userId}"
+                    }
+                }
+            }
+
         }
 
     }
@@ -150,6 +212,8 @@ class BarcodeActivity : AppCompatActivity() {
                 qrShare.clear()
                 qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
 
+                listLevel.clear()
+                listQuestion.clear()
                 listLevel = qrShare[0].level
                 listQuestion = qrShare[0].question
 
@@ -158,6 +222,8 @@ class BarcodeActivity : AppCompatActivity() {
                         "Category: ${listLevel[0].category} \n" +
                         "Title: ${listLevel[0].title} \n" +
                         "Creator: ${listLevel[0].userId}"
+
+                binding.btnSaveSoal.visibility = View.VISIBLE
             } else {
                 Toast.makeText(this@BarcodeActivity, "Result Not Found", Toast.LENGTH_LONG).show()
             }
@@ -214,6 +280,8 @@ class BarcodeActivity : AppCompatActivity() {
                         "Category: ${listLevel[0].category} \n" +
                         "Title: ${listLevel[0].title} \n" +
                         "Creator: ${listLevel[0].userId}"
+
+                binding.btnSaveSoal.visibility = View.VISIBLE
 
             }
         } else {
