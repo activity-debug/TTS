@@ -1647,12 +1647,8 @@ class BoardActivity : AppCompatActivity() {
                 if (range[i] in ada) mapAnswer.put(range[i], answer[i].toString())
             }
 
-            //val mapBeda = mutableMapOf<Int, String>()
-            //val mapBefore = mutableMapOf<Int, String>()
             for (i in 0 until ada.size) {
                 if (box[ada[i]].text != mapAnswer.getValue(ada[i])) {
-                    //mapBeda.put(ada[i], mapAnswer.getValue(ada[i]))
-                    //mapBefore.put(ada[i], box[ada[i]].text.toString())
                     harusnya.add(
                         "\n box:${ada[i]}=\"${box[ada[i]].text}\" -> \"${
                             mapAnswer.getValue(
