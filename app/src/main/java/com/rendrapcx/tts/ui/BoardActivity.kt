@@ -328,6 +328,18 @@ class BoardActivity : AppCompatActivity() {
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(tvSpanQuestion)
                 //pickByArrow = false
                 //onClickBox()
+                for (i in currentRange.indices) {
+                    if (box[currentRange[i]].text.isEmpty()) {
+                        position = currentRange[i]
+                        resetBoxStyle()
+                        box[position].setTextColor(getColor(this@BoardActivity, R.color.white))
+                        box[position].setBackgroundResource(R.drawable.box_shape_selected)
+                        YoYo.with(Techniques.Bounce)
+                            .onEnd { YoYo.with(Techniques.RubberBand).playOn(box[position]) }
+                            .playOn(box[position])
+                        break
+                    }
+                }
                 setColorizeRange(position, currentRange)
             }
         }
