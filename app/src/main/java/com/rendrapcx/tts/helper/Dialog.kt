@@ -333,8 +333,8 @@ open class Dialog {
         val dialog = builder.create()
         extracted(dialog)
 
-        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
-        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
@@ -351,6 +351,7 @@ open class Dialog {
             Progress().updateUserAnswer(Const.AnswerStatus.PROGRESS, this, lifecycle)
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
+            finish()
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             dialog.dismiss()
         }

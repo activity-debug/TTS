@@ -108,6 +108,7 @@ class MainActivity : AppCompatActivity() {
                 when (state) {
                     MyState.Fetched -> textView7.text = "fetch"
                     MyState.Error -> textView7.text = "error"
+                    else -> {}
                 }
             }
         }
@@ -158,11 +159,12 @@ class MainActivity : AppCompatActivity() {
             btnGoListQuestion.setOnClickListener() {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
                 startActivity(i)
+                //finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
             btnSettingMain.setOnClickListener() {
-                Dialog().apply { settingDialog(this@MainActivity, lifecycle ) }
+                Dialog().apply { settingDialog(this@MainActivity, lifecycle) }
                 UserRef().getIsEditor()
             }
 
@@ -189,9 +191,41 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                     return@setOnClickListener
                 }
+
+//                val count = listLevel.size
+//
+//                val arr = arrayListOf<Int>()
+//                for (i in 0 until count) {
+//                    val x = (0 until count).random()
+//                    if (!progress.contains(listLevel[x].id)) {
+//                        currentLevel = listLevel[x].id
+//                        break
+//                    }
+//                    arr.add(i)
+//                }
+//                if (arr.size == count) {
+//                    Toast.makeText(
+//                        this@MainActivity,
+//                        "Silakan selesaikan dulu soal untuk bisa menjalankan secara acak",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                    return@setOnClickListener
+//                }
+
+                if (progress.isEmpty()) {
+                    Dialog().showDialog(
+                        this@MainActivity,
+                        "Belum ada soal yang Anda selesaikan,\n" +
+                                "Silakan bermain dan selesaikan beberapa soal terlebih dahulu, " +
+                                "untuk bisa memankan secara acak"
+                    )
+                    return@setOnClickListener
+                }
+
                 boardSet = Const.BoardSet.PLAY_RANDOM
                 val intent = Intent(this@MainActivity, BoardActivity::class.java)
                 startActivity(intent)
+                //finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
@@ -200,6 +234,7 @@ class MainActivity : AppCompatActivity() {
             btnGoScan.setOnClickListener() {
                 val intent = Intent(this@MainActivity, BarcodeActivity::class.java)
                 startActivity(intent)
+                //finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
@@ -343,6 +378,7 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             val i = Intent(this@MainActivity, BoardActivity::class.java)
                             startActivity(i)
+                            //finish()
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                             dialog.dismiss()
                         }

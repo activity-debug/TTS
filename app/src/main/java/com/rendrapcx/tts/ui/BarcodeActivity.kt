@@ -80,6 +80,7 @@ class BarcodeActivity : AppCompatActivity() {
             btnBack.setOnClickListener() {
                 val i = Intent(this@BarcodeActivity, MainActivity::class.java)
                 startActivity(i)
+                finish()
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
         }
@@ -105,6 +106,7 @@ class BarcodeActivity : AppCompatActivity() {
 
                     val i = Intent(this@BarcodeActivity, MainActivity::class.java)
                     startActivity(i)
+                    finish()
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
 
                 }

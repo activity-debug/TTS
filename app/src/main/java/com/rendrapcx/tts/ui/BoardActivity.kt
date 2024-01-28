@@ -95,6 +95,8 @@ class BoardActivity : AppCompatActivity() {
     private var isNext = false
     private var indexOfCategory = ""
 
+    private var acakHolder = arrayListOf<String>()
+
     private lateinit var mAdView: AdView
 
     @SuppressLint("ClickableViewAccessibility")
@@ -957,7 +959,6 @@ class BoardActivity : AppCompatActivity() {
                     Const.AnswerStatus.DONE, this, lifecycle
                 )
                 progress = Progress().getUserProgress(this, lifecycle)
-                Toast.makeText(this, "${progress.count().toString()}", Toast.LENGTH_SHORT).show()
             }
             Sound().soundWinning(this)
             winDialog(this)
@@ -997,9 +998,15 @@ class BoardActivity : AppCompatActivity() {
             if (boardSet != BoardSet.PLAY_RANDOM) {
                 val ct = dataLevel.map { it.id }
                 if (progress.containsAll(ct)) {
+                    bind.tvSelamat.text = "Semua Level di Kategori $currentCategory sudah selesai"
                     bind.btnNext.visibility = View.GONE
                 }
             }
+
+            YoYo.with(Techniques.ZoomIn).duration(1000)
+                .onEnd { YoYo.with(Techniques.Tada).repeat(2).playOn(bind.imgCongrate) }
+                .playOn(bind.imgCongrate)
+            YoYo.with(Techniques.RubberBand).repeat(1).playOn(bind.tvSelamat)
 
             bind.btnNext.setOnClickListener() {
                 if (boardSet == BoardSet.PLAY_RANDOM) {
@@ -1015,6 +1022,7 @@ class BoardActivity : AppCompatActivity() {
             bind.btnBack.setOnClickListener() {
                 val i = Intent(context.applicationContext, MainActivity::class.java)
                 startActivity(i)
+                finish()
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                 dialog.dismiss()
             }
@@ -1023,8 +1031,6 @@ class BoardActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    /* asdsd ad                                                                              */
-
     private fun playRandom() {
         lifecycleScope.launch {
             boardSet = BoardSet.PLAY_RANDOM
@@ -1032,8 +1038,35 @@ class BoardActivity : AppCompatActivity() {
             val jobLevel = async {
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                 val count = listLevel.size
-                val index = (0 until count).random()
-                currentLevel = listLevel[index].id
+
+                if (acakHolder.size == progress.size) {
+                    acakHolder.clear()
+                }
+
+                var arr = arrayListOf<Int>()
+                for (i in 0 until count) {
+                    val x = (0 until count).random()
+
+                    if (acakHolder.contains(listLevel[x].id)) {
+                        continue
+                    }
+
+                    if (progress.contains(listLevel[x].id)) {
+                        acakHolder.add(listLevel[x].id)
+                        currentLevel = listLevel[x].id
+                        break
+                    }
+                    arr.add(i)
+                }
+                if (arr.size == count) {
+                    Toast.makeText(
+                        this@BoardActivity,
+                        "Silakan selesaikan dulu soal untuk bisa menjalankan secara acak",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@async
+                }
+
             }
             jobLevel.await()
             val jobQuest = async {
@@ -1124,11 +1157,9 @@ class BoardActivity : AppCompatActivity() {
                 includeEditor.mainContainer.visibility = View.GONE
 
                 val index = dataLevel.indexOfFirst { it.id == currentLevel }
-                //val title = dataLevel[index].title
-                //Dialog().showDialog(this@BoardActivity, "$index")
                 indexOfCategory = Helper().format(index + 1)
                 val category = currentCategory
-                val msg =          //"${index +1} Title:  ${title} \n" +
+                val msg =
                     "Level ke: ${indexOfCategory} \n" +
                             "Category: ${category}"
                 includeHeader.tvLabelTop.text = msg

@@ -97,6 +97,7 @@ class QuestionActivity : AppCompatActivity() {
             boardSet = BoardSet.EDITOR_NEW
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
+            finish()
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
@@ -113,6 +114,7 @@ class QuestionActivity : AppCompatActivity() {
             btnBack.setOnClickListener() {
                 val i = Intent(this@QuestionActivity, MainActivity::class.java)
                 startActivity(i)
+                finish()
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
         }
@@ -378,6 +380,7 @@ class QuestionActivity : AppCompatActivity() {
 
                     val i = Intent(this@QuestionActivity, BoardActivity::class.java)
                     startActivity(i)
+                    finish()
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 }
             }
