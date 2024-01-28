@@ -1,6 +1,7 @@
 package com.rendrapcx.tts.helper
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -25,19 +26,21 @@ import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
-import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogUserProfileBinding
+import com.rendrapcx.tts.databinding.DialogYesNoBinding
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listUser
+import com.rendrapcx.tts.ui.BoardActivity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
 open class Dialog {
+
     @RequiresApi(Build.VERSION_CODES.R)
     fun aboutDialog(
         context: Context
@@ -95,12 +98,12 @@ open class Dialog {
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun settingDialog(
-        context: Context, lifecycle: Lifecycle
+        context: Context,
+        lifecycle : Lifecycle
     ) {
         val inflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogSettingBinding.inflate(inflater)
-        val mainBinding = ActivityMainBinding.inflate(inflater)
         val builder = AlertDialog.Builder(context).setView(binding.root)
         val dialog = builder.create()
 
@@ -149,12 +152,14 @@ open class Dialog {
             var isEditor = UserRef().getIsEditor()
             if (isEditor) binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_enable)
             else binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_disable)
-            binding.btnEditorShow.setOnClickListener(){
+            binding.btnEditorShow.setOnClickListener() {
                 ++i
                 if (i in 7..9) {
                     Toast.makeText(context, "${10 - i} kali lagi", Toast.LENGTH_SHORT).show()
                 }
-                if (i > 9) { isEditor = true}
+                if (i > 9) {
+                    isEditor = true
+                }
                 if (isEditor) {
                     binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_enable)
                     UserRef().setIsEditor("0", true, context, lifecycle)
@@ -163,7 +168,7 @@ open class Dialog {
                 Sound().soundClickSetting(context)
                 YoYo.with(Techniques.RubberBand).playOn(it)
             }
-            binding.btnEditorShow.setOnLongClickListener(){
+            binding.btnEditorShow.setOnLongClickListener() {
                 isEditor = false
                 binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_disable)
                 UserRef().setIsEditor("0", false, context, lifecycle)
@@ -308,6 +313,45 @@ open class Dialog {
         binding.btnSubmit.setOnClickListener() {
             updateList()
             fillText()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun Activity.showDialogYesNo(
+        title: String,
+        msg: String,
+        btnOneTitle: String = "Tidak",
+        btnTwoTitle: String = "Ya",
+        lifecycle: Lifecycle
+    ) {
+        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = DialogYesNoBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(this).setView(binding.root)
+        val dialog = builder.create()
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        binding.tvTitle.text = title
+        binding.tvMessage.text = msg
+        binding.btnOne.text = btnOneTitle
+        binding.btnTwo.text = btnTwoTitle
+
+        binding.btnOne.setOnClickListener(){
+            dialog.dismiss()
+        }
+
+        binding.btnTwo.setOnClickListener(){
+            Progress().updateUserAnswer(Const.AnswerStatus.PROGRESS, this, lifecycle)
+            val i = Intent(this, BoardActivity::class.java)
+            startActivity(i)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             dialog.dismiss()
         }
 

@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mAdView: AdView
 
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,7 +122,8 @@ class MainActivity : AppCompatActivity() {
                 if (isEmpty) UserRef().writeDefaultPreferences(applicationContext, lifecycle)
 
                 userPreferences =
-                    DB.getInstance(applicationContext.applicationContext).userPreferences().getAllUserPreferences()
+                    DB.getInstance(applicationContext.applicationContext).userPreferences()
+                        .getAllUserPreferences()
             }
             job.await()
             val job1 = async {
@@ -130,7 +131,7 @@ class MainActivity : AppCompatActivity() {
                 listUser = DB.getInstance(applicationContext).user().getAllUser()
                 currentUser = UserRef().getCurrentUser()
 
-                progress = Progress().getUserProgress(this@MainActivity, lifecycleScope)
+                progress = Progress().getUserProgress(this@MainActivity, lifecycle)
             }
             job1.await()
 
@@ -146,10 +147,10 @@ class MainActivity : AppCompatActivity() {
         }
         binding.apply {
 
-            btnOnline.setOnClickListener(){
+            btnOnline.setOnClickListener() {
                 Toast.makeText(this@MainActivity, "${progress}", Toast.LENGTH_SHORT).show()
             }
-            
+
             btnTrophy.setOnClickListener() {
                 Dialog().aboutDialog(this@MainActivity)
             }
@@ -161,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnSettingMain.setOnClickListener() {
-                Dialog().apply { settingDialog(this@MainActivity, lifecycle) }
+                Dialog().apply { settingDialog(this@MainActivity, lifecycle ) }
                 UserRef().getIsEditor()
             }
 
@@ -329,18 +330,24 @@ class MainActivity : AppCompatActivity() {
                         boardSet = Const.BoardSet.PLAY_USER
                         currentLevel = it.id
 
-                        updateUserAnswer(Const.AnswerStatus.PROGRESS)
+                        if (progress.contains(currentLevel)) {
+                            Dialog().apply {
+                                showDialogYesNo(
+                                    "Info",
+                                    "Anda sudah menyelesaikan level ini. \nMau reset ulang level ini?",
+                                    "Tidak",
+                                    "Ya",
+                                    lifecycle
+                                )
+                            }
+                        } else {
+                            val i = Intent(this@MainActivity, BoardActivity::class.java)
+                            startActivity(i)
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                            dialog.dismiss()
+                        }
 
-                        /* Kasih dulu pertanyaan */
-//                        if (it.id in progress) {
-//                            Dialog().showDialog(this@MainActivity,
-//                                "Kamu sudah menyelesaikan tahap ini, Mau mengulang?")
-//                        }
 
-                        val i = Intent(this@MainActivity, BoardActivity::class.java)
-                        startActivity(i)
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                        dialog.dismiss()
                     }
 
                 }
@@ -374,19 +381,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         dialog.show()
-    }
-
-    private fun updateUserAnswer(status: Const.AnswerStatus = Const.AnswerStatus.PROGRESS) {
-        lifecycleScope.launch {
-            DB.getInstance(applicationContext).userAnswerTTS().insertUserAnswer(
-                Data.UserAnswerTTS(
-                    id = currentLevel,
-                    userId = "Andra",
-                    levelId = currentLevel,
-                    status = status
-                )
-            )
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -442,6 +436,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun signOutDialog(
@@ -457,7 +452,7 @@ class MainActivity : AppCompatActivity() {
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
-        bind.btnSignOut.setOnClickListener() {
+        bind.btnTwo.setOnClickListener() {
             isSignedIn = false
             currentUserId = ""
             binding.btnLogin.text = "Login"
@@ -465,7 +460,7 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
-        bind.btnCancelSignOut.setOnClickListener() {
+        bind.btnOne.setOnClickListener() {
             dialog.dismiss()
         }
 

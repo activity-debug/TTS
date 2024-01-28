@@ -33,7 +33,6 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
-import com.rendrapcx.tts.constant.Const.AnswerStatus
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentCategory
@@ -94,6 +93,7 @@ class BoardActivity : AppCompatActivity() {
     private var robot = 0
 
     private var isNext = false
+    private var indexOfCategory = ""
 
     private lateinit var mAdView: AdView
 
@@ -110,8 +110,6 @@ class BoardActivity : AppCompatActivity() {
 
         initBoardChild()
         initIntKeyChild()
-
-        Progress().updateUserAnswer(AnswerStatus.PROGRESS, this, lifecycleScope)
 
         when (boardSet) {
             BoardSet.EDITOR_NEW -> {
@@ -180,6 +178,9 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
+                // FIXME: kalo di declare di menu title, progress ini nanti hapus
+                //Progress().updateUserAnswer(AnswerStatus.PROGRESS, this, lifecycleScope)
+
                 playNext()
             }
 
@@ -951,13 +952,13 @@ class BoardActivity : AppCompatActivity() {
 
         //onClickBox()
         if (pass) {
-            Progress().updateUserAnswer(
-                Const.AnswerStatus.DONE,
-                this@BoardActivity,
-                lifecycleScope
-            )
-            progress = Progress().getUserProgress(this, lifecycleScope)
-            Toast.makeText(this, "${progress.count()}", Toast.LENGTH_SHORT).show()
+            if (boardSet != BoardSet.PLAY_RANDOM) {
+                Progress().updateUserAnswer(
+                    Const.AnswerStatus.DONE, this, lifecycle
+                )
+                progress = Progress().getUserProgress(this, lifecycle)
+                Toast.makeText(this, "${progress.count().toString()}", Toast.LENGTH_SHORT).show()
+            }
             Sound().soundWinning(this)
             winDialog(this)
         }
@@ -980,8 +981,11 @@ class BoardActivity : AppCompatActivity() {
         dialog.setCancelable(false)
 
         lifecycleScope.launch {
-            bind.tvSelamat.text = "Lolos Level ini"
+            if (boardSet == BoardSet.PLAY_RANDOM)
+                bind.tvSelamat.text = "Lanjutkan bermain?"
+            else bind.tvSelamat.text = "Lolos Level $indexOfCategory di kategori $currentCategory"
 
+            // FIXME: Data level coba pake fungsi aja, soalnya dipake dua tempat sementara gini dulu
             var dataLevel = mutableListOf<Data.Level>()
             val job = async {
                 dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
@@ -990,9 +994,11 @@ class BoardActivity : AppCompatActivity() {
             }
             job.await()
 
-            val ct = dataLevel.map { it.id }
-            if (progress.containsAll(ct)) {
-                bind.btnNext.visibility = View.GONE
+            if (boardSet != BoardSet.PLAY_RANDOM) {
+                val ct = dataLevel.map { it.id }
+                if (progress.containsAll(ct)) {
+                    bind.btnNext.visibility = View.GONE
+                }
             }
 
             bind.btnNext.setOnClickListener() {
@@ -1004,7 +1010,6 @@ class BoardActivity : AppCompatActivity() {
                     playNext()
                     dialog.dismiss()
                 }
-                //dialog.dismiss()
             }
 
             bind.btnBack.setOnClickListener() {
@@ -1013,8 +1018,6 @@ class BoardActivity : AppCompatActivity() {
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                 dialog.dismiss()
             }
-
-            //dialog.dismiss()
         }
 
         dialog.show()
@@ -1024,6 +1027,8 @@ class BoardActivity : AppCompatActivity() {
 
     private fun playRandom() {
         lifecycleScope.launch {
+            boardSet = BoardSet.PLAY_RANDOM
+
             val jobLevel = async {
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                 val count = listLevel.size
@@ -1121,10 +1126,10 @@ class BoardActivity : AppCompatActivity() {
                 val index = dataLevel.indexOfFirst { it.id == currentLevel }
                 //val title = dataLevel[index].title
                 //Dialog().showDialog(this@BoardActivity, "$index")
-
+                indexOfCategory = Helper().format(index + 1)
                 val category = currentCategory
                 val msg =          //"${index +1} Title:  ${title} \n" +
-                    "Level ke: ${Helper().format(index + 1)} \n" +
+                    "Level ke: ${indexOfCategory} \n" +
                             "Category: ${category}"
                 includeHeader.tvLabelTop.text = msg
             }

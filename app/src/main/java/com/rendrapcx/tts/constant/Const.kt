@@ -31,6 +31,7 @@ class Const {
 
         var progress = arrayListOf<String>()
 
+        var resetLevel = false
 
         var gameState = GameState.CREATOR
         var boardSet = BoardSet.EDITOR_NEW
