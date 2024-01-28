@@ -349,6 +349,7 @@ open class Dialog {
 
         binding.btnTwo.setOnClickListener(){
             Progress().updateUserAnswer(Const.AnswerStatus.PROGRESS, this, lifecycle)
+            Const.progress = Progress().getUserProgress(this, lifecycle)
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
             finish()

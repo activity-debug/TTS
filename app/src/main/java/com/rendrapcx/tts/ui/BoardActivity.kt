@@ -38,8 +38,9 @@ import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentCategory
 import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
+import com.rendrapcx.tts.constant.Const.Companion.inputMode
 import com.rendrapcx.tts.constant.Const.Companion.position
-import com.rendrapcx.tts.constant.Const.Companion.progress
+import com.rendrapcx.tts.constant.Const.Companion.selesai
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
 import com.rendrapcx.tts.constant.Const.InputQuestionDirection
@@ -117,7 +118,7 @@ class BoardActivity : AppCompatActivity() {
             BoardSet.EDITOR_NEW -> {
                 lifecycleScope.launch {
                     val job = async {
-                        currentLevel = UUID.randomUUID().toString().substring(0, 20)
+                        currentLevel = Helper().generateLevelId(listLevel.size)
                         listLevel.add(
                             Data.Level(currentLevel, "2024", "Title", "Andra", FilterStatus.DRAFT)
                         )
@@ -181,7 +182,7 @@ class BoardActivity : AppCompatActivity() {
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
                 // FIXME: kalo di declare di menu title, progress ini nanti hapus
-                //Progress().updateUserAnswer(AnswerStatus.PROGRESS, this, lifecycleScope)
+
 
                 playNext()
             }
@@ -206,6 +207,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeKeyboard.apply {
             btnBackSpace.setOnClickListener() {
                 box[position].text = ""
+                upsertUserSlot(position, box[position].text.toString())
                 onPressBackSpace()
                 Sound().soundTyping(this@BoardActivity)
                 YoYo.with(Techniques.Landing)
@@ -213,14 +215,16 @@ class BoardActivity : AppCompatActivity() {
                     .playOn(btnBackSpace);
             }
             btnShuffle.setOnClickListener() {
-                for (i in 0 until intKey.size) {
-                    YoYo.with(Techniques.Hinge).duration(1000)
-                        .onEnd {
-                            YoYo.with(Techniques.RotateInDownLeft).duration(300).playOn(intKey[i])
-                            showAnswerKeypad()
-                        }
-                        .playOn((intKey[i]))
-
+                lifecycle.coroutineScope.launch {
+                    for (i in 0 until intKey.size) {
+                        YoYo.with(Techniques.RotateIn)
+                            .onEnd {
+                                YoYo.with(Techniques.Landing).duration(500).playOn(intKey[i])
+                                showAnswerKeypad()
+                            }
+                            .playOn((intKey[i]))
+                        delay(50)
+                    }
                 }
                 Sound().soundShuffle(this@BoardActivity)
                 YoYo.with(Techniques.Landing)
@@ -233,6 +237,7 @@ class BoardActivity : AppCompatActivity() {
                 intKey[i].setOnTouchListener(View.OnTouchListener() { _, motionEvent ->
                     when (motionEvent.action) {
                         MotionEvent.ACTION_DOWN -> {
+                            upsertUserSlot(position, intKey[i].text.toString())
                             box[position].text = intKey[i].text
                             YoYo.with(Techniques.Landing)
                                 .duration(1000)
@@ -240,7 +245,6 @@ class BoardActivity : AppCompatActivity() {
                             onPressAbjabMove()
                             checkWinCondition(false)
                             Sound().soundTyping(this@BoardActivity)
-                            upsertUserSlot(position, intKey[i].text.toString())
                         }
 
                         MotionEvent.ACTION_UP -> {
@@ -326,8 +330,6 @@ class BoardActivity : AppCompatActivity() {
             tvSpanQuestion.setOnClickListener() {
                 Sound().soundOnClickBox(this@BoardActivity)
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(tvSpanQuestion)
-                //pickByArrow = false
-                //onClickBox()
                 for (i in currentRange.indices) {
                     if (box[currentRange[i]].text.isEmpty()) {
                         position = currentRange[i]
@@ -486,12 +488,24 @@ class BoardActivity : AppCompatActivity() {
 
     } //onCreate
 
-
-    /*APA INIIIIIIIIIIIII*/
-    private fun loadUserProgress() {
-
+    private fun deleteUserSlotDone(){
+        lifecycleScope.launch {
+            DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(Const.currentLevel)
+        }
     }
 
+    private fun loadUserState() {
+        lifecycleScope.launch {
+            val userAnswerSlot = DB.getInstance(applicationContext)
+                .userAnswerSlot().getAnswerSlot(currentLevel)
+                .ifEmpty { return@launch }
+            userAnswerSlot.map { it.answerSlot }.forEach {
+                for (i in it.keys) {
+                    box[i].text = it.getValue(i)
+                }
+            }
+        }
+    }
 
     private fun upsertUserSlot(charAt: Int, charStr: String) {
         lifecycleScope.launch {
@@ -499,7 +513,7 @@ class BoardActivity : AppCompatActivity() {
             answerSlot.put(charAt, charStr)
             DB.getInstance(applicationContext).userAnswerSlot().upsertSlot(
                 Data.UserAnswerSlot(
-                    id = currentLevel + "-at-" + charAt,
+                    id = currentLevel + "-" + charAt.toString(),
                     levelId = currentLevel,
                     answerSlot = answerSlot
                 )
@@ -560,6 +574,7 @@ class BoardActivity : AppCompatActivity() {
                                 position = x
                                 setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
+                                upsertUserSlot(x, box[x].tag.toString())
                                 YoYo.with(Techniques.RollIn)
                                     .onEnd {
                                         YoYo.with(Techniques.Bounce).playOn(box[x])
@@ -574,6 +589,7 @@ class BoardActivity : AppCompatActivity() {
                                 position = x
                                 setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
+                                upsertUserSlot(x, box[x].tag.toString())
                                 YoYo.with(Techniques.SlideInUp)
                                     .onEnd {
                                         YoYo.with(Techniques.Bounce).playOn(box[x])
@@ -648,6 +664,7 @@ class BoardActivity : AppCompatActivity() {
                     Sound().soundSuccess(this@BoardActivity)
                     position = x
                     box[x].text = box[x].tag.toString()
+                    upsertUserSlot(x, box[x].tag.toString())
                     pickByArrow = false
                     setInputAnswerDirection()
                     onClickBox()
@@ -787,7 +804,7 @@ class BoardActivity : AppCompatActivity() {
 
     private fun fillTextDescription() {
         if (boardSet == BoardSet.EDITOR_NEW || boardSet == BoardSet.EDITOR_EDIT) {
-            listLevel.filter { it.id == Const.currentLevel }.forEach() {
+            listLevel.filter { it.id == currentLevel }.forEach() {
                 binding.includeEditor.apply {
                     textLevelId.text = it.id
                     textCategory.text = it.category
@@ -868,6 +885,7 @@ class BoardActivity : AppCompatActivity() {
             in 29..54 -> {
                 val s = event?.displayLabel
                 box[x].text = s.toString()
+                upsertUserSlot(x, s.toString())
                 onPressAbjabMove()
                 checkWinCondition(false)
                 YoYo.with(Techniques.Landing)
@@ -967,10 +985,11 @@ class BoardActivity : AppCompatActivity() {
         //onClickBox()
         if (pass) {
             if (boardSet != BoardSet.PLAY_RANDOM) {
+                deleteUserSlotDone()
                 Progress().updateUserAnswer(
                     Const.AnswerStatus.DONE, this, lifecycle
                 )
-                progress = Progress().getUserProgress(this, lifecycle)
+                selesai = Progress().getUserSelesai(this, lifecycle)
             }
             Sound().soundWinning(this)
             winDialog(this)
@@ -996,7 +1015,8 @@ class BoardActivity : AppCompatActivity() {
         lifecycleScope.launch {
             if (boardSet == BoardSet.PLAY_RANDOM)
                 bind.tvSelamat.text = "Lanjutkan bermain?"
-            else bind.tvSelamat.text = "Lolos Level $indexOfCategory di kategori $currentCategory"
+            else bind.tvSelamat.text =
+                "Berhasil melewati \nLevel $indexOfCategory \nkategori $currentCategory"
 
             // FIXME: Data level coba pake fungsi aja, soalnya dipake dua tempat sementara gini dulu
             var dataLevel = mutableListOf<Data.Level>()
@@ -1009,8 +1029,9 @@ class BoardActivity : AppCompatActivity() {
 
             if (boardSet != BoardSet.PLAY_RANDOM) {
                 val ct = dataLevel.map { it.id }
-                if (progress.containsAll(ct)) {
-                    bind.tvSelamat.text = "Semua Level di Kategori $currentCategory sudah selesai"
+                if (selesai.containsAll(ct)) {
+                    bind.tvSelamat.text = "Selamat \nanda sudah menyelesaikan\n" +
+                            "Kategori $currentCategory"
                     bind.btnNext.visibility = View.GONE
                 }
             }
@@ -1051,7 +1072,7 @@ class BoardActivity : AppCompatActivity() {
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                 val count = listLevel.size
 
-                if (acakHolder.size == progress.size) {
+                if (acakHolder.size == selesai.size) {
                     acakHolder.clear()
                 }
 
@@ -1063,7 +1084,7 @@ class BoardActivity : AppCompatActivity() {
                         continue
                     }
 
-                    if (progress.contains(listLevel[x].id)) {
+                    if (selesai.contains(listLevel[x].id)) {
                         acakHolder.add(listLevel[x].id)
                         currentLevel = listLevel[x].id
                         break
@@ -1095,7 +1116,7 @@ class BoardActivity : AppCompatActivity() {
                 includeEditor.mainContainer.visibility = View.GONE
                 val index = listLevel.indexOfFirst { it.id == currentLevel }
                 val category = listLevel[index].category
-                val msg = "Level:  ${Helper().format(index + 1)} \n" +
+                val msg = "Level:  ${Helper().formatLevelId(index + 1)} \n" +
                         "Category: ${category}"
                 includeHeader.tvLabelTop.text = msg
             }
@@ -1138,7 +1159,7 @@ class BoardActivity : AppCompatActivity() {
 
             if (isNext) {
                 for (i in ct) {
-                    if (!progress.contains(i)) {
+                    if (!selesai.contains(i)) {
                         currentLevel = i
                         break
                     }
@@ -1169,7 +1190,7 @@ class BoardActivity : AppCompatActivity() {
                 includeEditor.mainContainer.visibility = View.GONE
 
                 val index = dataLevel.indexOfFirst { it.id == currentLevel }
-                indexOfCategory = Helper().format(index + 1)
+                indexOfCategory = Helper().formatLevelId(index + 1)
                 val category = currentCategory
                 val msg =
                     "Level ke: ${indexOfCategory} \n" +
@@ -1194,6 +1215,7 @@ class BoardActivity : AppCompatActivity() {
                 btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
             }
             setBoxTagText()
+            loadUserState()
             position = listPartial.first { it.levelId == currentLevel }.charAt
             pickByArrow = false
             setInputAnswerDirection()
@@ -1728,12 +1750,13 @@ class BoardActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val id: String = UUID.randomUUID().toString()
             val number: Int = bind.etNoInput.text.toString().toInt()
             val asking: String = bind.etAskInput.text.toString().trim()
             val answer: String = bind.etAnswerInput.text.toString().uppercase()
             val direction: String = bind.swDirection.text.toString()
 
+            val subDir = direction[0].toString()
+            val id: String = Helper().generateQuestionId(currentLevel, number, subDir)
             lifecycle.coroutineScope.launch {
                 val job1 = async {
                     addQuestion(
@@ -1773,8 +1796,8 @@ class BoardActivity : AppCompatActivity() {
         rowAvailable: List<Int>,
         colAvailable: List<Int>
     ) {
-        val levelId = Const.currentLevel
-        val data = Data.listQuestion
+        val data = listQuestion
+        val levelId = currentLevel
         val box = if (direction == InputQuestionDirection.HORIZONTAL.name) {
             rowAvailable.toMutableList()
         } else {
@@ -1786,7 +1809,7 @@ class BoardActivity : AppCompatActivity() {
             slot.add(box[i])
         }
 
-        if (Const.inputMode == InputMode.NEW.name) {
+        if (inputMode == InputMode.NEW.name) {
             data.add(
                 Data.Question(
                     levelId = levelId,
@@ -1798,7 +1821,7 @@ class BoardActivity : AppCompatActivity() {
                     slot = slot
                 )
             )
-            Const.position = slot[0]
+            position = slot[0]
             currentIndex = Data.listQuestion.count() { it.levelId == levelId }
         }
 

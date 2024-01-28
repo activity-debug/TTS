@@ -14,7 +14,7 @@ class Const {
 
     enum class QrAction {READ, CREATE}
 
-    enum class AnswerStatus {DONE, PROGRESS}
+    enum class AnswerStatus {DONE, PROGRESS, UNDONE}
 
     enum class FilterStatus {ALL, DRAFT, POST}
 
@@ -29,6 +29,7 @@ class Const {
         var currentUserId = "ADMIN"
         var currentUser = -1
 
+        var selesai = arrayListOf<String>()
         var progress = arrayListOf<String>()
 
         var resetLevel = false

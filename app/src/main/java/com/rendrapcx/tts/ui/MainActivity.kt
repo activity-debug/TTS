@@ -39,6 +39,7 @@ import com.rendrapcx.tts.constant.Const.Companion.currentUser
 import com.rendrapcx.tts.constant.Const.Companion.currentUserId
 import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
 import com.rendrapcx.tts.constant.Const.Companion.progress
+import com.rendrapcx.tts.constant.Const.Companion.selesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogExitAppBinding
 import com.rendrapcx.tts.databinding.DialogLoginBinding
@@ -106,15 +107,16 @@ class MainActivity : AppCompatActivity() {
         viewModelNet.state.observe(this) { state ->
             binding.apply {
                 when (state) {
-                    MyState.Fetched -> textView7.text = "fetch"
-                    MyState.Error -> textView7.text = "error"
+                    MyState.Fetched -> btnOnline.visibility = View.VISIBLE
+                    MyState.Error -> btnOnline.visibility = View.INVISIBLE
                     else -> {}
                 }
             }
         }
-        binding.textView7.text = "error"
+        binding.btnOnline.visibility = View.INVISIBLE
 
         lifecycleScope.launch {
+            /*INIT DATABASE*/
             val job = async {
                 val isEmpty =
                     DB.getInstance(applicationContext)
@@ -132,6 +134,7 @@ class MainActivity : AppCompatActivity() {
                 listUser = DB.getInstance(applicationContext).user().getAllUser()
                 currentUser = UserRef().getCurrentUser()
 
+                selesai = Progress().getUserSelesai(this@MainActivity, lifecycle)
                 progress = Progress().getUserProgress(this@MainActivity, lifecycle)
             }
             job1.await()
@@ -149,7 +152,10 @@ class MainActivity : AppCompatActivity() {
         binding.apply {
 
             btnOnline.setOnClickListener() {
-                Toast.makeText(this@MainActivity, "${progress}", Toast.LENGTH_SHORT).show()
+//                lifecycleScope.launch {
+//                    DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
+//                }
+                //Toast.makeText(this@MainActivity, "${progress}", Toast.LENGTH_SHORT).show()
             }
 
             btnTrophy.setOnClickListener() {
@@ -159,7 +165,6 @@ class MainActivity : AppCompatActivity() {
             btnGoListQuestion.setOnClickListener() {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
                 startActivity(i)
-                //finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
@@ -192,27 +197,7 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-//                val count = listLevel.size
-//
-//                val arr = arrayListOf<Int>()
-//                for (i in 0 until count) {
-//                    val x = (0 until count).random()
-//                    if (!progress.contains(listLevel[x].id)) {
-//                        currentLevel = listLevel[x].id
-//                        break
-//                    }
-//                    arr.add(i)
-//                }
-//                if (arr.size == count) {
-//                    Toast.makeText(
-//                        this@MainActivity,
-//                        "Silakan selesaikan dulu soal untuk bisa menjalankan secara acak",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                    return@setOnClickListener
-//                }
-
-                if (progress.isEmpty()) {
+                if (selesai.isEmpty()) {
                     Dialog().showDialog(
                         this@MainActivity,
                         "Belum ada soal yang Anda selesaikan,\n" +
@@ -225,7 +210,6 @@ class MainActivity : AppCompatActivity() {
                 boardSet = Const.BoardSet.PLAY_RANDOM
                 val intent = Intent(this@MainActivity, BoardActivity::class.java)
                 startActivity(intent)
-                //finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
 
@@ -234,13 +218,7 @@ class MainActivity : AppCompatActivity() {
             btnGoScan.setOnClickListener() {
                 val intent = Intent(this@MainActivity, BarcodeActivity::class.java)
                 startActivity(intent)
-                //finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            }
-
-            btnExitApp.setOnClickListener() {
-                exitDialog()
-                loadBannerAds()
             }
         }
     }
@@ -323,16 +301,6 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
-//    private fun getUserProgress(): ArrayList<String>{
-//        val arr = arrayListOf<String>()
-//        lifecycleScope.launch {
-//            Data.userAnswerTTS = DB.getInstance(applicationContext).userAnswerTTS().getAllUserAnswer()
-//            Data.userAnswerTTS.filter { it.status == Const.AnswerStatus.DONE }.forEach {
-//                arr.add(it.levelId)
-//            }
-//        }
-//        return arr
-//    }
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
@@ -365,7 +333,7 @@ class MainActivity : AppCompatActivity() {
                         boardSet = Const.BoardSet.PLAY_USER
                         currentLevel = it.id
 
-                        if (progress.contains(currentLevel)) {
+                        if (selesai.contains(currentLevel)) {
                             Dialog().apply {
                                 showDialogYesNo(
                                     "Info",

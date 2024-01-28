@@ -4,9 +4,9 @@
     <corners android:radius="5dp" />
     <size android:height="36dp"
         android:width="36dp"/>
-    <solid android:color="@color/button_text"/>
+    <solid android:color="#F1F8E9"/>
     <stroke
-        android:color="@color/selected"
+        android:color="#C8E6C9"
         android:dashWidth="10px"
         android:dashGap="0dp"
         android:width="1sp"/>

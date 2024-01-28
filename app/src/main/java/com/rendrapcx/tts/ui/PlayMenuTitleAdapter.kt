@@ -1,19 +1,15 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
-import android.icu.text.DecimalFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.rendrapcx.tts.R
-import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.progress
+import com.rendrapcx.tts.constant.Const.Companion.selesai
 import com.rendrapcx.tts.databinding.DialogMenuItemTitleBinding
 import com.rendrapcx.tts.helper.Helper
-import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
-import kotlinx.coroutines.launch
 
 class PlayMenuTitleAdapter : RecyclerView.Adapter<PlayMenuTitleAdapter.PlayViewHolder>() {
     private var listLevel = mutableListOf<Data.Level>()
@@ -49,10 +45,16 @@ class PlayMenuTitleAdapter : RecyclerView.Adapter<PlayMenuTitleAdapter.PlayViewH
     override fun onBindViewHolder(holder: PlayViewHolder, position: Int) {
         val level = listLevel[position]
 
-        val pos = Helper().format(position+1)
+        val pos = Helper().formatTigaDigit(position+1)
         holder.binding.tvTitleLevel.text = pos //+ " " + Const.strRed
-        if (level.id in progress) holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_done)
-        else holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_undone)
+        holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_undone)
+
+        if (level.id in selesai) {
+            holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_done)
+        }
+        if (level.id in progress){
+            holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_progress)
+        }
 
         holder.binding.root.setOnClickListener {
             onClickView?.invoke(level)

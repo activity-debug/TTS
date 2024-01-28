@@ -33,7 +33,12 @@
             android:exported="false" />
         <activity
             android:name=".ui.BarcodeActivity"
-            android:exported="false"/>
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan|adjustResize"
+            tools:ignore="LockedOrientationActivity"
+            tools:replace="screenOrientation"
+            />
 <!--            android:screenOrientation="fullSensor"-->
 <!--            tools:replace="screenOrientation"-->
 <!--            />-->
@@ -42,10 +47,20 @@
             android:exported="false" />
         <activity
             android:name=".ui.BoardActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan|adjustResize"
+            tools:ignore="LockedOrientationActivity"
+            tools:replace="screenOrientation"
+            />
         <activity
             android:name=".ui.QuestionActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan|adjustResize"
+            tools:ignore="LockedOrientationActivity"
+            tools:replace="screenOrientation"
+            />
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"

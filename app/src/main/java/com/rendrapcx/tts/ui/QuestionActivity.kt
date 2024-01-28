@@ -1,7 +1,6 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
@@ -192,8 +191,7 @@ class QuestionActivity : AppCompatActivity() {
                     "QR Image tidak bisa di generate. \n" +
                     "kirim soal terinkripsi"
             Toast.makeText(this, "${e.message}", Toast.LENGTH_SHORT).show()
-        }
-        finally {
+        } finally {
             if (error) {
                 binding.btnShareQr.text = "Share As Text"
                 binding.tvWarningInfo.visibility = View.VISIBLE
@@ -228,8 +226,7 @@ class QuestionActivity : AppCompatActivity() {
             barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
         val x = levelShareIndexId
         val lvl = listLevel[x].category.trim().uppercase()
-        //val tit = listLevel[x].title.trim().uppercase()
-        val index = Helper().format(x)
+        val index = Helper().formatLevelId(x)
         val filename = "${lvl}-${index}-${System.currentTimeMillis()}.png"
         var outputStream: OutputStream? = null
 
@@ -345,12 +342,15 @@ class QuestionActivity : AppCompatActivity() {
                             .deleteQuestionByLevelId(levelId)
                     }
                     job2.await()
-
                     val job3 = async {
                         listLevel.clear()
                         listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                     }
                     job3.await()
+                    val job4 = async {
+                        DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(levelId)
+                    }
+                    job4.await()
 
                     questionAdapter.setListItem(listLevel)
                     questionAdapter.notifyDataSetChanged()
