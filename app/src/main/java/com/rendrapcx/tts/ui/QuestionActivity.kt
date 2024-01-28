@@ -61,7 +61,7 @@ class QuestionActivity : AppCompatActivity() {
     private var questionAdapter = QuestionAdapter()
     private var levelShareIndexId = -1
     private var myClipboard: ClipboardManager? = null
-    private var myClip: ClipData? = null
+    //private var myClip: ClipData? = null
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)

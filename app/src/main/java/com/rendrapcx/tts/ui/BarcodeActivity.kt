@@ -55,10 +55,8 @@ enum class RequestCode {
 
 class BarcodeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBarcodeBinding
-    private var fileUrl = ""
-    private var imgUri = ""
     private var myClipboard: ClipboardManager? = null
-    private var myClip: ClipData? = null
+    //private var myClip: ClipData? = null
 
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
@@ -68,7 +66,7 @@ class BarcodeActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         Helper().apply { hideSystemUI() }
-        myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?;
+        myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
 
         binding.textResultContent.text = ""
         binding.editPaste.setText("")
