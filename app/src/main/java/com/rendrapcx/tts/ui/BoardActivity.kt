@@ -181,9 +181,6 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
-                // FIXME: kalo di declare di menu title, progress ini nanti hapus
-
-
                 playNext()
             }
 
@@ -197,12 +194,15 @@ class BoardActivity : AppCompatActivity() {
 
         }
 
-        for (i in 0 until box.size) {
-            YoYo.with(Techniques.RotateInUpRight)
-                .duration(2000)
-                .repeat(0)
-                .playOn(box[i]);
-        }
+//        lifecycle.coroutineScope.launch {
+//            for (i in 0 until box.size) {
+//                YoYo.with(Techniques.FlipInY)
+//                    .duration(500)
+//                    .repeat(0)
+//                    .playOn(box[i])
+//                delay(30)
+//            }
+//        }
 
         binding.includeKeyboard.apply {
             btnBackSpace.setOnClickListener() {
@@ -488,7 +488,7 @@ class BoardActivity : AppCompatActivity() {
 
     } //onCreate
 
-    private fun deleteUserSlotDone(){
+    private fun deleteUserSlotDone() {
         lifecycleScope.launch {
             DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(Const.currentLevel)
         }
@@ -635,7 +635,7 @@ class BoardActivity : AppCompatActivity() {
                     setOnSelectedColor()
                     if (box[tag[i]].text != box[tag[i]].tag) arr.add(tag[i])
 
-                    delay(100)
+                    delay(30)
                 }
             }
             job.await()
@@ -1185,7 +1185,7 @@ class BoardActivity : AppCompatActivity() {
             val jobExtract = async { listPartial = getPartialData() }
             jobExtract.await()
 
-            Sound().soundStartGame(this@BoardActivity)
+            Sound().soundFirstLaunch(this@BoardActivity)
             binding.apply {
                 includeEditor.mainContainer.visibility = View.GONE
 
@@ -1200,10 +1200,13 @@ class BoardActivity : AppCompatActivity() {
 
             position = listPartial.first { it.levelId == currentLevel }.charAt
 
+            /*/DI PLAYNEXT*/
             for (i in 0 until box.size) {
+                box[i].visibility = View.VISIBLE
                 box[i].text = ""
                 box[i].tag = ""
-                box[i].visibility = View.VISIBLE
+                YoYo.with(Techniques.RotateInUpRight).duration(1000).playOn(box[i])
+                delay(10)
             }
 
             telunjuk = 0
@@ -1214,6 +1217,7 @@ class BoardActivity : AppCompatActivity() {
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_active)
                 btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
             }
+
             setBoxTagText()
             loadUserState()
             position = listPartial.first { it.levelId == currentLevel }.charAt
@@ -1466,6 +1470,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER, BoardSet.PLAY_RANDOM -> {
+                Sound().soundStartGame(this)
                 tag.clear()
                 listPartial.filter { it.levelId == currentLevel }.forEach() {
                     for (i in 0 until box.size) {
@@ -1474,6 +1479,20 @@ class BoardActivity : AppCompatActivity() {
                             box[i].tag = it.charStr
                             tag.add(it.charAt)
                         }
+                    }
+                }
+                lifecycle.coroutineScope.launch {
+                    for (i in 0 until box.size) {
+                        if (box[i].tag == "") {
+                            if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_RANDOM) {
+                                YoYo.with(Techniques.DropOut).duration(1000)
+                                    .onEnd {
+                                        box[i].visibility = View.INVISIBLE
+                                    }
+                                    .playOn(box[i])
+                            }
+                        }
+                        delay(40)
                     }
                 }
                 resetBoxStyle()
@@ -1548,11 +1567,11 @@ class BoardActivity : AppCompatActivity() {
 
     private fun resetBoxStyle() {
         for (i in 0 until box.size) {
-            if (box[i].tag == "") {
-                if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_RANDOM) {
-                    box[i].visibility = View.INVISIBLE
-                }
-            }
+//            if (box[i].tag == "") {
+//                if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_RANDOM) {
+//                    box[i].visibility = View.INVISIBLE
+//                }
+//            }
             box[i].setTextColor(getColor(this, R.color.button))
             box[i].setBackgroundResource(R.drawable.box_shape_active)
         }

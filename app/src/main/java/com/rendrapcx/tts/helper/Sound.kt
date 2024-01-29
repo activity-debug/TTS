@@ -98,4 +98,10 @@ class Sound {
         mp.start()
     }
 
+    fun soundFirstLaunch(context: Context){
+        if (!isSound) return
+        val mp = MediaPlayer.create(context.applicationContext, R.raw.launch_sequence) //.hybrid_logo //.crystal_logo
+        mp.start()
+    }
+
 }
