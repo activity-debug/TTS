@@ -14,6 +14,12 @@ interface IUserAnswerTTS {
     @Update
     suspend fun updateUserAnswer(userAnswer: Data.UserAnswerTTS)
 
+    @Query("DELETE FROM user_answer_tts")
+    suspend fun deleteAllUSerAnswer()
+
+    @Query("DELETE FROM user_answer_tts WHERE level_id =:levelId;")
+    suspend fun deleteByLevelId(levelId: String)
+
     @Query("SELECT * FROM user_answer_tts")
     suspend fun getAllUserAnswer(): MutableList<Data.UserAnswerTTS>
 

@@ -40,6 +40,7 @@ import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.inputMode
 import com.rendrapcx.tts.constant.Const.Companion.position
+import com.rendrapcx.tts.constant.Const.Companion.progress
 import com.rendrapcx.tts.constant.Const.Companion.selesai
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
@@ -111,6 +112,9 @@ class BoardActivity : AppCompatActivity() {
 
         loadBannerAds()
 
+        binding.includeEditor.mainContainer.visibility = View.GONE
+        binding.includeQuestionSpan.tvSpanQuestion.text = ""
+
         initBoardChild()
         initIntKeyChild()
 
@@ -181,6 +185,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY, BoardSet.PLAY_USER -> {
+                /*PlayNext Init*/
                 playNext()
             }
 
@@ -501,7 +506,9 @@ class BoardActivity : AppCompatActivity() {
                 .ifEmpty { return@launch }
             userAnswerSlot.map { it.answerSlot }.forEach {
                 for (i in it.keys) {
+                    YoYo.with(Techniques.FlipInY).duration(2000).playOn(box[i])
                     box[i].text = it.getValue(i)
+                    delay(100)
                 }
             }
         }
@@ -989,10 +996,14 @@ class BoardActivity : AppCompatActivity() {
                 Progress().updateUserAnswer(
                     Const.AnswerStatus.DONE, this, lifecycle
                 )
-                selesai = Progress().getUserSelesai(this, lifecycle)
+                Sound().soundWinning(this)
+                winDialog(this)
+            } else {
+                Sound().soundWinning(this)
+                winDialog(this)
             }
-            Sound().soundWinning(this)
-            winDialog(this)
+
+
         }
     }
 
@@ -1013,6 +1024,10 @@ class BoardActivity : AppCompatActivity() {
         dialog.setCancelable(false)
 
         lifecycleScope.launch {
+
+            //progress = Progress().getUserProgress(this@BoardActivity, lifecycle)
+            selesai = Progress().getUserSelesai(this@BoardActivity, lifecycle)
+
             if (boardSet == BoardSet.PLAY_RANDOM)
                 bind.tvSelamat.text = "Lanjutkan bermain?"
             else bind.tvSelamat.text =
@@ -1068,6 +1083,12 @@ class BoardActivity : AppCompatActivity() {
         lifecycleScope.launch {
             boardSet = BoardSet.PLAY_RANDOM
 
+            for (i in 0 until box.size) {
+                box[i].text = ""
+                box[i].tag = ""
+                box[i].visibility = View.VISIBLE
+            }
+
             val jobLevel = async {
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                 val count = listLevel.size
@@ -1121,12 +1142,6 @@ class BoardActivity : AppCompatActivity() {
                 includeHeader.tvLabelTop.text = msg
             }
 
-            for (i in 0 until box.size) {
-                box[i].text = ""
-                box[i].tag = ""
-                box[i].visibility = View.VISIBLE
-            }
-
             telunjuk = 0
             robot = 0
             binding.includeGameHelperBottom.apply {
@@ -1146,7 +1161,8 @@ class BoardActivity : AppCompatActivity() {
 
     private fun playNext() {
         lifecycleScope.launch {
-            //Get Data Level by Category on Play
+            skipActions(0)
+
             var dataLevel = mutableListOf<Data.Level>()
             val job = async {
                 dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
@@ -1185,7 +1201,6 @@ class BoardActivity : AppCompatActivity() {
             val jobExtract = async { listPartial = getPartialData() }
             jobExtract.await()
 
-            Sound().soundFirstLaunch(this@BoardActivity)
             binding.apply {
                 includeEditor.mainContainer.visibility = View.GONE
 
@@ -1196,34 +1211,46 @@ class BoardActivity : AppCompatActivity() {
                     "Level ke: ${indexOfCategory} \n" +
                             "Category: ${category}"
                 includeHeader.tvLabelTop.text = msg
-            }
 
-            position = listPartial.first { it.levelId == currentLevel }.charAt
+                includeGameHelperBottom.apply {
+                    btnGetHint.setImageResource(R.drawable.hand_point_up_solid)
+                    btnRobot.setImageResource(R.drawable.robot_solid)
+                    btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_active)
+                    btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
+                }
 
-            /*/DI PLAYNEXT*/
-            for (i in 0 until box.size) {
-                box[i].visibility = View.VISIBLE
-                box[i].text = ""
-                box[i].tag = ""
-                YoYo.with(Techniques.RotateInUpRight).duration(1000).playOn(box[i])
-                delay(10)
+                Sound().soundFirstLaunch(this@BoardActivity)
+                /*/DI PLAYNEXT*/
+                for (i in 0 until box.size) {
+                    box[i].visibility = View.VISIBLE
+                    box[i].text = ""
+                    box[i].tag = ""
+                    YoYo.with(Techniques.RotateInUpRight).duration(1000).playOn(box[i])
+                    delay(5)
+                }
+
             }
 
             telunjuk = 0
             robot = 0
-            binding.includeGameHelperBottom.apply {
-                btnGetHint.setImageResource(R.drawable.hand_point_up_solid)
-                btnRobot.setImageResource(R.drawable.robot_solid)
-                btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_active)
-                btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
-            }
 
-            setBoxTagText()
-            loadUserState()
+            position = listPartial.first { it.levelId == currentLevel }.charAt
+
+            val job1 = async {
+                setBoxTagText()
+            }
+            job1.await()
+
             position = listPartial.first { it.levelId == currentLevel }.charAt
             pickByArrow = false
             setInputAnswerDirection()
-            onClickBox()
+            setOnSelectedColor()
+            setOnRangeStyle()
+            binding.includeQuestionSpan.tvSpanQuestion.text = selectedQuestion
+
+            //init progress to progress
+            Progress().updateUserAnswer(Const.AnswerStatus.PROGRESS, this@BoardActivity, lifecycle)
+            progress = Progress().getUserProgress(this@BoardActivity, lifecycle)
         }
     }
 
@@ -1423,12 +1450,12 @@ class BoardActivity : AppCompatActivity() {
     }
 
 
-    private fun hasBothId(): Boolean {
-        val row = listPartial.filter { it.charAt == position }.first().rowQuestionId
-        val col = listPartial.filter { it.charAt == position }.first().colQuestionId
-        if (row.isNotEmpty() && col.isNotEmpty()) return true
-        else return false
-    }
+//    private fun hasBothId(): Boolean {
+//        val row = listPartial.filter { it.charAt == position }.first().rowQuestionId
+//        val col = listPartial.filter { it.charAt == position }.first().colQuestionId
+//        if (row.isNotEmpty() && col.isNotEmpty()) return true
+//        else return false
+//    }
 
     private fun showAnswerKeypad() {
         binding.includeEditor.apply {
@@ -1494,6 +1521,17 @@ class BoardActivity : AppCompatActivity() {
                         }
                         delay(40)
                     }
+                    for (i in 0 until intKey.size) {
+                        YoYo.with(Techniques.RotateIn)
+                            .onEnd {
+                                YoYo.with(Techniques.Landing).duration(500).playOn(intKey[i])
+                                showAnswerKeypad()
+                                skipActions(1)
+                            }
+                            .playOn((intKey[i]))
+                        delay(40)
+                    }
+                    loadUserState()
                 }
                 resetBoxStyle()
             }
@@ -1583,6 +1621,7 @@ class BoardActivity : AppCompatActivity() {
             val child = binding.includeKeyboard.integratedKeyboard.getChildAt(i)
             if (child is TextView) {
                 intKey.add(child)
+                intKey[i].text = ""
             }
         }
     }

@@ -154,7 +154,9 @@ class MainActivity : AppCompatActivity() {
             btnOnline.setOnClickListener() {
 //                lifecycleScope.launch {
 //                    DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
+//                    DB.getInstance(applicationContext).userAnswerTTS().deleteAllUSerAnswer()
 //                }
+
                 //Toast.makeText(this@MainActivity, "${progress}", Toast.LENGTH_SHORT).show()
             }
 
@@ -346,12 +348,9 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             val i = Intent(this@MainActivity, BoardActivity::class.java)
                             startActivity(i)
-                            //finish()
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                             dialog.dismiss()
                         }
-
-
                     }
 
                 }

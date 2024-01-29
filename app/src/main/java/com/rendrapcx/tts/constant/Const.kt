@@ -34,7 +34,6 @@ class Const {
 
         var resetLevel = false
 
-        var gameState = GameState.CREATOR
         var boardSet = BoardSet.EDITOR_NEW
 
         var position = 0

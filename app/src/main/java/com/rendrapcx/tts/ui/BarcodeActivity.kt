@@ -2,7 +2,6 @@ package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -29,6 +28,7 @@ import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.integration.android.IntentIntegrator
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.RequestCode
 import com.rendrapcx.tts.databinding.ActivityBarcodeBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.DB
@@ -46,17 +46,12 @@ import java.io.InputStream
 import java.util.Base64
 
 
-enum class RequestCode {
-    WRITE_EXTERNAL_STORAGE_PERMISSION_CODE,
-    READ_EXTERNAL_STORAGE_PERMISSION_CODE,
-    CAMERA_PERMISSION_CODE,
-}
-
-
 class BarcodeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBarcodeBinding
     private var myClipboard: ClipboardManager? = null
     //private var myClip: ClipData? = null
+
+    private var counterClearInput = 0
 
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
@@ -80,6 +75,20 @@ class BarcodeActivity : AppCompatActivity() {
                 startActivity(i)
                 finish()
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+            btnSettingPlay.setOnClickListener() {
+                counterClearInput++
+                if (counterClearInput > 3) {
+                    lifecycleScope.launch {
+                        DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
+                        DB.getInstance(applicationContext).userAnswerTTS().deleteAllUSerAnswer()
+                        Toast.makeText(
+                            this@BarcodeActivity,
+                            "user_answer_tts | user_answer_tts = CLEARED ",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             }
         }
 
@@ -140,7 +149,11 @@ class BarcodeActivity : AppCompatActivity() {
                     Toast.makeText(this@BarcodeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
                 } finally {
                     if (error) {
-                        Toast.makeText(applicationContext, "Bukan data soal Terka TTS", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            applicationContext,
+                            "Bukan data soal Terka TTS",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
                         binding.btnSaveSoal.visibility = View.VISIBLE
                         binding.textResultContent.text =

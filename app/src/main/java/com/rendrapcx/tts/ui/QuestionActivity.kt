@@ -342,15 +342,17 @@ class QuestionActivity : AppCompatActivity() {
                             .deleteQuestionByLevelId(levelId)
                     }
                     job2.await()
-                    val job3 = async {
+                    val job4 = async {
+                        DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(levelId)
+                        DB.getInstance(applicationContext).userAnswerTTS().deleteByLevelId(levelId)
+                    }
+                    job4.await()
+
+                    val reGetData = async {
                         listLevel.clear()
                         listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                     }
-                    job3.await()
-                    val job4 = async {
-                        DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(levelId)
-                    }
-                    job4.await()
+                    reGetData.await()
 
                     questionAdapter.setListItem(listLevel)
                     questionAdapter.notifyDataSetChanged()
