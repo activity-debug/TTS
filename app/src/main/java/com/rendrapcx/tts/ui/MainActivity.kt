@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity() {
 //                    DB.getInstance(applicationContext).userAnswerTTS().deleteAllUSerAnswer()
 //                }
 
-                //Toast.makeText(this@MainActivity, "${progress}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\nsedang dalam perbaikan", Toast.LENGTH_SHORT).show()
             }
 
             btnTrophy.setOnClickListener() {

@@ -1203,6 +1203,7 @@ class BoardActivity : AppCompatActivity() {
 
             binding.apply {
                 includeEditor.mainContainer.visibility = View.GONE
+                includeQuestionSpan.tvSpanQuestion.text = ""
 
                 val index = dataLevel.indexOfFirst { it.id == currentLevel }
                 indexOfCategory = Helper().formatLevelId(index + 1)
@@ -1246,7 +1247,6 @@ class BoardActivity : AppCompatActivity() {
             setInputAnswerDirection()
             setOnSelectedColor()
             setOnRangeStyle()
-            binding.includeQuestionSpan.tvSpanQuestion.text = selectedQuestion
 
             //init progress to progress
             Progress().updateUserAnswer(Const.AnswerStatus.PROGRESS, this@BoardActivity, lifecycle)
@@ -1526,6 +1526,7 @@ class BoardActivity : AppCompatActivity() {
                             .onEnd {
                                 YoYo.with(Techniques.Landing).duration(500).playOn(intKey[i])
                                 showAnswerKeypad()
+                                binding.includeQuestionSpan.tvSpanQuestion.text = selectedQuestion
                                 skipActions(1)
                             }
                             .playOn((intKey[i]))
