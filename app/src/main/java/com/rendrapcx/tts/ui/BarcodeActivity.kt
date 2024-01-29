@@ -75,14 +75,14 @@ class BarcodeActivity : AppCompatActivity() {
 
         binding.includeHeader.apply {
             tvLabelTop.text = "Scan Data Questioner"
-            btnBack.setOnClickListener() {
+            btnBack.setOnClickListener {
                 val i = Intent(this@BarcodeActivity, MainActivity::class.java)
                 startActivity(i)
                 finish()
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
 
-            btnSettingPlay.setOnClickListener() {
+            btnSettingPlay.setOnClickListener {
                 /*ENABLE EDITOR*/
                 counterClearInput++
                 if (counterClearInput > 9 && !isEditor) {
@@ -100,7 +100,7 @@ class BarcodeActivity : AppCompatActivity() {
 
             }
 
-            btnSettingPlay.setOnLongClickListener() {
+            btnSettingPlay.setOnLongClickListener {
                 /*RESET USER ANSWER*/
                 lifecycleScope.launch {
                     DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
@@ -123,15 +123,15 @@ class BarcodeActivity : AppCompatActivity() {
 
         binding.apply {
 
-            btnDecodeGallery.setOnClickListener() {
+            btnDecodeGallery.setOnClickListener {
                 openAlbums()
             }
 
-            btnDecodeFromCamera.setOnClickListener() {
+            btnDecodeFromCamera.setOnClickListener {
                 openCamera()
             }
 
-            btnSaveSoal.setOnClickListener() {
+            btnSaveSoal.setOnClickListener {
                 lifecycleScope.launch {
                     val job = async {
                         saveQRToDB()
@@ -143,12 +143,12 @@ class BarcodeActivity : AppCompatActivity() {
                     val i = Intent(this@BarcodeActivity, MainActivity::class.java)
                     startActivity(i)
                     finish()
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
 
                 }
             }
 
-            btnPasteSoal.setOnClickListener() {
+            btnPasteSoal.setOnClickListener {
                 var error = false
                 try {
                     val abc = myClipboard?.primaryClip
@@ -211,7 +211,7 @@ class BarcodeActivity : AppCompatActivity() {
                 )
             )
             //Add Questioner
-            listQuestion.filter { it.levelId == levelId }.map { it }.forEach() {
+            listQuestion.filter { it.levelId == levelId }.map { it }.forEach {
                 DB.getInstance(applicationContext).question().insertQuestion(
                     Data.Question(
                         levelId = it.levelId,

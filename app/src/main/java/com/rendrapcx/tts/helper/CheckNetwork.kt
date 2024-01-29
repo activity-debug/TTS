@@ -5,7 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 
-class Check {
+class CheckNetwork {
     @SuppressLint("ServiceCast")
     fun isConnected(context: Context): Boolean {
         val conMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

@@ -1,4 +1,4 @@
-package com.rendrapcx.tts.helper
+package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -11,7 +11,6 @@ import android.os.Build
 import android.text.InputFilter
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.WindowCompat
@@ -23,15 +22,15 @@ import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
-import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogYesNoBinding
+import com.rendrapcx.tts.helper.Sound
+import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
-import com.rendrapcx.tts.ui.BoardActivity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -75,7 +74,7 @@ open class Dialog {
         YoYo.with(Techniques.RubberBand).repeat(5).playOn(binding.btnHireMe)
 
 
-        binding.btnHireMe.setOnClickListener() {
+        binding.btnHireMe.setOnClickListener {
             val emailIntent = Intent(
                 Intent.ACTION_SENDTO, Uri.fromParts(
                     "mailto", "rendrapc33@gmail.com", null
@@ -124,7 +123,7 @@ open class Dialog {
             var isSound = UserRef().getIsSound()
             if (isSound) binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_enable)
             else binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_disable)
-            binding.imgBtnSound.setOnClickListener() {
+            binding.imgBtnSound.setOnClickListener {
                 if (isSound) {
                     binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_disable)
                     UserRef().setIsSound(false, context, lifecycle)
@@ -138,7 +137,7 @@ open class Dialog {
             }
 
             binding.swSettingKeyboard.isChecked = UserRef().getIntKey()
-            binding.swSettingKeyboard.setOnClickListener() {
+            binding.swSettingKeyboard.setOnClickListener {
                 UserRef().setIntKey("0", binding.swSettingKeyboard.isChecked, context, lifecycle)
                 Sound().soundClickSetting(context)
                 YoYo.with(Techniques.Wave).playOn(it)
@@ -169,14 +168,14 @@ open class Dialog {
             editTitle.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(50))
         }
 
-        Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {
+        Data.listLevel.filter { it.id == Const.currentLevel }.forEach {
             binding.editCategory.setText(it.category)
             binding.editTitle.setText(it.title)
             binding.editCreator.setText(it.userId)
         }
 
         fun updateList() {
-            Data.listLevel.filter { it.id == Const.currentLevel }.map { it }.forEach() {
+            Data.listLevel.filter { it.id == Const.currentLevel }.map { it }.forEach {
                 boardBinding.apply {
                     it.category = binding.editCategory.text.toString()
                     it.title = binding.editTitle.text.toString()
@@ -186,7 +185,7 @@ open class Dialog {
         }
 
         fun fillText() {
-            Data.listLevel.filter { it.id == Const.currentLevel }.forEach() {
+            Data.listLevel.filter { it.id == Const.currentLevel }.forEach {
                 boardBinding.includeEditor.apply {
                     textCategory.text = it.category
                     textTitle.text = it.title
@@ -195,7 +194,7 @@ open class Dialog {
             }
         }
 
-        binding.btnSubmit.setOnClickListener() {
+        binding.btnSubmit.setOnClickListener {
             updateList()
             fillText()
             dialog.dismiss()
@@ -227,11 +226,11 @@ open class Dialog {
         binding.btnOne.text = btnOneTitle
         binding.btnTwo.text = btnTwoTitle
 
-        binding.btnOne.setOnClickListener(){
+        binding.btnOne.setOnClickListener {
             dialog.dismiss()
         }
 
-        binding.btnTwo.setOnClickListener(){
+        binding.btnTwo.setOnClickListener {
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
             finish()

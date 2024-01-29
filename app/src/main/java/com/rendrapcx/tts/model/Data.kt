@@ -60,6 +60,14 @@ class Data {
         @ColumnInfo(name = "answer_slot") var answerSlot: MutableMap<Int, String>,
     )
 
+    @Entity(tableName = "helper_counter")
+    data class HelperCounter(
+        @PrimaryKey(autoGenerate = false)
+        @ColumnInfo(name = "id") var id :String,
+        @ColumnInfo(name = "hint_one") var hintOne: Int,
+        @ColumnInfo(name = "hint_two") var hintTwo: Int,
+    )
+
     @Entity(tableName = "user_preferences")
     data class UserPreferences(
         @PrimaryKey(autoGenerate = false)

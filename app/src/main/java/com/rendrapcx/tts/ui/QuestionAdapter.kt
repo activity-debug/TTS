@@ -11,10 +11,8 @@ import com.rendrapcx.tts.databinding.QuestionListItemBinding
 import com.rendrapcx.tts.model.Data
 import java.util.Locale
 
-class QuestionAdapter(
-) : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>() {
+class QuestionAdapter : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>() {
     private var listLevel = mutableListOf<Data.Level>()
-    private var onClickView: ((Data.Level) -> Unit)? = null
     private var onClickEdit: ((Data.Level) -> Unit)? = null
     private var onClickDelete: ((Data.Level) -> Unit)? = null
     private var onClickStatus: ((Data.Level) -> Unit)? = null
@@ -24,12 +22,6 @@ class QuestionAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setListItem(level: MutableList<Data.Level>) {
         this.listLevel = level
-        this.notifyDataSetChanged()
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun setOnClickView(callback: (Data.Level) -> Unit ){
-        this.onClickView = callback
         this.notifyDataSetChanged()
     }
 
@@ -64,7 +56,7 @@ class QuestionAdapter(
     }
 
     class QuestionViewHolder(val binding: QuestionListItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {}
+        RecyclerView.ViewHolder(binding.root)
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuestionViewHolder {
@@ -81,7 +73,7 @@ class QuestionAdapter(
         return listLevel.size
     }
 
-    @SuppressLint("ClickableViewAccessibility", "ResourceAsColor")
+    @SuppressLint("ClickableViewAccessibility", "ResourceAsColor", "SetTextI18n")
     override fun onBindViewHolder(holder: QuestionViewHolder, position: Int) {
         val level = listLevel[position]
         holder.binding.tvItemId.text = "${position + 1} - ${level.id}"
@@ -94,27 +86,23 @@ class QuestionAdapter(
 
         holder.binding.swPublish.isChecked = holder.binding.swPublish.text == Const.FilterStatus.POST.name
 
-        holder.binding.root.setOnClickListener{
-            onClickView?.invoke(level)
-        }
-
-        holder.binding.btnItemEdit.setOnClickListener(){
+        holder.binding.btnItemEdit.setOnClickListener {
             onClickEdit?.invoke(level)
         }
 
-        holder.binding.btnItemDelete.setOnClickListener(){
+        holder.binding.btnItemDelete.setOnClickListener {
             onClickDelete?.invoke(level)
         }
 
-        holder.binding.btnCloudUp.setOnClickListener(){
+        holder.binding.btnCloudUp.setOnClickListener {
             onClickUpload?.invoke(level)
         }
 
-        holder.binding.swPublish.setOnClickListener(){
+        holder.binding.swPublish.setOnClickListener {
             onClickStatus?.invoke(level)
         }
 
-        holder.binding.btnShareAsQR.setOnClickListener(){
+        holder.binding.btnShareAsQR.setOnClickListener {
             onClickShare?.invoke(level)
         }
 

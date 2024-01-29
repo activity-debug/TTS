@@ -37,7 +37,6 @@ import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
-import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
@@ -49,8 +48,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.io.OutputStream
 import java.util.Base64
 
@@ -71,7 +73,7 @@ class QuestionActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
-        myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?;
+        myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
 
         binding.headerPanel.tvLabelTop.text = "Editor"
 
@@ -92,7 +94,7 @@ class QuestionActivity : AppCompatActivity() {
             rcViewQuestioner.adapter = questionAdapter
         }
 
-        binding.btnNewLevel.setOnClickListener() {
+        binding.btnNewLevel.setOnClickListener {
             boardSet = BoardSet.EDITOR_NEW
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
@@ -110,7 +112,7 @@ class QuestionActivity : AppCompatActivity() {
 
 
         binding.headerPanel.apply {
-            btnBack.setOnClickListener() {
+            btnBack.setOnClickListener {
                 val i = Intent(this@QuestionActivity, MainActivity::class.java)
                 startActivity(i)
                 finish()
@@ -118,15 +120,15 @@ class QuestionActivity : AppCompatActivity() {
             }
         }
 
-        binding.swAll.setOnClickListener() {
+        binding.swAll.setOnClickListener {
             activeFilterTab(FilterStatus.ALL)
             UserRef().setActiveTabFilter(FilterStatus.ALL, this, lifecycle)
         }
-        binding.swDraft.setOnClickListener() {
+        binding.swDraft.setOnClickListener {
             activeFilterTab(FilterStatus.DRAFT)
             UserRef().setActiveTabFilter(FilterStatus.DRAFT, this, lifecycle)
         }
-        binding.swPosted.setOnClickListener() {
+        binding.swPosted.setOnClickListener {
             activeFilterTab(FilterStatus.POST)
             UserRef().setActiveTabFilter(FilterStatus.POST, this, lifecycle)
         }
@@ -201,10 +203,9 @@ class QuestionActivity : AppCompatActivity() {
             }
         }
 
-
-        binding.btnShareQr.setOnClickListener() {
+        binding.btnShareQr.setOnClickListener {
             if (!error) {
-                saveAndShareQRTBK(content)
+                saveAndShareQRCode(content)
             } else {
                 val i = Intent()
                 i.action = Intent.ACTION_SEND
@@ -220,7 +221,7 @@ class QuestionActivity : AppCompatActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun saveAndShareQRTBK(content: String) {
+    private fun saveAndShareQRCode(content: String) {
         val barcodeEncoder = BarcodeEncoder()
         val bitmap: Bitmap =
             barcodeEncoder.encodeBitmap(content, BarcodeFormat.QR_CODE, 1000, 1000)
@@ -256,12 +257,13 @@ class QuestionActivity : AppCompatActivity() {
             outputStream = FileOutputStream(image)
         }
 
+
         outputStream?.use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
             Dialog().showDialog(this, "Captured View and saved to Gallery")
         }
-
     }
+
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun extracted(dialog: AlertDialog) {
@@ -312,23 +314,6 @@ class QuestionActivity : AppCompatActivity() {
                 binding.etSearch.hint = questionAdapter.itemCount.toString()
             }
 
-            /*DISABLE DULU INI YAH BIAR GAK PLAY DARI EDITOR, KEBANYAKAN*/
-//            questionAdapter.setOnClickView { it ->
-//                lifecycleScope.launch {
-//                    boardSet = BoardSet.PLAY
-//                    currentLevel = it.id
-//
-//                    listLevel =
-//                        DB.getInstance(applicationContext).level().getLevel(currentLevel)
-//                    listQuestion =
-//                        DB.getInstance(applicationContext).question().getQuestion(currentLevel)
-//
-//                    val i = Intent(this@QuestionActivity, BoardActivity::class.java)
-//                    startActivity(i)
-//                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-//                }
-//            }
-
             questionAdapter.setOnClickDelete {
                 lifecycleScope.launch {
 
@@ -375,8 +360,10 @@ class QuestionActivity : AppCompatActivity() {
                     boardSet = BoardSet.EDITOR_EDIT
                     currentLevel = it.id
 
+                    listLevel.clear()
                     listLevel =
                         DB.getInstance(applicationContext).level().getLevel(currentLevel)
+                    listQuestion.clear()
                     listQuestion =
                         DB.getInstance(applicationContext).question().getQuestion(currentLevel)
 
@@ -412,7 +399,6 @@ class QuestionActivity : AppCompatActivity() {
                         levelShareIndexId = listLevel.indexOfFirst { it.id == lvl.id }
                     }
                     job.await()
-                    //Dialog().showDialog(this@QuestionActivity, "${qrShare}")
                     var encodeString = ""
                     val job2 = async {
                         val json = Json.encodeToString(qrShare)
@@ -420,8 +406,8 @@ class QuestionActivity : AppCompatActivity() {
                         encodeString = Base64.getEncoder().encodeToString(json.toByteArray())
                     }
                     job2.await()
-//                    Toast.makeText(this@QuestionActivity, "${encodeString.count()}", Toast.LENGTH_SHORT).show()
-//                    val myClip = ClipData.newPlainText("encodeString", encodeString);
+                    //Toast.makeText(this@QuestionActivity, "${encodeString.count()}", Toast.LENGTH_SHORT).show()
+                    //val myClip = ClipData.newPlainText("encodeString", encodeString);
                     //myClipboard?.setPrimaryClip(myClip);
                     shareQRDialog(this@QuestionActivity, encodeString)
                 }

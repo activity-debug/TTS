@@ -8,11 +8,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.rendrapcx.tts.model.Data.*
 
 class Const {
-    enum class BoardSet { PLAY, PLAY_USER, PLAY_RANDOM, PLAY_NEXT, EDITOR_NEW, EDITOR_EDIT }
+    enum class BoardSet { PLAY_KATEGORI, PLAY_RANDOM, EDITOR_NEW, EDITOR_EDIT }
     enum class InputQuestionDirection { H, V }
-    enum class InputAnswerDirection { ROW, COLUMN, UNKNOWN }
-
-    enum class QrAction {READ, CREATE}
+    enum class InputAnswerDirection { ROW, COLUMN }
 
     enum class AnswerStatus {DONE, PROGRESS, UNDONE}
 
@@ -25,6 +23,8 @@ class Const {
     enum class InputMode { NEW, EDIT }
 
     enum class Direction { H, V }
+
+    enum class Counter { DELETE, SAVE, LOAD }
 
     companion object {
         var pubCaAppId = "ca-app-pub-5609246517650629~7589046483"

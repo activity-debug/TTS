@@ -33,6 +33,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
@@ -40,7 +41,6 @@ import com.rendrapcx.tts.constant.Const.Companion.progress
 import com.rendrapcx.tts.constant.Const.Companion.selesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
-import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.MyState
 import com.rendrapcx.tts.helper.NetworkStatusTracker
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                boardSet = Const.BoardSet.PLAY_RANDOM
+                boardSet = BoardSet.PLAY_RANDOM
                 val intent = Intent(this@MainActivity, BoardActivity::class.java)
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
@@ -202,34 +202,13 @@ class MainActivity : AppCompatActivity() {
         mAdView.loadAd(adRequest)
 
         mAdView.adListener = object : AdListener() {
-            override fun onAdClicked() {
-                // Code to be executed when the user clicks on an ad.
-            }
-
-            override fun onAdClosed() {
-                // Code to be executed when the user is about to return
-                // to the app after tapping on an ad.
-            }
-
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                //Toast.makeText(this@MainActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onAdImpression() {
-                // Code to be executed when an impression is recorded
-                // for an ad.
-            }
-
-            override fun onAdLoaded() {
-                //Toast.makeText(this@MainActivity, "adLoaded", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onAdOpened() {
-                // Code to be executed when an ad opens an overlay that
-                // covers the screen.
-            }
+            override fun onAdClicked() {}
+            override fun onAdClosed() {}
+            override fun onAdFailedToLoad(adError: LoadAdError) {}
+            override fun onAdImpression() {}
+            override fun onAdLoaded() {}
+            override fun onAdOpened() {}
         }
-
     }
 
     private fun animLogo() {
@@ -269,7 +248,7 @@ class MainActivity : AppCompatActivity() {
 
                 adapter.setOnClickView {
                     lifecycle.coroutineScope.launch {
-                        boardSet = Const.BoardSet.PLAY_USER
+                        boardSet = BoardSet.PLAY_KATEGORI
                         currentLevel = it.id
 
                         if (selesai.contains(currentLevel)) {

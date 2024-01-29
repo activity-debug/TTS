@@ -12,9 +12,10 @@ import androidx.room.TypeConverters
         Data.Question::class,
         Data.UserAnswerTTS::class,
         Data.UserAnswerSlot::class,
+        Data.HelperCounter::class,
         Data.UserPreferences::class,
     ],
-    version = 42,
+    version = 1,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -23,8 +24,8 @@ abstract class DB : RoomDatabase() {
     abstract fun question(): Dao.Question
     abstract fun userAnswerTTS(): Dao.UserAnswerTTS
     abstract fun userAnswerSlot(): Dao.UserAnswerSlot
+    abstract fun helperCounter(): Dao.HelperCounter
     abstract fun userPreferences(): Dao.UserPreferences
-
 
     companion object {
         @Volatile

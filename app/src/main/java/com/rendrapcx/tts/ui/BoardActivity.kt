@@ -42,6 +42,7 @@ import com.rendrapcx.tts.constant.Const.Companion.inputMode
 import com.rendrapcx.tts.constant.Const.Companion.position
 import com.rendrapcx.tts.constant.Const.Companion.progress
 import com.rendrapcx.tts.constant.Const.Companion.selesai
+import com.rendrapcx.tts.constant.Const.Counter
 import com.rendrapcx.tts.constant.Const.Direction
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
@@ -51,7 +52,6 @@ import com.rendrapcx.tts.constant.Const.SelectRequest
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogInputSoalBinding
 import com.rendrapcx.tts.databinding.DialogWinBinding
-import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.Keypad
 import com.rendrapcx.tts.helper.Progress
@@ -62,6 +62,7 @@ import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
+import com.rendrapcx.tts.model.Data.HelperCounter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -120,77 +121,15 @@ class BoardActivity : AppCompatActivity() {
 
         when (boardSet) {
             BoardSet.EDITOR_NEW -> {
-                lifecycleScope.launch {
-                    val job = async {
-                        currentLevel = Helper().generateLevelId(listLevel.size)
-                        listLevel.add(
-                            Data.Level(currentLevel, "2024", "Title", "Andra", FilterStatus.DRAFT)
-                        )
-                    }
-                    job.await()
-
-                    binding.apply {
-                        includeEditor.btnClear.visibility = View.INVISIBLE
-                        includeEditor.mainContainer.visibility = View.VISIBLE
-                        includeKeyboard.integratedKeyboard.visibility = View.GONE
-                        includeQuestionSpan.tvSpanQuestion.text = ""
-                        includeGameHelperBottom.bottomHelper.visibility = View.GONE
-                        includeHeader.tvLabelTop.text =
-                            listLevel.first() { it.id == currentLevel }.title
-                    }
-
-                    listPartial.clear()
-
-                    Dialog().apply { inputDescription(binding) }
-
-                    position = 0
-                    setBoxTagText()
-                    pickByArrow = false
-                    setInputAnswerDirection()
-                    onClickBox()
-                    fillTextDescription()
-                    setOnSelectedColor()
-                }
+                editorNew()
             }
 
             BoardSet.EDITOR_EDIT -> {
-                lifecycleScope.launch {
-
-                    val job1 = async { listPartial = getPartialData() }
-                    job1.await()
-
-                    Dialog().apply { inputDescription(binding) }
-
-                    binding.apply {
-                        includeEditor.btnClear.visibility = View.INVISIBLE
-                        includeEditor.mainContainer.visibility = View.VISIBLE
-                        includeKeyboard.integratedKeyboard.visibility = View.GONE
-                        includeQuestionSpan.tvSpanQuestion.text = ""
-                        includeGameHelperBottom.bottomHelper.visibility = View.GONE
-                        includeHeader.tvLabelTop.text =
-                            listLevel.first() { it.id == currentLevel }.title
-                    }
-
-                    position = listPartial.first { it.levelId == currentLevel }.charAt
-
-                    setBoxTagText()
-                    fillTextDescription()
-                    fillText()
-                    pickByArrow = false
-                    setInputAnswerDirection()
-                    onClickBox()
-                }
-
-
+                editorEdit()
             }
 
-            BoardSet.PLAY, BoardSet.PLAY_USER -> {
-                /*PlayNext Init*/
+            BoardSet.PLAY_KATEGORI -> {
                 playNext()
-            }
-
-            BoardSet.PLAY_NEXT -> {
-
             }
 
             BoardSet.PLAY_RANDOM -> {
@@ -199,27 +138,17 @@ class BoardActivity : AppCompatActivity() {
 
         }
 
-//        lifecycle.coroutineScope.launch {
-//            for (i in 0 until box.size) {
-//                YoYo.with(Techniques.FlipInY)
-//                    .duration(500)
-//                    .repeat(0)
-//                    .playOn(box[i])
-//                delay(30)
-//            }
-//        }
-
         binding.includeKeyboard.apply {
-            btnBackSpace.setOnClickListener() {
+            btnBackSpace.setOnClickListener {
                 box[position].text = ""
                 upsertUserSlot(position, box[position].text.toString())
                 onPressBackSpace()
                 Sound().soundTyping(this@BoardActivity)
                 YoYo.with(Techniques.Landing)
                     .duration(500)
-                    .playOn(btnBackSpace);
+                    .playOn(btnBackSpace)
             }
-            btnShuffle.setOnClickListener() {
+            btnShuffle.setOnClickListener {
                 lifecycle.coroutineScope.launch {
                     for (i in 0 until intKey.size) {
                         YoYo.with(Techniques.RotateIn)
@@ -234,19 +163,19 @@ class BoardActivity : AppCompatActivity() {
                 Sound().soundShuffle(this@BoardActivity)
                 YoYo.with(Techniques.Landing)
                     .duration(500)
-                    .playOn(btnShuffle);
+                    .playOn(btnShuffle)
             }
 
             /* KEYBOARD PRESS */
             for (i in 0 until intKey.size) {
-                intKey[i].setOnTouchListener(View.OnTouchListener() { _, motionEvent ->
+                intKey[i].setOnTouchListener(View.OnTouchListener { _, motionEvent ->
                     when (motionEvent.action) {
                         MotionEvent.ACTION_DOWN -> {
                             upsertUserSlot(position, intKey[i].text.toString())
                             box[position].text = intKey[i].text
                             YoYo.with(Techniques.Landing)
                                 .duration(1000)
-                                .playOn(box[position]);
+                                .playOn(box[position])
                             onPressAbjabMove()
                             checkWinCondition(false)
                             Sound().soundTyping(this@BoardActivity)
@@ -254,7 +183,7 @@ class BoardActivity : AppCompatActivity() {
 
                         MotionEvent.ACTION_UP -> {
                             YoYo.with(Techniques.Landing)
-                                .playOn(intKey[i]);
+                                .playOn(intKey[i])
                         }
                     }
                     return@OnTouchListener true
@@ -264,23 +193,24 @@ class BoardActivity : AppCompatActivity() {
 
         /* HEADER ACTIONS*/
         binding.includeHeader.apply {
-            btnBack.setOnClickListener() {
-                val intent = if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY_RANDOM)
-                    Intent(this@BoardActivity, MainActivity::class.java)
-                else Intent(this@BoardActivity, QuestionActivity::class.java)
+            btnBack.setOnClickListener {
+                val intent =
+                    if (boardSet == BoardSet.PLAY_KATEGORI || boardSet == BoardSet.PLAY_RANDOM)
+                        Intent(this@BoardActivity, MainActivity::class.java)
+                    else Intent(this@BoardActivity, QuestionActivity::class.java)
                 startActivity(intent)
                 finish()
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
-            btnSettingPlay.setOnClickListener() {
+            btnSettingPlay.setOnClickListener {
                 Dialog().apply { settingDialog(this@BoardActivity, lifecycle) }
             }
         }
 
         /*  BOX CLICK ACTION*/
-        binding.includeBoard.boardTen.setOnClickListener() {
+        binding.includeBoard.boardTen.setOnClickListener {
             for (i in 0 until box.size) {
-                box[i].setOnClickListener() {
+                box[i].setOnClickListener {
                     Sound().soundOnClickBox(this)
                     pickByArrow = false
                     position = i
@@ -288,7 +218,7 @@ class BoardActivity : AppCompatActivity() {
                     onClickBox()
 
                     when (boardSet) {
-                        BoardSet.PLAY, BoardSet.PLAY_USER, BoardSet.PLAY_RANDOM -> {
+                        BoardSet.PLAY_KATEGORI, BoardSet.PLAY_RANDOM -> {
                             if (userPreferences[0].integratedKeyboard) {
                                 Keypad().showSoftKeyboard(window, it)
                             }
@@ -303,7 +233,7 @@ class BoardActivity : AppCompatActivity() {
         /* SELECT QUESTION BY ARROW */
         binding.includeQuestionSpan.apply {
             /*ARROW NEXT QUESTION*/
-            btnNextQuestion.setOnClickListener() {
+            btnNextQuestion.setOnClickListener {
                 if (listPartial.isEmpty()) return@setOnClickListener
                 Sound().soundNextQuestion(this@BoardActivity)
                 getRequestQuestions(SelectRequest.NEXT)
@@ -318,7 +248,7 @@ class BoardActivity : AppCompatActivity() {
                     .playOn(tvSpanQuestion)
             }
             /*ARROR PREV QUESTION*/
-            btnPrevQuestion.setOnClickListener() {
+            btnPrevQuestion.setOnClickListener {
                 if (listPartial.isEmpty()) return@setOnClickListener
                 Sound().soundNextQuestion(this@BoardActivity)
                 getRequestQuestions(SelectRequest.PREV)
@@ -332,7 +262,7 @@ class BoardActivity : AppCompatActivity() {
                     .playOn(tvSpanQuestion)
             }
 
-            tvSpanQuestion.setOnClickListener() {
+            tvSpanQuestion.setOnClickListener {
                 Sound().soundOnClickBox(this@BoardActivity)
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(tvSpanQuestion)
                 for (i in currentRange.indices) {
@@ -354,7 +284,7 @@ class BoardActivity : AppCompatActivity() {
         /*GAME HELPER ACTIONS*/
         binding.includeGameHelperBottom.apply {
             /*NINJA*/
-            btnNinja.setOnClickListener() {
+            btnNinja.setOnClickListener {
                 lifecycleScope.launch {
                     skipActions(0)
                     //btnNinja.isEnabled = true
@@ -374,13 +304,13 @@ class BoardActivity : AppCompatActivity() {
             }
 
             /*CURSOR FIRST OR LAST*/
-            btnCursor.setOnClickListener() {
+            btnCursor.setOnClickListener {
                 cursorFirstOrLast()
                 YoYo.with(Techniques.RotateIn).playOn(btnCursor)
                 Sound().soundShuffle(this@BoardActivity)
             }
             /*ISI SOAL*/
-            btnRobot.setOnClickListener() {
+            btnRobot.setOnClickListener {
                 robot++
                 if (robot > 3) {
                     YoYo.with(Techniques.Shake).playOn(btnRobot)
@@ -391,6 +321,8 @@ class BoardActivity : AppCompatActivity() {
                     btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                     btnRobot.setImageResource(R.drawable.robot_solid_not_active)
                 }
+
+                helperCounter(Counter.SAVE)
                 Sound().soundOnRandomFill(this@BoardActivity)
                 YoYo.with(Techniques.Wave).duration(1000)
                     .onEnd {
@@ -404,12 +336,15 @@ class BoardActivity : AppCompatActivity() {
                     .playOn(btnRobot)
             }
             /*Kasih tau jawaban 1 row atau kolom*/
-            btnGetHint.setOnClickListener() {
+            btnGetHint.setOnClickListener {
                 telunjuk++
                 if (telunjuk > 1) {
                     YoYo.with(Techniques.Shake).playOn(btnGetHint)
                     return@setOnClickListener
                 }
+
+                helperCounter(Counter.SAVE)
+
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
                 Sound().soundDingDong(this@BoardActivity)
@@ -425,10 +360,10 @@ class BoardActivity : AppCompatActivity() {
         /* EDITOR BINDING ACTION                                                                 */
         binding.includeEditor.apply {
 
-            if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY_RANDOM) return
+            if (boardSet == BoardSet.PLAY_KATEGORI || boardSet == BoardSet.PLAY_RANDOM) return
 
             /*SAVE QUESTION*/
-            btnSave.setOnClickListener() {
+            btnSave.setOnClickListener {
                 if (listQuestion.isEmpty()) {
                     Dialog().showDialog(this@BoardActivity, "Data masih kosong")
                 } else {
@@ -437,7 +372,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             /* CLEAR BOXES RESET QUESTION*/
-            btnClear.setOnClickListener() {
+            btnClear.setOnClickListener {
                 val builder: AlertDialog.Builder = AlertDialog.Builder(this@BoardActivity)
                 builder
                     .setMessage("Yakin mau balikan dari awal?")
@@ -473,8 +408,8 @@ class BoardActivity : AppCompatActivity() {
                 dialog.show()
             }
 
-            btnAdd.setOnClickListener() {
-                Const.inputMode = InputMode.NEW.name
+            btnAdd.setOnClickListener {
+                inputMode = InputMode.NEW.name
                 inputDataQuestioner(
                     position,
                     boxRowOvers().count(),
@@ -485,7 +420,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             //EDIT DESCRIPTION
-            btnEdit.setOnClickListener() {
+            btnEdit.setOnClickListener {
                 Dialog().apply { inputDescription(binding) }
             }
         }
@@ -493,9 +428,71 @@ class BoardActivity : AppCompatActivity() {
 
     } //onCreate
 
+    private fun editorEdit() {
+        lifecycleScope.launch {
+            val job1 = async { listPartial = getPartialData() }
+            job1.await()
+            Dialog().apply { inputDescription(binding) }
+
+            binding.apply {
+                includeEditor.btnClear.visibility = View.INVISIBLE
+                includeEditor.mainContainer.visibility = View.VISIBLE
+                includeKeyboard.integratedKeyboard.visibility = View.GONE
+                includeQuestionSpan.tvSpanQuestion.text = ""
+                includeGameHelperBottom.bottomHelper.visibility = View.GONE
+                includeHeader.tvLabelTop.text =
+                    listLevel.first { it.id == currentLevel }.title
+            }
+
+            position = listPartial.first { it.levelId == currentLevel }.charAt
+
+            setBoxTagText()
+            fillTextDescription()
+            fillText()
+            pickByArrow = false
+            setInputAnswerDirection()
+            onClickBox()
+        }
+    }
+
+    private fun editorNew() {
+        lifecycleScope.launch {
+            val job = async {
+                currentLevel = Helper().generateLevelId(listLevel.size)
+                listLevel.add(
+                    Data.Level(currentLevel, "2024", "Title", "Andra", FilterStatus.DRAFT)
+                )
+            }
+            job.await()
+
+            binding.apply {
+                includeEditor.btnClear.visibility = View.INVISIBLE
+                includeEditor.mainContainer.visibility = View.VISIBLE
+                includeKeyboard.integratedKeyboard.visibility = View.GONE
+                includeQuestionSpan.tvSpanQuestion.text = ""
+                includeGameHelperBottom.bottomHelper.visibility = View.GONE
+                includeHeader.tvLabelTop.text =
+                    listLevel.first { it.id == currentLevel }.title
+            }
+
+            listQuestion.clear()
+            listPartial.clear()
+
+            Dialog().apply { inputDescription(binding) }
+
+            position = 0
+            setBoxTagText()
+            pickByArrow = false
+            setInputAnswerDirection()
+            onClickBox()
+            fillTextDescription()
+            setOnSelectedColor()
+        }
+    }
+
     private fun deleteUserSlotDone() {
         lifecycleScope.launch {
-            DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(Const.currentLevel)
+            DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(currentLevel)
         }
     }
 
@@ -522,9 +519,51 @@ class BoardActivity : AppCompatActivity() {
                 Data.UserAnswerSlot(
                     id = currentLevel + "-" + charAt.toString(),
                     levelId = currentLevel,
-                    answerSlot = answerSlot
+                    answerSlot = answerSlot,
                 )
             )
+        }
+    }
+
+    private fun helperCounter(counter: Counter) {
+        lifecycleScope.launch {
+            when (counter) {
+                Counter.DELETE -> {
+                    DB.getInstance(applicationContext).helperCounter().deleteById(currentLevel)
+                }
+
+                Counter.SAVE -> {
+                    DB.getInstance(applicationContext).helperCounter().upsert(
+                        HelperCounter(
+                            currentLevel,
+                            telunjuk,
+                            robot
+                        )
+                    )
+                }
+
+                Counter.LOAD -> {
+                    val hpCounter = DB.getInstance(applicationContext)
+                        .helperCounter().getById(currentLevel)
+                        .ifEmpty { return@launch }
+
+                    telunjuk = hpCounter[0].hintOne
+                    robot = hpCounter[0].hintTwo
+
+                    binding.includeGameHelperBottom.apply {
+                        if (telunjuk > 0) {
+                            btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
+                            btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
+                        }
+
+                        if (robot > 2) {
+                            btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
+                            btnRobot.setImageResource(R.drawable.robot_solid_not_active)
+                        }
+                    }
+
+                }
+            }
         }
     }
 
@@ -535,32 +574,12 @@ class BoardActivity : AppCompatActivity() {
         mAdView.loadAd(adRequest)
 
         mAdView.adListener = object : AdListener() {
-            override fun onAdClicked() {
-                // Code to be executed when the user clicks on an ad.
-            }
-
-            override fun onAdClosed() {
-                // Code to be executed when the user is about to return
-                // to the app after tapping on an ad.
-            }
-
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                //Toast.makeText(this@BoardActivity, "${adError.message}", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onAdImpression() {
-                // Code to be executed when an impression is recorded
-                // for an ad.
-            }
-
-            override fun onAdLoaded() {
-                //Toast.makeText(this@MainActivity, "adLoaded", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onAdOpened() {
-                // Code to be executed when an ad opens an overlay that
-                // covers the screen.
-            }
+            override fun onAdClicked() {}
+            override fun onAdClosed() {}
+            override fun onAdFailedToLoad(adError: LoadAdError) {}
+            override fun onAdImpression() {}
+            override fun onAdLoaded() {}
+            override fun onAdOpened() {}
         }
 
     }
@@ -759,7 +778,7 @@ class BoardActivity : AppCompatActivity() {
     private fun moveToRequestedQuestion() {
         val arr = arrayListOf<Int>()
 
-        if (boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY_RANDOM) {
+        if (boardSet == BoardSet.PLAY_KATEGORI || boardSet == BoardSet.PLAY_RANDOM) {
             for (i in 0 until currentRange.size) {
                 arr.add(i)
                 if (box[currentRange[i]].text.isEmpty()) {
@@ -811,7 +830,7 @@ class BoardActivity : AppCompatActivity() {
 
     private fun fillTextDescription() {
         if (boardSet == BoardSet.EDITOR_NEW || boardSet == BoardSet.EDITOR_EDIT) {
-            listLevel.filter { it.id == currentLevel }.forEach() {
+            listLevel.filter { it.id == currentLevel }.forEach {
                 binding.includeEditor.apply {
                     textLevelId.text = it.id
                     textCategory.text = it.category
@@ -864,7 +883,7 @@ class BoardActivity : AppCompatActivity() {
             job1.await()
 
             val job2 = async {
-                Data.listQuestion.filter { it.levelId == levelId }.map { it }.forEach() {
+                listQuestion.filter { it.levelId == levelId }.map { it }.forEach {
                     DB.getInstance(applicationContext).question().insertQuestion(
                         Data.Question(
                             levelId = it.levelId,
@@ -897,7 +916,7 @@ class BoardActivity : AppCompatActivity() {
                 checkWinCondition(false)
                 YoYo.with(Techniques.Landing)
                     .duration(1000)
-                    .playOn(box[x]);
+                    .playOn(box[x])
             }
 
             67 -> {
@@ -920,7 +939,7 @@ class BoardActivity : AppCompatActivity() {
             if (position in currentRange) {
                 YoYo.with(Techniques.Landing)
                     .duration(1000)
-                    .playOn(box[x]);
+                    .playOn(box[x])
                 setOnSelectedColor()
             } else position = currentRange[0]
         }
@@ -929,7 +948,7 @@ class BoardActivity : AppCompatActivity() {
             if (position in currentRange) {
                 YoYo.with(Techniques.Landing)
                     .duration(1000)
-                    .playOn(box[x]);
+                    .playOn(box[x])
                 setOnSelectedColor()
             } else position = currentRange[0]
         }
@@ -944,7 +963,7 @@ class BoardActivity : AppCompatActivity() {
             if (position in currentRange) {
                 YoYo.with(Techniques.Wave)
                     .duration(1000)
-                    .playOn(box[x]);
+                    .playOn(box[x])
                 setOnSelectedColor()
             } else position = x
         }
@@ -992,6 +1011,7 @@ class BoardActivity : AppCompatActivity() {
         //onClickBox()
         if (pass) {
             if (boardSet != BoardSet.PLAY_RANDOM) {
+                helperCounter(Counter.DELETE)
                 deleteUserSlotDone()
                 Progress().updateUserAnswer(
                     Const.AnswerStatus.DONE, this, lifecycle
@@ -1056,7 +1076,7 @@ class BoardActivity : AppCompatActivity() {
                 .playOn(bind.imgCongrate)
             YoYo.with(Techniques.RubberBand).repeat(1).playOn(bind.tvSelamat)
 
-            bind.btnNext.setOnClickListener() {
+            bind.btnNext.setOnClickListener {
                 if (boardSet == BoardSet.PLAY_RANDOM) {
                     playRandom()
                     dialog.dismiss()
@@ -1067,7 +1087,7 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
 
-            bind.btnBack.setOnClickListener() {
+            bind.btnBack.setOnClickListener {
                 val i = Intent(context.applicationContext, MainActivity::class.java)
                 startActivity(i)
                 finish()
@@ -1183,7 +1203,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             //GET DATA from New currentLevel
-            boardSet = BoardSet.PLAY_USER
+            boardSet = BoardSet.PLAY_KATEGORI
 
             listLevel.clear()
             listQuestion.clear()
@@ -1232,8 +1252,7 @@ class BoardActivity : AppCompatActivity() {
 
             }
 
-            telunjuk = 0
-            robot = 0
+            helperCounter(Counter.LOAD)
 
             position = listPartial.first { it.levelId == currentLevel }.charAt
 
@@ -1392,7 +1411,7 @@ class BoardActivity : AppCompatActivity() {
         var result = ""
         listQuestion.filter { it.levelId == currentLevel }
             .filter { it.id == id }
-            .map { it }.forEach() {
+            .map { it }.forEach {
                 result = it.answer
             }
         return result
@@ -1408,7 +1427,7 @@ class BoardActivity : AppCompatActivity() {
         var result = ""
         listQuestion.filter { it.levelId == currentLevel }
             .filter { it.id == id }
-            .map { it }.forEach() {
+            .map { it }.forEach {
                 result = it.asking
             }
         return result
@@ -1421,7 +1440,7 @@ class BoardActivity : AppCompatActivity() {
             listQuestion.indexOfFirst { it.levelId == currentLevel && it.id == currentQuestId }
         } else currentIndex
 
-        val count = listQuestion.count() { it.levelId == currentLevel }
+        val count = listQuestion.count { it.levelId == currentLevel }
 
         val req = if (selectRequest == SelectRequest.NEXT) {
             if (index < count - 1) index + 1 else 0
@@ -1436,7 +1455,7 @@ class BoardActivity : AppCompatActivity() {
         var range = arrayListOf<Int>()
         var dir = Direction.H.name
         listQuestion.filter { it.levelId == currentLevel && it.id == reqId }
-            .map { it }.forEach() {
+            .map { it }.forEach {
                 dir = it.direction
                 range = it.slot
             }
@@ -1488,10 +1507,10 @@ class BoardActivity : AppCompatActivity() {
                 resetBoxStyle()
             }
 
-            BoardSet.PLAY, BoardSet.PLAY_USER, BoardSet.PLAY_RANDOM -> {
+            BoardSet.PLAY_KATEGORI, BoardSet.PLAY_RANDOM -> {
                 Sound().soundStartGame(this)
                 tag.clear()
-                listPartial.filter { it.levelId == currentLevel }.forEach() {
+                listPartial.filter { it.levelId == currentLevel }.forEach {
                     for (i in 0 until box.size) {
                         if (i == it.charAt) {
                             box[i].text = ""
@@ -1503,7 +1522,7 @@ class BoardActivity : AppCompatActivity() {
                 lifecycle.coroutineScope.launch {
                     for (i in 0 until box.size) {
                         if (box[i].tag == "") {
-                            if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_RANDOM) {
+                            if (boardSet == BoardSet.PLAY_KATEGORI || boardSet == BoardSet.PLAY_RANDOM) {
                                 YoYo.with(Techniques.DropOut).duration(1000)
                                     .onEnd {
                                         box[i].visibility = View.INVISIBLE
@@ -1514,6 +1533,12 @@ class BoardActivity : AppCompatActivity() {
                         delay(40)
                     }
                     for (i in 0 until intKey.size) {
+                        binding.includeGameHelperBottom.apply {
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnGetHint)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnCursor)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnRobot)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnNinja)
+                        }
                         YoYo.with(Techniques.RotateIn)
                             .onEnd {
                                 YoYo.with(Techniques.Landing).duration(500).playOn(intKey[i])
@@ -1524,6 +1549,7 @@ class BoardActivity : AppCompatActivity() {
                             .playOn((intKey[i]))
                         delay(40)
                     }
+
                     loadUserState()
                 }
                 resetBoxStyle()
@@ -1585,7 +1611,7 @@ class BoardActivity : AppCompatActivity() {
 
     private fun fillText() {
         if (boardSet == BoardSet.EDITOR_NEW || boardSet == BoardSet.EDITOR_EDIT) {
-            listPartial.filter { it.levelId == currentLevel }.map { it }.forEach() {
+            listPartial.filter { it.levelId == currentLevel }.map { it }.forEach {
                 for (i in 0 until box.size)
                     if (i == it.charAt) {
                         box[i].text = it.charStr
@@ -1691,7 +1717,7 @@ class BoardActivity : AppCompatActivity() {
         }
 
         //FIXME: ACTIONS LISTENER
-        bind.swDirection.setOnClickListener() {
+        bind.swDirection.setOnClickListener {
             if (bind.swDirection.isChecked) {
                 if (col.isEmpty()) {
                     bind.swDirection.text = "Menurun" //InputQuestionDirection.V.name
@@ -1758,11 +1784,10 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
 
-            if (harusnya.isNotEmpty()) return false
-            else return true
+            return !harusnya.isNotEmpty()
         }
 
-        bind.btnUpdateInput.setOnClickListener() {
+        bind.btnUpdateInput.setOnClickListener {
             if (bind.etAskInput.text.isEmpty()) {
                 bind.etAskInput.error = "tidak boleh kosong"
                 return@setOnClickListener
@@ -1778,7 +1803,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             if (!cekInputAnswer()) {
-                bind.etAnswerInput.error = "char baru tidak sesuai \n${harusnya.toString()}}"
+                bind.etAnswerInput.error = "char baru tidak sesuai \n$harusnya}"
                 return@setOnClickListener
             }
 
@@ -1814,7 +1839,7 @@ class BoardActivity : AppCompatActivity() {
             }
         }
 
-        bind.btnCancelInput.setOnClickListener() {
+        bind.btnCancelInput.setOnClickListener {
             dialog.dismiss()
         }
         dialog.show()
@@ -1855,11 +1880,11 @@ class BoardActivity : AppCompatActivity() {
                 )
             )
             position = slot[0]
-            currentIndex = Data.listQuestion.count() { it.levelId == levelId }
+            currentIndex = listQuestion.count { it.levelId == levelId }
         }
 
         //TODO: HAPUS DULU YANG SEBELUMNYA
-        if (Const.inputMode == InputMode.EDIT.name) {
+        if (inputMode == InputMode.EDIT.name) {
             val sf =
                 data.filter { it.levelId == levelId && it.id == id && it.direction == direction }
             sf.map { it }.forEach {

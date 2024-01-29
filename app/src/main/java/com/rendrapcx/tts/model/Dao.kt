@@ -1,6 +1,7 @@
 package com.rendrapcx.tts.model
 
 import androidx.room.Dao
+import com.rendrapcx.tts.model.dao.IHelperCounter
 import com.rendrapcx.tts.model.dao.ILevel
 import com.rendrapcx.tts.model.dao.IQuestion
 import com.rendrapcx.tts.model.dao.IUserAnswerSlot
@@ -10,18 +11,21 @@ import com.rendrapcx.tts.model.dao.IUserPreferences
 class Dao {
 
     @Dao
-    interface Level : ILevel {}
+    interface Level : ILevel
 
     @Dao
-    interface Question : IQuestion {}
+    interface Question : IQuestion
 
     @Dao
-    interface UserAnswerTTS : IUserAnswerTTS {}
+    interface UserAnswerTTS : IUserAnswerTTS
 
     @Dao
-    interface UserAnswerSlot : IUserAnswerSlot{}
+    interface UserAnswerSlot : IUserAnswerSlot
 
     @Dao
-    interface UserPreferences : IUserPreferences {}
+    interface HelperCounter: IHelperCounter
+
+    @Dao
+    interface UserPreferences : IUserPreferences
 
 }

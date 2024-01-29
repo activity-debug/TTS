@@ -12,7 +12,7 @@ class Progress {
 
     fun getUserProgress(context: Context, lifecycle: Lifecycle): ArrayList<String> {
         val arr = arrayListOf<String>()
-        lifecycle.coroutineScope.launch() {
+        lifecycle.coroutineScope.launch {
             Data.userAnswerTTS =
                 DB.getInstance(context.applicationContext).userAnswerTTS().getAllUserAnswer()
             Data.userAnswerTTS.filter { it.status == Const.AnswerStatus.PROGRESS }.forEach {
@@ -24,7 +24,7 @@ class Progress {
 
     fun getUserSelesai(context: Context, lifecycle: Lifecycle): ArrayList<String> {
         val arr = arrayListOf<String>()
-        lifecycle.coroutineScope.launch() {
+        lifecycle.coroutineScope.launch {
             Data.userAnswerTTS =
                 DB.getInstance(context.applicationContext).userAnswerTTS().getAllUserAnswer()
             Data.userAnswerTTS.filter { it.status == Const.AnswerStatus.DONE }.forEach {
@@ -35,7 +35,7 @@ class Progress {
     }
 
     fun updateUserAnswer(status: Const.AnswerStatus, context: Context, lifecycle: Lifecycle) {
-        lifecycle.coroutineScope.launch() {
+        lifecycle.coroutineScope.launch {
             DB.getInstance(context.applicationContext).userAnswerTTS().insertUserAnswer(
                 Data.UserAnswerTTS(
                     id = Const.currentLevel,
