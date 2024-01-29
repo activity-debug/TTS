@@ -1008,14 +1008,13 @@ class BoardActivity : AppCompatActivity() {
             }
         }
 
-        //onClickBox()
         if (pass) {
             if (boardSet != BoardSet.PLAY_RANDOM) {
-                helperCounter(Counter.DELETE)
-                deleteUserSlotDone()
                 Progress().updateUserAnswer(
                     Const.AnswerStatus.DONE, this, lifecycle
                 )
+                helperCounter(Counter.DELETE)
+                deleteUserSlotDone()
                 Sound().soundWinning(this)
                 winDialog(this)
             } else {
@@ -1045,7 +1044,7 @@ class BoardActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
 
-            //progress = Progress().getUserProgress(this@BoardActivity, lifecycle)
+            progress = Progress().getUserProgress(this@BoardActivity, lifecycle)
             selesai = Progress().getUserSelesai(this@BoardActivity, lifecycle)
 
             if (boardSet == BoardSet.PLAY_RANDOM)
@@ -1251,6 +1250,9 @@ class BoardActivity : AppCompatActivity() {
                 }
 
             }
+
+            telunjuk = 0
+            robot = 0
 
             helperCounter(Counter.LOAD)
 
