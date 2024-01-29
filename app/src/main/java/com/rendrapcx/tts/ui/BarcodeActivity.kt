@@ -19,6 +19,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.LuminanceSource
 import com.google.zxing.MultiFormatReader
@@ -28,9 +30,12 @@ import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.integration.android.IntentIntegrator
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.RequestCode
 import com.rendrapcx.tts.databinding.ActivityBarcodeBinding
 import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.helper.Sound
+import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
@@ -76,19 +81,43 @@ class BarcodeActivity : AppCompatActivity() {
                 finish()
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
+
             btnSettingPlay.setOnClickListener() {
+                /*ENABLE EDITOR*/
                 counterClearInput++
-                if (counterClearInput > 3) {
-                    lifecycleScope.launch {
-                        DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
-                        DB.getInstance(applicationContext).userAnswerTTS().deleteAllUSerAnswer()
-                        Toast.makeText(
-                            this@BarcodeActivity,
-                            "user_answer_tts | user_answer_tts = CLEARED ",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                if (counterClearInput > 9 && !isEditor) {
+                    isEditor = true
+                    UserRef().setIsEditor(true, applicationContext, lifecycle)
+                    isEditor = UserRef().getIsEditor()
+                    YoYo.with(Techniques.RubberBand).playOn(it)
+                    Toast.makeText(
+                        this@BarcodeActivity,
+                        "Editor Aktif",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Sound().soundSuccess(this@BarcodeActivity)
                 }
+
+            }
+
+            btnSettingPlay.setOnLongClickListener() {
+                /*RESET USER ANSWER*/
+                lifecycleScope.launch {
+                    DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
+                    DB.getInstance(applicationContext).userAnswerTTS().deleteAllUSerAnswer()
+                    Toast.makeText(
+                        this@BarcodeActivity,
+                        "user_answer = cleared\neditor = off",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    isEditor = false
+                    UserRef().setIsEditor(false, applicationContext, lifecycle)
+                    isEditor = UserRef().getIsEditor()
+
+                    Sound().soundSuccess(this@BarcodeActivity)
+                }
+                return@setOnLongClickListener true
             }
         }
 
@@ -137,13 +166,6 @@ class BarcodeActivity : AppCompatActivity() {
                     listLevel = qrShare[0].level
                     listQuestion = qrShare[0].question
 
-//                    binding.textResultContent.text =
-//                        "ID: ${listLevel[0].id} \n" +
-//                                "Category: ${listLevel[0].category} \n" +
-//                                "Title: ${listLevel[0].title} \n" +
-//                                "Creator: ${listLevel[0].userId}"
-
-                    //Toast.makeText(applicationContext, "Text Pasted", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     error = true
                     Toast.makeText(this@BarcodeActivity, "${e.message}", Toast.LENGTH_SHORT).show()
@@ -219,7 +241,6 @@ class BarcodeActivity : AppCompatActivity() {
                 val imagePath = convertMediaUriToPath(imageUri)
                 val imgFile = File(imagePath)
                 val dt = getQRContent(imgFile)
-                //Toast.makeText(this, "$dt", Toast.LENGTH_SHORT).show()
                 val decodeString = String(Base64.getDecoder().decode(dt))
 
                 qrShare.clear()
@@ -267,15 +288,8 @@ class BarcodeActivity : AppCompatActivity() {
             if (intentResult.contents == null) {
                 Toast.makeText(baseContext, "Cancelled", Toast.LENGTH_SHORT).show()
             } else {
-//                val data: Intent? = intentResult.contents
-                //val imageUri = data!!.data!!
-                //binding.imgCoder.setImageURI(intentResult.barcodeImagePath)
-
-//                val imagePath = convertMediaUriToPath(intentResult.barcodeImagePath)
                 val imagePath = intentResult.barcodeImagePath
                 binding.imgCoder.setImageURI(imagePath.toUri())
-                //val imgFile = File(imagePath)
-                // Toast.makeText(this, "${imgFile} | ${imagePath}", Toast.LENGTH_SHORT).show()
 
                 val dt = intentResult.contents //getQRContent(imgFile)
                 val decodeString = String(Base64.getDecoder().decode(dt))
@@ -333,7 +347,7 @@ class BarcodeActivity : AppCompatActivity() {
             Log.e("QrTest", "Error decoding qr code", e)
             Toast.makeText(
                 this,
-                "Error decoding QR Code, Mohon pilih gambar QR Code yang benar!",
+                "Error decoding QR Code, Silakan pilih gambar QR Code yang benar!",
                 Toast.LENGTH_SHORT
             ).show()
         }

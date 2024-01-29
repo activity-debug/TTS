@@ -11,7 +11,6 @@ import android.os.Build
 import android.text.InputFilter
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -24,16 +23,14 @@ import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
-import com.rendrapcx.tts.constant.Const.Companion.currentUser
+import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
-import com.rendrapcx.tts.databinding.DialogUserProfileBinding
 import com.rendrapcx.tts.databinding.DialogYesNoBinding
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
-import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.ui.BoardActivity
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -114,7 +111,6 @@ open class Dialog {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
-        binding.btnSettingDisableAds.visibility = View.INVISIBLE
 
         lifecycle.coroutineScope.launch {
             val job1 = async {
@@ -131,10 +127,10 @@ open class Dialog {
             binding.imgBtnSound.setOnClickListener() {
                 if (isSound) {
                     binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_disable)
-                    UserRef().setIsSound("0", false, context, lifecycle)
+                    UserRef().setIsSound(false, context, lifecycle)
                 } else {
                     binding.imgBtnSound.setBackgroundResource(R.drawable.button_image_enable)
-                    UserRef().setIsSound("0", true, context, lifecycle)
+                    UserRef().setIsSound(true, context, lifecycle)
                 }
                 isSound = UserRef().getIsSound()
                 Sound().soundClickSetting(context)
@@ -148,117 +144,6 @@ open class Dialog {
                 YoYo.with(Techniques.Wave).playOn(it)
             }
 
-            var i = 0
-            var isEditor = UserRef().getIsEditor()
-            if (isEditor) binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_enable)
-            else binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_disable)
-            binding.btnEditorShow.setOnClickListener() {
-                ++i
-                if (i in 7..9) {
-                    Toast.makeText(context, "${10 - i} kali lagi", Toast.LENGTH_SHORT).show()
-                }
-                if (i > 9) {
-                    isEditor = true
-                }
-                if (isEditor) {
-                    binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_enable)
-                    UserRef().setIsEditor("0", true, context, lifecycle)
-                }
-                isEditor = UserRef().getIsEditor()
-                Sound().soundClickSetting(context)
-                YoYo.with(Techniques.RubberBand).playOn(it)
-            }
-            binding.btnEditorShow.setOnLongClickListener() {
-                isEditor = false
-                binding.btnEditorShow.setBackgroundResource(R.drawable.button_image_disable)
-                UserRef().setIsEditor("0", false, context, lifecycle)
-                return@setOnLongClickListener true
-            }
-
-            binding.btnSettingDisableAds.setOnClickListener() {
-                lifecycle.coroutineScope.launch {
-                    DB.getInstance(context.applicationContext).user().insertUser(
-                        Data.User(
-                            id = "Admin2024",
-                            username = "Andra",
-                            password = "bismillah",
-                            isGuest = false
-                        ),
-                    )
-                }
-            }
-        }
-
-        dialog.show()
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    fun userProfile(
-        context: Context
-    ) {
-        val inflater =
-            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val binding = DialogUserProfileBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(context).setView(binding.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window!!.attributes.windowAnimations = R.style.DialogBottomAnim
-        dialog.window!!.attributes.gravity = Gravity.BOTTOM
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(true)
-
-        fun activeTabs(int: Int) {
-            when (int) {
-                0 -> {
-                    binding.btnTabTTS.setBackgroundResource(R.drawable.tabs_active_shape)
-                    binding.btnTabTBK.setBackgroundResource(R.drawable.tabs_disable_shape)
-                    binding.btnTabWIW.setBackgroundResource(R.drawable.tabs_disable_shape)
-                }
-
-                1 -> {
-                    binding.btnTabTTS.setBackgroundResource(R.drawable.tabs_disable_shape)
-                    binding.btnTabTBK.setBackgroundResource(R.drawable.tabs_active_shape)
-                    binding.btnTabWIW.setBackgroundResource(R.drawable.tabs_disable_shape)
-                }
-
-                2 -> {
-                    binding.btnTabTTS.setBackgroundResource(R.drawable.tabs_disable_shape)
-                    binding.btnTabTBK.setBackgroundResource(R.drawable.tabs_disable_shape)
-                    binding.btnTabWIW.setBackgroundResource(R.drawable.tabs_active_shape)
-                }
-            }
-        }
-
-        // Init
-        activeTabs(0)
-
-        binding.apply {
-            textUserId.text = listUser[currentUser].id
-            textUsername.text = listUser[currentUser].username
-        }
-
-        //Actions
-        binding.btnSaveProgress.setOnClickListener() {
-            Toast.makeText(context, "Save Progress", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnCloseProfile.setOnClickListener() {
-            dialog.dismiss()
-        }
-
-        binding.btnTabTTS.setOnClickListener() {
-            activeTabs(0)
-        }
-
-        binding.btnTabTBK.setOnClickListener() {
-            activeTabs(1)
-        }
-
-        binding.btnTabWIW.setOnClickListener() {
-            activeTabs(2)
         }
 
         dialog.show()
@@ -325,7 +210,6 @@ open class Dialog {
         msg: String,
         btnOneTitle: String = "Tidak",
         btnTwoTitle: String = "Ya",
-        lifecycle: Lifecycle
     ) {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogYesNoBinding.inflate(inflater)
@@ -351,7 +235,7 @@ open class Dialog {
             val i = Intent(this, BoardActivity::class.java)
             startActivity(i)
             finish()
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             dialog.dismiss()
         }
 

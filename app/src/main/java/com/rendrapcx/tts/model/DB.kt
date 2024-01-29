@@ -10,21 +10,17 @@ import androidx.room.TypeConverters
     entities = [
         Data.Level::class,
         Data.Question::class,
-        Data.Partial::class,
-        Data.User::class,
         Data.UserAnswerTTS::class,
         Data.UserAnswerSlot::class,
         Data.UserPreferences::class,
     ],
-    version = 7,
+    version = 42,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class DB : RoomDatabase() {
     abstract fun level(): Dao.Level
     abstract fun question(): Dao.Question
-    abstract fun partial(): Dao.Partial
-    abstract fun user(): Dao.User
     abstract fun userAnswerTTS(): Dao.UserAnswerTTS
     abstract fun userAnswerSlot(): Dao.UserAnswerSlot
     abstract fun userPreferences(): Dao.UserPreferences

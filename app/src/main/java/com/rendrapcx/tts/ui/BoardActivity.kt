@@ -42,12 +42,12 @@ import com.rendrapcx.tts.constant.Const.Companion.inputMode
 import com.rendrapcx.tts.constant.Const.Companion.position
 import com.rendrapcx.tts.constant.Const.Companion.progress
 import com.rendrapcx.tts.constant.Const.Companion.selesai
+import com.rendrapcx.tts.constant.Const.Direction
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
+import com.rendrapcx.tts.constant.Const.InputMode
 import com.rendrapcx.tts.constant.Const.InputQuestionDirection
-import com.rendrapcx.tts.constant.Direction
-import com.rendrapcx.tts.constant.InputMode
-import com.rendrapcx.tts.constant.SelectRequest
+import com.rendrapcx.tts.constant.Const.SelectRequest
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogInputSoalBinding
 import com.rendrapcx.tts.databinding.DialogWinBinding
@@ -797,9 +797,9 @@ class BoardActivity : AppCompatActivity() {
                         id = UUID.randomUUID().toString(),
                         charAt = soal[i].slot[x],
                         charStr = soal[i].answer[x].toString(),
-                        rowQuestionId = if (soal[i].direction == InputQuestionDirection.HORIZONTAL.name) soal[i].id
+                        rowQuestionId = if (soal[i].direction == InputQuestionDirection.H.name) soal[i].id
                         else prevId,
-                        colQuestionId = if (soal[i].direction == InputQuestionDirection.VERTICAL.name) soal[i].id
+                        colQuestionId = if (soal[i].direction == InputQuestionDirection.V.name) soal[i].id
                         else prevId,
                     )
                 )
@@ -1434,7 +1434,7 @@ class BoardActivity : AppCompatActivity() {
         val reqId = listQuestion.filter { it.levelId == currentLevel }[req].id
 
         var range = arrayListOf<Int>()
-        var dir = Direction.HORIZONTAL.name
+        var dir = Direction.H.name
         listQuestion.filter { it.levelId == currentLevel && it.id == reqId }
             .map { it }.forEach() {
                 dir = it.direction
@@ -1442,20 +1442,12 @@ class BoardActivity : AppCompatActivity() {
             }
 
         inputAnswerDirection =
-            if (dir == Direction.HORIZONTAL.name) InputAnswerDirection.ROW
+            if (dir == Direction.H.name) InputAnswerDirection.ROW
             else InputAnswerDirection.COLUMN
 
         currentQuestId = reqId
         currentRange = range
     }
-
-
-//    private fun hasBothId(): Boolean {
-//        val row = listPartial.filter { it.charAt == position }.first().rowQuestionId
-//        val col = listPartial.filter { it.charAt == position }.first().colQuestionId
-//        if (row.isNotEmpty() && col.isNotEmpty()) return true
-//        else return false
-//    }
 
     private fun showAnswerKeypad() {
         binding.includeEditor.apply {
@@ -1606,11 +1598,6 @@ class BoardActivity : AppCompatActivity() {
 
     private fun resetBoxStyle() {
         for (i in 0 until box.size) {
-//            if (box[i].tag == "") {
-//                if (boardSet == BoardSet.PLAY_USER || boardSet == BoardSet.PLAY || boardSet == BoardSet.PLAY_RANDOM) {
-//                    box[i].visibility = View.INVISIBLE
-//                }
-//            }
             box[i].setTextColor(getColor(this, R.color.button))
             box[i].setBackgroundResource(R.drawable.box_shape_active)
         }
@@ -1640,11 +1627,6 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-
-    /*
-    * INPUT DATA DENGAN DIALOG INTERNAL, KALO PAKE YANG EXTERNAL, GAK BISA MANGGIL onCLick,
-    * walau kebaca di external dialog tapi error pas runtime, CARI TAU
-    * */
     @RequiresApi(Build.VERSION_CODES.R)
     private fun inputDataQuestioner(
         position: Int,
@@ -1672,41 +1654,38 @@ class BoardActivity : AppCompatActivity() {
         val colFilter = arrayOf<InputFilter>(InputFilter.LengthFilter(colCount))
         bind.etNoInput.setText("${position}")
         bind.etAskInput.requestFocus()
+        bind.etAskInput.hint = "Pertanyaan"
         bind.etAnswerInput.filters = rowFilter
-        bind.etAnswerInput.hint = "available ${rowCount} boxes"
+        bind.etAnswerInput.hint = "tersedia ${rowCount} kotak"
         bind.tvSlotPreview.text = "${rowAvailable}"
-        bind.swDirection.text = InputQuestionDirection.HORIZONTAL.name
+        bind.swDirection.text = "Mendatar" //InputQuestionDirection.H.name
 
         bind.textView16.visibility = View.INVISIBLE
         bind.tvIdInput.visibility = View.INVISIBLE
         bind.tvSlotPreview.visibility = View.INVISIBLE
 
-//        val x = listPartial.indexOfFirst { it.charAt == position }
-        val row = getRowId() //if (x != -1) listPartial[x].rowQuestionId else ""
-        val col = getColumnId() // if (x != -1) listPartial[x].colQuestionId else ""
+        val row = getRowId()
+        val col = getColumnId()
 
-//        Toast.makeText(this, "$row | $col", Toast.LENGTH_SHORT).show()
 
         if (row.isNotEmpty() && col.isNotEmpty()) {
             Toast.makeText(this, "rowId dan colomId sudah terpenuhi", Toast.LENGTH_SHORT).show()
-            //dialog.dismiss()
             return
         }
-//        val firstChar = box[position].text.toString()
 
         if (row.isEmpty() && col.isNotEmpty()) {
             bind.swDirection.isChecked = false
-            bind.swDirection.text = InputQuestionDirection.HORIZONTAL.name
+            bind.swDirection.text = "Mendatar" //InputQuestionDirection.H.name
             bind.etAnswerInput.setText("")
-            bind.etAnswerInput.hint = "available ${rowCount} boxes"
+            bind.etAnswerInput.hint = "tersedia ${rowCount} kotak"
             bind.etAnswerInput.filters = rowFilter
             bind.tvSlotPreview.text = "${rowAvailable}"
         }
         if (row.isNotEmpty() && col.isEmpty()) {
             bind.swDirection.isChecked = true
-            bind.swDirection.text = InputQuestionDirection.VERTICAL.name
+            bind.swDirection.text = "Menurun" //InputQuestionDirection.V.name
             bind.etAnswerInput.setText("")
-            bind.etAnswerInput.hint = "available ${colCount} boxes"
+            bind.etAnswerInput.hint = "tersedia ${colCount} kotak"
             bind.etAnswerInput.filters = colFilter
             bind.tvSlotPreview.text = "${colAvailable}"
         }
@@ -1715,9 +1694,9 @@ class BoardActivity : AppCompatActivity() {
         bind.swDirection.setOnClickListener() {
             if (bind.swDirection.isChecked) {
                 if (col.isEmpty()) {
-                    bind.swDirection.text = InputQuestionDirection.VERTICAL.name
+                    bind.swDirection.text = "Menurun" //InputQuestionDirection.V.name
                     bind.etAnswerInput.setText("")
-                    bind.etAnswerInput.hint = "available ${colCount} boxes"
+                    bind.etAnswerInput.hint = "tersedia ${colCount} kotak"
                     bind.etAnswerInput.filters = colFilter
                     bind.tvSlotPreview.text = "${colAvailable}"
                 } else {
@@ -1726,9 +1705,9 @@ class BoardActivity : AppCompatActivity() {
                 }
             } else {
                 if (row.isEmpty()) {
-                    bind.swDirection.text = InputQuestionDirection.HORIZONTAL.name
+                    bind.swDirection.text = "Mendatar" //InputQuestionDirection.H.name
                     bind.etAnswerInput.setText("")
-                    bind.etAnswerInput.hint = "available ${rowCount} boxes"
+                    bind.etAnswerInput.hint = "tersedia ${rowCount} kotak"
                     bind.etAnswerInput.filters = rowFilter
                     bind.tvSlotPreview.text = "${rowAvailable}"
                 } else {
@@ -1737,9 +1716,6 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
         }
-
-        /* Harus ada Checking kalo input berada dalam range, dan nilainya berbeda*/
-        //Toast.makeText(this, "${currentRange}", Toast.LENGTH_SHORT).show()
 
         var harusnya = arrayListOf<String>()
         fun cekInputAnswer(): Boolean {
@@ -1758,7 +1734,6 @@ class BoardActivity : AppCompatActivity() {
                 if (box[i].text.toString().isNotEmpty()) isBox.add(i)
             }
 
-            //val ada = mutableMapOf<Int, String>()
             val ada = arrayListOf<Int>()
             for (i in 0 until isBox.size) {
                 val key = isBox[i]
@@ -1783,7 +1758,6 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
 
-
             if (harusnya.isNotEmpty()) return false
             else return true
         }
@@ -1803,16 +1777,16 @@ class BoardActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-
             if (!cekInputAnswer()) {
-                bind.etAnswerInput.error = "char baru tidak susuai \n ${harusnya.toString()}}"
+                bind.etAnswerInput.error = "char baru tidak sesuai \n${harusnya.toString()}}"
                 return@setOnClickListener
             }
 
             val number: Int = bind.etNoInput.text.toString().toInt()
             val asking: String = bind.etAskInput.text.toString().trim()
             val answer: String = bind.etAnswerInput.text.toString().uppercase()
-            val direction: String = bind.swDirection.text.toString()
+            val direction: String =
+                if (bind.swDirection.text == "Menurun") Direction.V.name else Direction.H.name
 
             val subDir = direction[0].toString()
             val id: String = Helper().generateQuestionId(currentLevel, number, subDir)
@@ -1857,7 +1831,7 @@ class BoardActivity : AppCompatActivity() {
     ) {
         val data = listQuestion
         val levelId = currentLevel
-        val box = if (direction == InputQuestionDirection.HORIZONTAL.name) {
+        val box = if (direction == InputQuestionDirection.H.name) {
             rowAvailable.toMutableList()
         } else {
             colAvailable.toMutableList()
@@ -1907,7 +1881,7 @@ class BoardActivity : AppCompatActivity() {
     ) {
         val levelId = currentLevel
         val part = listPartial
-        val boxAvailable = if (direction == InputQuestionDirection.HORIZONTAL.name) {
+        val boxAvailable = if (direction == InputQuestionDirection.H.name) {
             rowAvailable
         } else {
             colAvailable
@@ -1927,8 +1901,8 @@ class BoardActivity : AppCompatActivity() {
                     id = UUID.randomUUID().toString(),
                     charAt = boxAvailable[i],
                     charStr = answerText[i].toString(),
-                    rowQuestionId = if (direction == InputQuestionDirection.HORIZONTAL.name) questionId else prevId,
-                    colQuestionId = if (direction == InputQuestionDirection.VERTICAL.name) questionId else prevId,
+                    rowQuestionId = if (direction == InputQuestionDirection.H.name) questionId else prevId,
+                    colQuestionId = if (direction == InputQuestionDirection.V.name) questionId else prevId,
                 )
             )
         }

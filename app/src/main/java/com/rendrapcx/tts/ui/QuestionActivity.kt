@@ -120,15 +120,15 @@ class QuestionActivity : AppCompatActivity() {
 
         binding.swAll.setOnClickListener() {
             activeFilterTab(FilterStatus.ALL)
-            UserRef().setActiveTabFilter("0", FilterStatus.ALL, this, lifecycle)
+            UserRef().setActiveTabFilter(FilterStatus.ALL, this, lifecycle)
         }
         binding.swDraft.setOnClickListener() {
             activeFilterTab(FilterStatus.DRAFT)
-            UserRef().setActiveTabFilter("0", FilterStatus.DRAFT, this, lifecycle)
+            UserRef().setActiveTabFilter(FilterStatus.DRAFT, this, lifecycle)
         }
         binding.swPosted.setOnClickListener() {
             activeFilterTab(FilterStatus.POST)
-            UserRef().setActiveTabFilter("0", FilterStatus.POST, this, lifecycle)
+            UserRef().setActiveTabFilter(FilterStatus.POST, this, lifecycle)
         }
     }
 
@@ -362,7 +362,7 @@ class QuestionActivity : AppCompatActivity() {
                         .setAction("Undo", View.OnClickListener {
                             Toast.makeText(
                                 this@QuestionActivity,
-                                "KASIH KODE DISINI",
+                                "No Code Yet",
                                 Toast.LENGTH_SHORT
                             ).show()
                         })

@@ -32,33 +32,21 @@ class Data {
         @ColumnInfo(name = "level_id") var levelId: String,
     )
 
-    @Entity(tableName = "partial")
     data class Partial(
-        @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id: String,
-        @ColumnInfo(name = "char_at") var charAt: Int,
-        @ColumnInfo(name = "char_str") var charStr: String,
-        @ColumnInfo(name = "row_question_id") var rowQuestionId: String,
-        @ColumnInfo(name = "col_question_id") var colQuestionId: String,
-        @ColumnInfo(name = "level_id") var levelId: String,
-)
-    {
-        constructor() : this("",0,"","","","")
+        var id: String,
+        var charAt: Int,
+        var charStr: String,
+        var rowQuestionId: String,
+        var colQuestionId: String,
+        var levelId: String,
+    ) {
+        constructor() : this("", 0, "", "", "", "")
     }
-
-    @Entity(tableName = "user")
-    data class User(
-        @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id : String,
-        @ColumnInfo(name = "username") var username : String,
-        @ColumnInfo(name = "password") var password : String,
-        @ColumnInfo(name = "is_guest") var isGuest : Boolean,
-    )
 
     @Entity(tableName = "user_answer_tts")
     data class UserAnswerTTS(
         @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id : String,
+        @ColumnInfo(name = "id") var id: String,
         @ColumnInfo(name = "user_id") var userId: String,
         @ColumnInfo(name = "level_id") var levelId: String,
         @ColumnInfo(name = "status") var status: AnswerStatus,
@@ -67,36 +55,32 @@ class Data {
     @Entity(tableName = "user_answer_slot")
     data class UserAnswerSlot(
         @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id : String,
-        @ColumnInfo(name = "level_id") var levelId : String,
-        @ColumnInfo(name = "answer_slot") var answerSlot : MutableMap<Int, String>,
+        @ColumnInfo(name = "id") var id: String,
+        @ColumnInfo(name = "level_id") var levelId: String,
+        @ColumnInfo(name = "answer_slot") var answerSlot: MutableMap<Int, String>,
     )
 
     @Entity(tableName = "user_preferences")
     data class UserPreferences(
         @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id : String,
-        @ColumnInfo(name = "current_user") var currentUser : Int,
-        @ColumnInfo(name = "is_login") var isLogin: Boolean,
-        @ColumnInfo(name = "active_filter_tab") var activeFilterTab : FilterStatus ,
-        @ColumnInfo(name = "sort_order_by_author") var sortOrderByAuthor : Boolean,
-        @ColumnInfo(name = "integrated_keyboard") var integratedKeyboard : Boolean,
-        @ColumnInfo(name = "is_music") var isMusic : Boolean,
-        @ColumnInfo(name = "is_sound") var isSound : Boolean,
-        @ColumnInfo(name = "is_editor") var isEditor : Boolean,
+        @ColumnInfo(name = "id") var id: Int,
+        @ColumnInfo(name = "active_filter_tab") var activeFilterTab: FilterStatus,
+        @ColumnInfo(name = "integrated_keyboard") var integratedKeyboard: Boolean,
+        @ColumnInfo(name = "is_music") var isMusic: Boolean,
+        @ColumnInfo(name = "is_sound") var isSound: Boolean,
+        @ColumnInfo(name = "is_editor") var isEditor: Boolean,
     )
 
     @Serializable
     data class QRShare(
-        var level : MutableList<Level>,
-        var question : MutableList<Question>
+        var level: MutableList<Level>,
+        var question: MutableList<Question>
     )
 
     companion object {
         var listLevel = mutableListOf<Level>()
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
-        var listUser = mutableListOf<User>()
         var userAnswerTTS = mutableListOf<UserAnswerTTS>()
         var userPreferences = mutableListOf<UserPreferences>()
         var qrShare = mutableListOf<QRShare>()

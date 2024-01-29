@@ -35,16 +35,11 @@ import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
-import com.rendrapcx.tts.constant.Const.Companion.currentUser
-import com.rendrapcx.tts.constant.Const.Companion.currentUserId
-import com.rendrapcx.tts.constant.Const.Companion.isSignedIn
+import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.progress
 import com.rendrapcx.tts.constant.Const.Companion.selesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
-import com.rendrapcx.tts.databinding.DialogExitAppBinding
-import com.rendrapcx.tts.databinding.DialogLoginBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
-import com.rendrapcx.tts.databinding.DialogSignOutBinding
 import com.rendrapcx.tts.helper.Dialog
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.MyState
@@ -54,14 +49,10 @@ import com.rendrapcx.tts.helper.Progress
 import com.rendrapcx.tts.helper.Sound
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
-import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
-import com.rendrapcx.tts.model.Data.Companion.listUser
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.util.UUID
-import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
@@ -96,12 +87,6 @@ class MainActivity : AppCompatActivity() {
 
         loadBannerAds()
 
-        binding.btnExitApp.visibility = View.GONE
-        binding.btnShop.visibility = View.GONE
-        binding.btnUserSecret.visibility = View.GONE
-        binding.btnDatabase.visibility = View.GONE
-        binding.textView7.visibility = View.GONE
-        binding.btnLogin.visibility = View.INVISIBLE
         binding.btnGoListQuestion.visibility = View.INVISIBLE
 
         viewModelNet.state.observe(this) { state ->
@@ -131,65 +116,45 @@ class MainActivity : AppCompatActivity() {
             job.await()
             val job1 = async {
 
-                listUser = DB.getInstance(applicationContext).user().getAllUser()
-                currentUser = UserRef().getCurrentUser()
-
+                isEditor = UserRef().getIsEditor()
                 selesai = Progress().getUserSelesai(this@MainActivity, lifecycle)
                 progress = Progress().getUserProgress(this@MainActivity, lifecycle)
             }
             job1.await()
 
-            /*NANTI AKTIFKAN LAGI*/
-            //loadCurrentUser()
-
-            initIsEditor()
-
             getDataLevel() //init for playMenuTTS
 
             animLogo()
 
+            initEditorMenu()
+
         }
         binding.apply {
 
-            btnOnline.setOnClickListener() {
-//                lifecycleScope.launch {
-//                    DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
-//                    DB.getInstance(applicationContext).userAnswerTTS().deleteAllUSerAnswer()
-//                }
-
+            btnOnline.setOnClickListener {
                 Toast.makeText(this@MainActivity, "\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\nsedang dalam perbaikan", Toast.LENGTH_SHORT).show()
             }
 
-            btnTrophy.setOnClickListener() {
+            btnTrophy.setOnClickListener {
                 Dialog().aboutDialog(this@MainActivity)
             }
 
-            btnGoListQuestion.setOnClickListener() {
+            btnGoListQuestion.setOnClickListener {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
                 startActivity(i)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
-            btnSettingMain.setOnClickListener() {
+            btnSettingMain.setOnClickListener {
                 Dialog().apply { settingDialog(this@MainActivity, lifecycle) }
                 UserRef().getIsEditor()
             }
 
-            btnUserSecret.setOnClickListener() {
-                Dialog().apply { userProfile(this@MainActivity) }
-            }
-
-            btnLogin.setOnClickListener() {
-                if (currentUserId.isNotEmpty()) signOutDialog()
-                else loginDialog()
-            }
-
-            btnGoTTS.setOnClickListener() {
+            btnGoTTS.setOnClickListener {
                 playMenuTTSDialog()
             }
 
-            /*Play Random*/
-            btnGoAcak.setOnClickListener() {
+            btnGoAcak.setOnClickListener {
                 if (listLevel.isEmpty()) {
                     Toast.makeText(
                         this@MainActivity,
@@ -204,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                         this@MainActivity,
                         "Belum ada soal yang Anda selesaikan,\n" +
                                 "Silakan bermain dan selesaikan beberapa soal terlebih dahulu, " +
-                                "untuk bisa memankan secara acak"
+                                "untuk bisa memainkan secara acak"
                     )
                     return@setOnClickListener
                 }
@@ -212,21 +177,19 @@ class MainActivity : AppCompatActivity() {
                 boardSet = Const.BoardSet.PLAY_RANDOM
                 val intent = Intent(this@MainActivity, BoardActivity::class.java)
                 startActivity(intent)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
-
-            /*BARCODE*/
-            btnGoScan.setOnClickListener() {
+            btnGoScan.setOnClickListener {
                 val intent = Intent(this@MainActivity, BarcodeActivity::class.java)
                 startActivity(intent)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
         }
     }
 
-    private fun initIsEditor() {
-        val isEditor = UserRef().getIsEditor()
+
+    private fun initEditorMenu(){
         if (isEditor) binding.btnGoListQuestion.visibility = View.VISIBLE
         else binding.btnGoListQuestion.visibility = View.INVISIBLE
     }
@@ -278,32 +241,6 @@ class MainActivity : AppCompatActivity() {
             .playOn(binding.imgLogo)
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun exitDialog() {
-        val inflater =
-            this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val bind = DialogExitAppBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(this).setView(bind.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
-        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(false)
-
-        bind.btnOK.setOnClickListener() {
-            exitProcess(-1)
-        }
-
-        bind.btnCancel.setOnClickListener() {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun playMenuTTSDialog() {
@@ -342,13 +279,12 @@ class MainActivity : AppCompatActivity() {
                                     "Anda sudah menyelesaikan level ini. \nMau reset ulang level ini?",
                                     "Tidak",
                                     "Ya",
-                                    lifecycle
                                 )
                             }
                         } else {
                             val i = Intent(this@MainActivity, BoardActivity::class.java)
                             startActivity(i)
-                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                             dialog.dismiss()
                         }
                     }
@@ -378,7 +314,7 @@ class MainActivity : AppCompatActivity() {
         showListByCategory()
 
         //Actions
-        binding.btnBackToCategoryAdapter.setOnClickListener() {
+        binding.btnBackToCategoryAdapter.setOnClickListener {
             binding.tvPlayMenuHeader.text = "Pilih Kategori"
             showListByCategory()
         }
@@ -403,147 +339,6 @@ class MainActivity : AppCompatActivity() {
             }
             view.onApplyWindowInsets(windowInsets)
         }
-    }
-
-    @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun loadCurrentUser() {
-        lifecycle.coroutineScope.launch {
-            var isEmpty = true
-            val job1 =
-                async { isEmpty = DB.getInstance(applicationContext).user().getAllUser().isEmpty() }
-            job1.await()
-            if (isEmpty) {
-                loginDialog()
-                return@launch
-            } else {
-                val load = async {
-                    listUser = DB.getInstance(applicationContext).user().getAllUser()
-                }
-                load.await()
-
-                currentUser = UserRef().getCurrentUser()
-
-                val guest = listUser[currentUser].isGuest
-                if (guest) {
-                    binding.btnLogin.text = "Guest"
-                    binding.btnGoListQuestion.visibility = View.INVISIBLE
-                } else {
-                    binding.btnLogin.text = listUser[currentUser].username
-                    binding.btnGoListQuestion.visibility = View.VISIBLE
-                }
-
-                currentUserId = listUser[currentUser].id
-                isSignedIn = true
-            }
-        }
-    }
-
-
-    @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun signOutDialog(
-    ) {
-        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val bind = DialogSignOutBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(this).setView(bind.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(true)
-
-        bind.btnTwo.setOnClickListener() {
-            isSignedIn = false
-            currentUserId = ""
-            binding.btnLogin.text = "Login"
-            loginDialog()
-            dialog.dismiss()
-        }
-
-        bind.btnOne.setOnClickListener() {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun loginDialog(
-    ) {
-        val inflater =
-            this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val bind = DialogLoginBinding.inflate(inflater)
-        val builder = AlertDialog.Builder(this).setView(bind.root)
-        val dialog = builder.create()
-
-        extracted(dialog)
-
-        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
-        dialog.window!!.attributes.gravity = Gravity.TOP
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.setCancelable(false)
-
-        fun createUserGuest() {
-            val id = UUID.randomUUID().toString().substring(0, 10)
-            val username = "Guest-$id"
-            lifecycle.coroutineScope.launch {
-                val job = async {
-                    DB.getInstance(applicationContext).user().insertUser(
-                        Data.User(
-                            id = id,
-                            username = username,
-                            password = "secret",
-                            isGuest = true
-                        )
-                    )
-                    listUser = DB.getInstance(applicationContext).user().getAllUser()
-                }
-                job.await()
-                currentUser = listUser.indexOfFirst { it.id == id }
-                UserRef().setCurrentUser("0", currentUser, this@MainActivity, lifecycle)
-                loadCurrentUser()
-                dialog.dismiss()
-            }
-        }
-
-        bind.btnLogin.setOnClickListener() {
-            lifecycleScope.launch {
-                val username = bind.editUser.text.toString()
-                val password = bind.editPassword.text.toString()
-
-                if (username.isEmpty()) {
-                    bind.editUser.error = "silakan lengkapi data"
-                }
-                if (password.isEmpty()) {
-                    bind.editPassword.error = "silakan isi password"
-                }
-
-                val job = async {
-                    listUser = DB.getInstance(applicationContext).user().getAllUser()
-                }
-                job.await()
-
-                val index =
-                    listUser.indexOfFirst { it.username == username && it.password == password }
-                if (index == -1) {
-                    bind.editPassword.error = "Tidak ada ada"
-                } else {
-                    currentUser = index
-                    UserRef().setCurrentUser("0", currentUser, this@MainActivity, lifecycle)
-                    loadCurrentUser()
-                    dialog.dismiss()
-                }
-            }
-        }
-
-        bind.btnLoginGuest.setOnClickListener() {
-            createUserGuest()
-        }
-
-        dialog.show()
     }
 
     private fun getDataLevel() {

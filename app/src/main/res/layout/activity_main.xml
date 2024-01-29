@@ -9,24 +9,6 @@
     >
 
     <Button
-        android:id="@+id/btnDatabase"
-        style="@style/Widget.Material3.Button.IconButton.Outlined"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/database_solid"
-        app:layout_constraintStart_toEndOf="@+id/btnUserSecret"
-        app:layout_constraintTop_toTopOf="@+id/btnUserSecret" />
-
-    <Button
-        android:id="@+id/btnShop"
-        style="@style/Widget.Material3.Button.IconButton.Outlined"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/basket_shopping_solid"
-        app:layout_constraintStart_toEndOf="@+id/btnTrophy"
-        app:layout_constraintTop_toTopOf="@+id/btnTrophy" />
-
-    <Button
         android:id="@+id/btnGoListQuestion"
         style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="0dp"
@@ -114,37 +96,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnExitApp"
-        style="@style/Widget.Material3.Button.IconButton.Outlined"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        app:icon="@drawable/power_off_solid"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:layout_editor_absoluteY="763dp" />
-
-    <Button
-        android:id="@+id/btnUserSecret"
-        style="@style/Widget.Material3.Button.IconButton.Outlined"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="80dp"
-        app:icon="@drawable/user_secret_solid"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnLogin"
-        style="@style/Widget.Material3.Button.IconButton.Outlined"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Login"
-        app:layout_constraintEnd_toStartOf="@+id/btnSettingMain"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
         android:id="@+id/btnSettingMain"
         style="@style/Widget.Material3.Button.IconButton.Outlined"
         android:layout_width="wrap_content"
@@ -165,17 +116,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/terka_banner" />
-
-    <TextView
-        android:id="@+id/textView7"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="176dp"
-        android:layout_marginEnd="177dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnOnline" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
