@@ -101,23 +101,13 @@ class BarcodeActivity : AppCompatActivity() {
                     ).show()
                     Sound().soundSuccess(this@BarcodeActivity)
                 }
-
             }
 
             btnSettingPlay.setOnLongClickListener {
                 /*RESET USER ANSWER*/
                 lifecycleScope.launch {
-                    DB.getInstance(applicationContext).userAnswerSlot().deleteAllSlot()
-                    DB.getInstance(applicationContext).userAnswerTTS().deleteAllUSerAnswer()
-                    Toast.makeText(
-                        this@BarcodeActivity,
-                        "user_answer = cleared\neditor = off",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
                     isEditor = false
                     UserRef().setIsEditor(isEditor, applicationContext, lifecycle)
-
                     Sound().soundSuccess(this@BarcodeActivity)
                 }
                 return@setOnLongClickListener true

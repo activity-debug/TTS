@@ -39,7 +39,7 @@ abstract class DB : RoomDatabase() {
                         DB::class.java,
                         "tts-db"
                     )
-                        //.createFromAsset("database/tts-db")
+                        .createFromAsset("database/tts-db")
                         .build()
                 }
                 return instance

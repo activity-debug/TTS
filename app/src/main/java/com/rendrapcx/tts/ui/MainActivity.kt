@@ -18,10 +18,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.daimajia.androidanimations.library.Techniques
@@ -42,6 +44,7 @@ import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.helper.MyState
 import com.rendrapcx.tts.helper.NetworkStatusTracker
 import com.rendrapcx.tts.helper.NetworkStatusViewModel
 import com.rendrapcx.tts.helper.Progress
@@ -83,6 +86,13 @@ class MainActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
+        viewModelNet.state.observe(this, Observer {
+            when (it) {
+                MyState.Fetched -> binding.btnOnline.visibility = View.VISIBLE
+                MyState.Error -> binding.btnOnline.visibility = View.INVISIBLE
+            }
+        })
+
         loadBannerAds()
 
         binding.btnGoListQuestion.visibility = View.INVISIBLE
@@ -92,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             /*INIT DATABASE*/
             val job = async {
+                try {
                 val isEmpty =
                     DB.getInstance(applicationContext)
                         .userPreferences().getAllUserPreferences().isEmpty()
@@ -101,6 +112,14 @@ class MainActivity : AppCompatActivity() {
                 userPreferences =
                     DB.getInstance(applicationContext.applicationContext).userPreferences()
                         .getAllUserPreferences()
+
+                } catch (e: Exception) {
+                    UserRef().writeDefaultPreferences(applicationContext, lifecycle)
+                } finally {
+                    userPreferences =
+                        DB.getInstance(applicationContext.applicationContext).userPreferences()
+                            .getAllUserPreferences()
+                }
             }
             job.await()
             val job1 = async {
@@ -241,7 +260,6 @@ class MainActivity : AppCompatActivity() {
                         boardSet = BoardSet.PLAY_KATEGORI
                         currentLevel = it.id
 
-                        listSelesai = Progress().getUserSelesai(applicationContext, lifecycle)
                         if (currentLevel in listSelesai) {
                             Dialog().apply {
                                 showDialogYesNo(
