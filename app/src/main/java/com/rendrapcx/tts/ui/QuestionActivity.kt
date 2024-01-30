@@ -43,16 +43,12 @@ import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
-import com.rendrapcx.tts.model.Data.Companion.qrShare
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.InputStreamReader
 import java.io.OutputStream
 import java.util.Base64
 
@@ -63,6 +59,8 @@ class QuestionActivity : AppCompatActivity() {
     private var levelShareIndexId = -1
     private var myClipboard: ClipboardManager? = null
     //private var myClip: ClipData? = null
+
+    private var qrShare = mutableListOf<Data.QRShare>()
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)

@@ -91,6 +91,5 @@ class Data {
         var listPartial = mutableListOf<Partial>()
         var userAnswerTTS = mutableListOf<UserAnswerTTS>()
         var userPreferences = mutableListOf<UserPreferences>()
-        var qrShare = mutableListOf<QRShare>()
     }
 }

@@ -38,10 +38,6 @@ import com.rendrapcx.tts.helper.Sound
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
-import com.rendrapcx.tts.model.Data.Companion.listLevel
-import com.rendrapcx.tts.model.Data.Companion.listQuestion
-import com.rendrapcx.tts.model.Data.Companion.qrShare
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
@@ -58,6 +54,10 @@ class BarcodeActivity : AppCompatActivity() {
 
     private var counterClearInput = 0
 
+    private var qrShare = mutableListOf<Data.QRShare>()
+    private var qrListLevel = mutableListOf<Data.Level>()
+    private var qrListQuestion = mutableListOf<Data.Question>()
+
     @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,6 +72,11 @@ class BarcodeActivity : AppCompatActivity() {
         binding.editPaste.setText("")
         binding.editPaste.visibility = View.INVISIBLE
         binding.btnSaveSoal.visibility = View.INVISIBLE
+        qrShare.clear()
+        qrListLevel.clear()
+        qrListQuestion.clear()
+
+
 
         binding.includeHeader.apply {
             tvLabelTop.text = "Scan Data Questioner"
@@ -85,7 +90,7 @@ class BarcodeActivity : AppCompatActivity() {
             btnSettingPlay.setOnClickListener {
                 /*ENABLE EDITOR*/
                 counterClearInput++
-                if (counterClearInput > 9 && !isEditor ) {
+                if (counterClearInput > 9 && !isEditor) {
                     isEditor = true
                     UserRef().setIsEditor(isEditor, applicationContext, lifecycle)
                     YoYo.with(Techniques.RubberBand).playOn(it)
@@ -131,18 +136,26 @@ class BarcodeActivity : AppCompatActivity() {
 
             btnSaveSoal.setOnClickListener {
                 lifecycleScope.launch {
-                    val job = async {
+                    val levelId = qrListLevel[0].id
+                    val data = DB.getInstance(applicationContext).level().getAllLevel()
+                    val ids = data.map { it.id }
+
+                    if (levelId in ids) {
+                        Toast.makeText(this@BarcodeActivity,
+                            "Sudah ada data dengan ID yang sama",
+                            Toast.LENGTH_SHORT).show()
+                        return@launch
+                    } else {
                         saveQRToDB()
-                        Toast.makeText(this@BarcodeActivity, "Soal tersimpan", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(this@BarcodeActivity,
+                            "Soal tersimpan",
+                            Toast.LENGTH_SHORT).show()
+
+                        val i = Intent(this@BarcodeActivity, MainActivity::class.java)
+                        startActivity(i)
+                        finish()
+                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                     }
-                    job.await()
-
-                    val i = Intent(this@BarcodeActivity, MainActivity::class.java)
-                    startActivity(i)
-                    finish()
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-
                 }
             }
 
@@ -159,10 +172,10 @@ class BarcodeActivity : AppCompatActivity() {
                         String(Base64.getDecoder().decode(binding.editPaste.text.toString()))
 
                     qrShare.clear()
-                    qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
 
-                    listLevel = qrShare[0].level
-                    listQuestion = qrShare[0].question
+                    qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
+                    qrListLevel = qrShare[0].level
+                    qrListQuestion = qrShare[0].question
 
                 } catch (e: Exception) {
                     error = true
@@ -177,10 +190,10 @@ class BarcodeActivity : AppCompatActivity() {
                     } else {
                         binding.btnSaveSoal.visibility = View.VISIBLE
                         binding.textResultContent.text =
-                            "ID: ${listLevel[0].id} \n" +
-                                    "Category: ${listLevel[0].category} \n" +
-                                    "Title: ${listLevel[0].title} \n" +
-                                    "Creator: ${listLevel[0].userId}"
+                            "ID: ${qrListLevel[0].id} \n" +
+                                    "Category: ${qrListLevel[0].category} \n" +
+                                    "Title: ${qrListLevel[0].title} \n" +
+                                    "Creator: ${qrListLevel[0].userId}"
                     }
                 }
             }
@@ -191,25 +204,25 @@ class BarcodeActivity : AppCompatActivity() {
 
     private fun saveQRToDB() {
         lifecycleScope.launch {
-            val levelId = listLevel[0].id
+            val levelId = qrListLevel[0].id
 
             val category = if (binding.editInputContent.text.isNotEmpty()) {
                 binding.editInputContent.text.toString()
             } else {
-                listLevel[0].category
+                qrListLevel[0].category
             }
 
             DB.getInstance(applicationContext).level().insertLevel(
                 Data.Level(
                     id = levelId,
                     category = category,
-                    title = listLevel[0].title,
-                    userId = listLevel[0].userId,
+                    title = qrListLevel[0].title,
+                    userId = qrListLevel[0].userId,
                     status = Const.FilterStatus.POST
                 )
             )
             //Add Questioner
-            listQuestion.filter { it.levelId == levelId }.map { it }.forEach {
+            qrListQuestion.filter { it.levelId == levelId }.map { it }.forEach {
                 DB.getInstance(applicationContext).question().insertQuestion(
                     Data.Question(
                         levelId = it.levelId,
@@ -244,16 +257,14 @@ class BarcodeActivity : AppCompatActivity() {
                 qrShare.clear()
                 qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
 
-                listLevel.clear()
-                listQuestion.clear()
-                listLevel = qrShare[0].level
-                listQuestion = qrShare[0].question
+                qrListLevel = qrShare[0].level
+                qrListQuestion = qrShare[0].question
 
                 binding.textResultContent.text = "file: ${imgFile} \n" +
-                        "ID: ${listLevel[0].id} \n" +
-                        "Category: ${listLevel[0].category} \n" +
-                        "Title: ${listLevel[0].title} \n" +
-                        "Creator: ${listLevel[0].userId}"
+                        "ID: ${qrListLevel[0].id} \n" +
+                        "Category: ${qrListLevel[0].category} \n" +
+                        "Title: ${qrListLevel[0].title} \n" +
+                        "Creator: ${qrListLevel[0].userId}"
 
                 binding.btnSaveSoal.visibility = View.VISIBLE
             } else {
@@ -295,16 +306,14 @@ class BarcodeActivity : AppCompatActivity() {
                 qrShare.clear()
                 qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
 
-                listLevel.clear()
-                listQuestion.clear()
-                listLevel = qrShare[0].level
-                listQuestion = qrShare[0].question
+                qrListLevel = qrShare[0].level
+                qrListQuestion = qrShare[0].question
 
                 binding.textResultContent.text = "file: ${intentResult.barcodeImagePath} \n" +
-                        "ID: ${listLevel[0].id} \n" +
-                        "Category: ${listLevel[0].category} \n" +
-                        "Title: ${listLevel[0].title} \n" +
-                        "Creator: ${listLevel[0].userId}"
+                        "ID: ${qrListLevel[0].id} \n" +
+                        "Category: ${qrListLevel[0].category} \n" +
+                        "Title: ${qrListLevel[0].title} \n" +
+                        "Creator: ${qrListLevel[0].userId}"
 
                 binding.btnSaveSoal.visibility = View.VISIBLE
 
