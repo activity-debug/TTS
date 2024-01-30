@@ -2,13 +2,17 @@ package com.rendrapcx.tts.helper
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.provider.MediaStore.Audio.Media
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.model.Data
+import kotlinx.coroutines.launch
 
 class Sound {
 
-    private val isSound = if (Data.userPreferences.isEmpty()) true else Data.userPreferences[0].isSound
+    private val isSound =
+        if (Data.userPreferences.isEmpty()) true else Data.userPreferences[0].isSound
+
     fun soundWinning(context: Context) {
         if (!isSound) return
         val mp = MediaPlayer.create(context.applicationContext, R.raw.winner_bell)
@@ -21,21 +25,24 @@ class Sound {
         mp.start()
     }
 
-    fun soundNextQuestion(context: Context){
+    fun soundNextQuestion(context: Context) {
         if (!isSound) return
         val mp = MediaPlayer.create(context.applicationContext, R.raw.door_opening)
         mp.start()
     }
+
     fun soundShuffle(context: Context) {
         if (!isSound) return
         val mp = MediaPlayer.create(context.applicationContext, R.raw.bit_video_game_points)
         mp.start()
     }
 
-    fun soundTyping(context: Context){
+    fun soundTyping(context: Context, lifecycle: Lifecycle) {
         if (!isSound) return
-        val mp = MediaPlayer.create(context.applicationContext, R.raw.mech_keyboard)
-        mp.start()
+        lifecycle.coroutineScope.launch {
+            val mp = MediaPlayer.create(context.applicationContext, R.raw.mech_keyboard)
+            mp.start()
+        }
     }
 
     fun soundOpeningApp(context: Context) {
@@ -50,7 +57,7 @@ class Sound {
         mp.start()
     }
 
-    fun soundOnClickBox(context: Context){
+    fun soundOnClickBox(context: Context) {
         if (!isSound) return
         val mp = MediaPlayer.create(context.applicationContext, R.raw.door_opening)
         mp.start()
@@ -92,15 +99,21 @@ class Sound {
         mp.start()
     }
 
-    fun soundStartGame(context: Context){
+    fun soundStartGame(context: Context) {
         if (!isSound) return
-        val mp = MediaPlayer.create(context.applicationContext, R.raw.vozrobotr) //.hybrid_logo //.crystal_logo
+        val mp = MediaPlayer.create(
+            context.applicationContext,
+            R.raw.vozrobotr
+        ) //.hybrid_logo //.crystal_logo
         mp.start()
     }
 
-    fun soundFirstLaunch(context: Context){
+    fun soundFirstLaunch(context: Context) {
         if (!isSound) return
-        val mp = MediaPlayer.create(context.applicationContext, R.raw.launch_sequence) //.hybrid_logo //.crystal_logo
+        val mp = MediaPlayer.create(
+            context.applicationContext,
+            R.raw.launch_sequence
+        ) //.hybrid_logo //.crystal_logo
         mp.start()
     }
 

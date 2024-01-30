@@ -68,8 +68,9 @@ open class Dialog {
             }
             .playOn(binding.imageView4)
 
-        YoYo.with(Techniques.FlipInY).duration(3000).playOn(binding.textView19)
-
+        YoYo.with(Techniques.FlipInY).duration(1000)
+            .onEnd { Const.isEnableClick = true }
+            .playOn(binding.textView19)
 
         YoYo.with(Techniques.RubberBand).repeat(5).playOn(binding.btnHireMe)
 
@@ -86,6 +87,7 @@ open class Dialog {
                 "Hi Am a Terka TTS User, Im Interest to Hire You"
             )
             context.startActivity(Intent.createChooser(emailIntent, "Please select App"))
+            Const.isEnableClick = true
             dialog.dismiss()
         }
 
@@ -110,6 +112,9 @@ open class Dialog {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
+        YoYo.with(Techniques.FlipInY)
+            .onEnd { Const.isEnableClick = true }
+            .playOn(binding.textView3)
 
         lifecycle.coroutineScope.launch {
             val job1 = async {

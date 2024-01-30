@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.daimajia.androidanimations.library.Techniques
@@ -39,6 +38,7 @@ import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
+import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.Const.Companion.listProgress
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
@@ -72,7 +72,6 @@ class MainActivity : AppCompatActivity() {
         )[NetworkStatusViewModel::class.java]
     }
 
-
     private lateinit var mAdView: AdView
 
 
@@ -95,6 +94,8 @@ class MainActivity : AppCompatActivity() {
 
         loadBannerAds()
 
+        isEnableClick = true
+
         binding.btnGoListQuestion.visibility = View.INVISIBLE
         binding.btnOnline.visibility = View.INVISIBLE
 
@@ -103,15 +104,15 @@ class MainActivity : AppCompatActivity() {
             /*INIT DATABASE*/
             val job = async {
                 try {
-                val isEmpty =
-                    DB.getInstance(applicationContext)
-                        .userPreferences().getAllUserPreferences().isEmpty()
+                    val isEmpty =
+                        DB.getInstance(applicationContext)
+                            .userPreferences().getAllUserPreferences().isEmpty()
 
-                if (isEmpty) UserRef().writeDefaultPreferences(applicationContext, lifecycle)
+                    if (isEmpty) UserRef().writeDefaultPreferences(applicationContext, lifecycle)
 
-                userPreferences =
-                    DB.getInstance(applicationContext.applicationContext).userPreferences()
-                        .getAllUserPreferences()
+                    userPreferences =
+                        DB.getInstance(applicationContext.applicationContext).userPreferences()
+                            .getAllUserPreferences()
 
                 } catch (e: Exception) {
                     UserRef().writeDefaultPreferences(applicationContext, lifecycle)
@@ -140,11 +141,18 @@ class MainActivity : AppCompatActivity() {
         binding.apply {
 
             btnOnline.setOnClickListener {
-                Toast.makeText(this@MainActivity, "\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\nsedang dalam perbaikan", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    "\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\nsedang dalam perbaikan",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             btnTrophy.setOnClickListener {
-                Dialog().aboutDialog(this@MainActivity)
+                if (isEnableClick) {
+                    Dialog().aboutDialog(this@MainActivity)
+                    isEnableClick = false
+                }
             }
 
             btnGoListQuestion.setOnClickListener {
@@ -155,12 +163,18 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnSettingMain.setOnClickListener {
-                Dialog().apply { settingDialog(this@MainActivity, lifecycle) }
-                UserRef().getIsEditor()
+                if (isEnableClick) {
+                    Dialog().apply { settingDialog(this@MainActivity, lifecycle) }
+                    isEnableClick = false
+                    UserRef().getIsEditor()
+                }
             }
 
             btnGoTTS.setOnClickListener {
-                playMenuTTSDialog()
+                if (isEnableClick) {
+                    playMenuTTSDialog()
+                    isEnableClick = false
+                }
             }
 
             btnGoAcak.setOnClickListener {
@@ -198,6 +212,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     /* ADMOB BANNER*/
     private fun loadBannerAds() {
         MobileAds.initialize(this@MainActivity) {}
@@ -215,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initEditorMenu(){
+    private fun initEditorMenu() {
         if (isEditor) binding.btnGoListQuestion.visibility = View.VISIBLE
         else binding.btnGoListQuestion.visibility = View.INVISIBLE
     }
@@ -245,6 +260,7 @@ class MainActivity : AppCompatActivity() {
         dialog.setCancelable(true)
 
         fun changeListFiltered(category: String) {
+            isEnableClick = true
             binding.apply {
                 val filteredListLevel = listLevel
                     .filter { it.category == category && it.status == Const.FilterStatus.POST }
@@ -300,10 +316,15 @@ class MainActivity : AppCompatActivity() {
 
         //Init Dialog Komponen
         binding.tvPlayMenuHeader.text = "Pilih Kategori"
+        YoYo.with(Techniques.Landing)
+            .onEnd { isEnableClick = true }
+            .playOn(binding.tvPlayMenuHeader)
         showListByCategory()
-
         //Actions
         binding.btnBackToCategoryAdapter.setOnClickListener {
+            if (binding.tvPlayMenuHeader.text == "Pilih Kategori") {
+                dialog.dismiss()
+            }
             binding.tvPlayMenuHeader.text = "Pilih Kategori"
             showListByCategory()
         }

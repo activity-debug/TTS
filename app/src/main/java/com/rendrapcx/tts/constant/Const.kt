@@ -44,5 +44,6 @@ class Const {
         var currentCategory = ""
         var inputMode = ""
 
+        var isEnableClick = true
     }
 }

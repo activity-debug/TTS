@@ -39,6 +39,7 @@ import com.rendrapcx.tts.constant.Const.Companion.currentCategory
 import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.inputMode
+import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.constant.Const.Companion.position
 import com.rendrapcx.tts.constant.Const.Counter
@@ -112,6 +113,8 @@ class BoardActivity : AppCompatActivity() {
 
         loadBannerAds()
 
+        isEnableClick = true
+
         binding.includeEditor.mainContainer.visibility = View.GONE
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
 
@@ -142,7 +145,7 @@ class BoardActivity : AppCompatActivity() {
                 box[position].text = ""
                 upsertUserSlot(position, box[position].text.toString())
                 onPressBackSpace()
-                Sound().soundTyping(this@BoardActivity)
+                Sound().soundTyping(applicationContext, lifecycle)
                 YoYo.with(Techniques.Landing)
                     .duration(500)
                     .playOn(btnBackSpace)
@@ -170,14 +173,15 @@ class BoardActivity : AppCompatActivity() {
                 intKey[i].setOnTouchListener(View.OnTouchListener { _, motionEvent ->
                     when (motionEvent.action) {
                         MotionEvent.ACTION_DOWN -> {
+                            if (isEnableClick == false) return@OnTouchListener true
+                            Sound().soundTyping(applicationContext, lifecycle)
                             upsertUserSlot(position, intKey[i].text.toString())
                             box[position].text = intKey[i].text
+                            onPressAbjabMove()
+                            checkWinCondition(false)
                             YoYo.with(Techniques.Landing)
                                 .duration(1000)
                                 .playOn(box[position])
-                            onPressAbjabMove()
-                            checkWinCondition(false)
-                            Sound().soundTyping(this@BoardActivity)
                         }
 
                         MotionEvent.ACTION_UP -> {
@@ -206,7 +210,10 @@ class BoardActivity : AppCompatActivity() {
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
             btnSettingPlay.setOnClickListener {
-                Dialog().apply { settingDialog(this@BoardActivity, lifecycle) }
+                if (isEnableClick) {
+                    Dialog().apply { settingDialog(this@BoardActivity, lifecycle) }
+                    isEnableClick = false
+                }
             }
         }
 
@@ -596,7 +603,7 @@ class BoardActivity : AppCompatActivity() {
             val job = async {
                 for (i in currentRange.indices) {
                     val x = currentRange[i]
-                    Sound().soundTyping(this@BoardActivity)
+                    Sound().soundTyping(applicationContext, lifecycle)
                     if (inputAnswerDirection == InputAnswerDirection.ROW) {
                         YoYo.with(Techniques.Hinge)
                             .onEnd {
@@ -635,7 +642,7 @@ class BoardActivity : AppCompatActivity() {
 
             YoYo.with(Techniques.Wave).repeat(1).duration(300)
                 .onEnd {
-                    Sound().soundOnFinger(this@BoardActivity)
+                    Sound().soundOnFinger(applicationContext)
                     YoYo.with(Techniques.RubberBand)
                         .onEnd {
                             pickByArrow = false
@@ -1012,6 +1019,7 @@ class BoardActivity : AppCompatActivity() {
         }
 
         if (pass) {
+            isEnableClick = false
             if (boardSet != BoardSet.PLAY_RANDOM) {
                 Progress().updateUserAnswer(AnswerStatus.DONE, applicationContext, lifecycle)
                 helperCounter(Counter.DELETE)
@@ -1159,6 +1167,7 @@ class BoardActivity : AppCompatActivity() {
                 includeHeader.tvLabelTop.text = msg
             }
 
+            isEnableClick = true
             telunjuk = 0
             robot = 0
             binding.includeGameHelperBottom.apply {
@@ -1258,6 +1267,7 @@ class BoardActivity : AppCompatActivity() {
 
             }
 
+            isEnableClick = true
             telunjuk = 0
             robot = 0
 
