@@ -23,6 +23,9 @@ interface IUserAnswerTTS {
     @Query("SELECT * FROM user_answer_tts")
     suspend fun getAllUserAnswer(): MutableList<Data.UserAnswerTTS>
 
+    @Query("SELECT * FROM user_answer_tts WHERE status =:status;")
+    suspend fun getStatus(status: String) : MutableList<Data.UserAnswerTTS>
+
     @Query("SELECT * FROM user_answer_tts WHERE level_id=:levelId")
     suspend fun getLevelAnswer(levelId: String) : MutableList<Data.UserAnswerTTS>
 

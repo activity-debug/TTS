@@ -5,8 +5,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.rendrapcx.tts.R
-import com.rendrapcx.tts.constant.Const.Companion.progress
-import com.rendrapcx.tts.constant.Const.Companion.selesai
+import com.rendrapcx.tts.constant.Const.*
+import com.rendrapcx.tts.constant.Const.Companion.listProgress
+import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.DialogMenuItemTitleBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.model.Data
@@ -47,13 +48,17 @@ class PlayMenuTitleAdapter : RecyclerView.Adapter<PlayMenuTitleAdapter.PlayViewH
 
         val pos = Helper().formatTigaDigit(position+1)
         holder.binding.tvTitleLevel.text = pos //+ " " + Const.strRed
-        holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_undone)
 
-        if (level.id in selesai) {
-            holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_done)
-        }
-        if (level.id in progress){
-            holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_progress)
+        when (level.id) {
+            in listSelesai -> {
+                holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_done)
+            }
+            in listProgress -> {
+                holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_progress)
+            }
+            else -> {
+                holder.binding.tvTitleLevel.setBackgroundResource(R.drawable.shape_item_undone)
+            }
         }
 
         holder.binding.root.setOnClickListener {

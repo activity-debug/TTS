@@ -5,6 +5,7 @@ import android.provider.ContactsContract.Data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.rendrapcx.tts.helper.Progress
 import com.rendrapcx.tts.model.Data.*
 
 class Const {
@@ -31,12 +32,10 @@ class Const {
         var bannerCaAppId = "ca-app-pub-5609246517650629/2803623664"
         var intersCaAppId = "ca-app-pub-5609246517650629/9483231011"
 
-        var selesai = arrayListOf<String>()
-        var progress = arrayListOf<String>()
-
-        var isEditor = false
-
         var boardSet = BoardSet.EDITOR_NEW
+        var isEditor = false
+        var listSelesai = arrayListOf<String>()
+        var listProgress = arrayListOf<String>()
 
         var position = 0
         var currentIndex = 0

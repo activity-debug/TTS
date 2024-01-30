@@ -85,10 +85,9 @@ class BarcodeActivity : AppCompatActivity() {
             btnSettingPlay.setOnClickListener {
                 /*ENABLE EDITOR*/
                 counterClearInput++
-                if (counterClearInput > 9 && !isEditor) {
+                if (counterClearInput > 9 && !isEditor ) {
                     isEditor = true
-                    UserRef().setIsEditor(true, applicationContext, lifecycle)
-                    isEditor = UserRef().getIsEditor()
+                    UserRef().setIsEditor(isEditor, applicationContext, lifecycle)
                     YoYo.with(Techniques.RubberBand).playOn(it)
                     Toast.makeText(
                         this@BarcodeActivity,
@@ -112,8 +111,7 @@ class BarcodeActivity : AppCompatActivity() {
                     ).show()
 
                     isEditor = false
-                    UserRef().setIsEditor(false, applicationContext, lifecycle)
-                    isEditor = UserRef().getIsEditor()
+                    UserRef().setIsEditor(isEditor, applicationContext, lifecycle)
 
                     Sound().soundSuccess(this@BarcodeActivity)
                 }

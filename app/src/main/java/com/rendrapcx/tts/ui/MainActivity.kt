@@ -37,12 +37,11 @@ import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
-import com.rendrapcx.tts.constant.Const.Companion.progress
-import com.rendrapcx.tts.constant.Const.Companion.selesai
+import com.rendrapcx.tts.constant.Const.Companion.listProgress
+import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.helper.Helper
-import com.rendrapcx.tts.helper.MyState
 import com.rendrapcx.tts.helper.NetworkStatusTracker
 import com.rendrapcx.tts.helper.NetworkStatusViewModel
 import com.rendrapcx.tts.helper.Progress
@@ -53,7 +52,6 @@ import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -88,17 +86,8 @@ class MainActivity : AppCompatActivity() {
         loadBannerAds()
 
         binding.btnGoListQuestion.visibility = View.INVISIBLE
-
-        viewModelNet.state.observe(this) { state ->
-            binding.apply {
-                when (state) {
-                    MyState.Fetched -> btnOnline.visibility = View.VISIBLE
-                    MyState.Error -> btnOnline.visibility = View.INVISIBLE
-                    else -> {}
-                }
-            }
-        }
         binding.btnOnline.visibility = View.INVISIBLE
+
 
         lifecycleScope.launch {
             /*INIT DATABASE*/
@@ -117,18 +106,18 @@ class MainActivity : AppCompatActivity() {
             val job1 = async {
 
                 isEditor = UserRef().getIsEditor()
-                selesai = Progress().getUserSelesai(this@MainActivity, lifecycle)
-                progress = Progress().getUserProgress(this@MainActivity, lifecycle)
+                listSelesai = Progress().getUserSelesai(applicationContext, lifecycle)
+                listProgress = Progress().getUserProgress(applicationContext, lifecycle)
             }
             job1.await()
 
-            getDataLevel() //init for playMenuTTS
+            getDataLevel()
 
             animLogo()
 
             initEditorMenu()
-
         }
+
         binding.apply {
 
             btnOnline.setOnClickListener {
@@ -163,8 +152,7 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                     return@setOnClickListener
                 }
-
-                if (selesai.isEmpty()) {
+                if (listSelesai.isEmpty()) {
                     Dialog().showDialog(
                         this@MainActivity,
                         "Belum ada soal yang Anda selesaikan,\n" +
@@ -188,12 +176,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun initEditorMenu(){
-        if (isEditor) binding.btnGoListQuestion.visibility = View.VISIBLE
-        else binding.btnGoListQuestion.visibility = View.INVISIBLE
-    }
-
     /* ADMOB BANNER*/
     private fun loadBannerAds() {
         MobileAds.initialize(this@MainActivity) {}
@@ -209,6 +191,11 @@ class MainActivity : AppCompatActivity() {
             override fun onAdLoaded() {}
             override fun onAdOpened() {}
         }
+    }
+
+    private fun initEditorMenu(){
+        if (isEditor) binding.btnGoListQuestion.visibility = View.VISIBLE
+        else binding.btnGoListQuestion.visibility = View.INVISIBLE
     }
 
     private fun animLogo() {
@@ -251,7 +238,8 @@ class MainActivity : AppCompatActivity() {
                         boardSet = BoardSet.PLAY_KATEGORI
                         currentLevel = it.id
 
-                        if (selesai.contains(currentLevel)) {
+                        listSelesai = Progress().getUserSelesai(applicationContext, lifecycle)
+                        if (currentLevel in listSelesai) {
                             Dialog().apply {
                                 showDialogYesNo(
                                     "Info",

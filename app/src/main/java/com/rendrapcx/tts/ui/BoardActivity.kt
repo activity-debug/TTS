@@ -33,15 +33,15 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.AnswerStatus
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentCategory
 import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.inputMode
+import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.constant.Const.Companion.position
-import com.rendrapcx.tts.constant.Const.Companion.progress
-import com.rendrapcx.tts.constant.Const.Companion.selesai
 import com.rendrapcx.tts.constant.Const.Counter
 import com.rendrapcx.tts.constant.Const.Direction
 import com.rendrapcx.tts.constant.Const.FilterStatus
@@ -530,6 +530,7 @@ class BoardActivity : AppCompatActivity() {
             when (counter) {
                 Counter.DELETE -> {
                     DB.getInstance(applicationContext).helperCounter().deleteById(currentLevel)
+                    Toast.makeText(this@BoardActivity, "deleted", Toast.LENGTH_SHORT).show()
                 }
 
                 Counter.SAVE -> {
@@ -1010,19 +1011,15 @@ class BoardActivity : AppCompatActivity() {
 
         if (pass) {
             if (boardSet != BoardSet.PLAY_RANDOM) {
-                Progress().updateUserAnswer(
-                    Const.AnswerStatus.DONE, this, lifecycle
-                )
+                Progress().updateUserAnswer(AnswerStatus.DONE, applicationContext, lifecycle)
                 helperCounter(Counter.DELETE)
                 deleteUserSlotDone()
-                Sound().soundWinning(this)
-                winDialog(this)
+                Sound().soundWinning(this@BoardActivity)
+                winDialog(this@BoardActivity)
             } else {
                 Sound().soundWinning(this)
                 winDialog(this)
             }
-
-
         }
     }
 
@@ -1044,30 +1041,32 @@ class BoardActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
 
-            progress = Progress().getUserProgress(this@BoardActivity, lifecycle)
-            selesai = Progress().getUserSelesai(this@BoardActivity, lifecycle)
-
             if (boardSet == BoardSet.PLAY_RANDOM)
                 bind.tvSelamat.text = "Lanjutkan bermain?"
             else bind.tvSelamat.text =
                 "Berhasil melewati \nLevel $indexOfCategory \nkategori $currentCategory"
 
-            // FIXME: Data level coba pake fungsi aja, soalnya dipake dua tempat sementara gini dulu
             var dataLevel = mutableListOf<Data.Level>()
+
             val job = async {
                 dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
                     currentCategory
-                )
+                ).filter { it.status == FilterStatus.POST }.toMutableList()
+                val dataDone = DB.getInstance(applicationContext).userAnswerTTS().getStatus(AnswerStatus.DONE.name)
+                listSelesai.clear()
+                dataDone.forEach {
+                    listSelesai.add(it.levelId)
+                }
             }
             job.await()
 
             if (boardSet != BoardSet.PLAY_RANDOM) {
                 val ct = dataLevel.map { it.id }
-                if (selesai.containsAll(ct)) {
-                    bind.tvSelamat.text = "Selamat \nanda sudah menyelesaikan\n" +
-                            "Kategori $currentCategory"
-                    bind.btnNext.visibility = View.GONE
-                }
+                    if (listSelesai.containsAll(ct)) {
+                        bind.tvSelamat.text = "Selamat \nanda sudah menyelesaikan\n" +
+                                "Kategori $currentCategory"
+                        bind.btnNext.visibility = View.GONE
+                    }
             }
 
             YoYo.with(Techniques.ZoomIn).duration(1000)
@@ -1112,7 +1111,7 @@ class BoardActivity : AppCompatActivity() {
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                 val count = listLevel.size
 
-                if (acakHolder.size == selesai.size) {
+                if (acakHolder.size >= listSelesai.size) {
                     acakHolder.clear()
                 }
 
@@ -1124,30 +1123,25 @@ class BoardActivity : AppCompatActivity() {
                         continue
                     }
 
-                    if (selesai.contains(listLevel[x].id)) {
+                    if (listSelesai.contains(listLevel[x].id)) {
                         acakHolder.add(listLevel[x].id)
                         currentLevel = listLevel[x].id
                         break
                     }
                     arr.add(i)
                 }
-                if (arr.size == count) {
-                    Toast.makeText(
-                        this@BoardActivity,
-                        "Silakan selesaikan dulu soal untuk bisa menjalankan secara acak",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@async
-                }
-
+                Toast.makeText(this@BoardActivity, "$arr | $acakHolder" , Toast.LENGTH_SHORT).show()
             }
             jobLevel.await()
+
+            listQuestion.clear()
             val jobQuest = async {
                 listQuestion =
                     DB.getInstance(applicationContext).question().getQuestion(currentLevel)
             }
             jobQuest.await()
 
+            listPartial.clear()
             val jobPart = async { listPartial = getPartialData() }
             jobPart.await()
 
@@ -1177,29 +1171,35 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-
     private fun playNext() {
         lifecycleScope.launch {
             skipActions(0)
 
+            //Initial cari LevelId
             var dataLevel = mutableListOf<Data.Level>()
+            var dataDone = mutableListOf<Data.UserAnswerTTS>()
             val job = async {
                 dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
                     currentCategory
-                )
+                ).filter { it.status == FilterStatus.POST }.toMutableList()
+                dataDone = DB.getInstance(applicationContext).userAnswerTTS().getStatus(AnswerStatus.DONE.name)
+                listSelesai.clear()
+                dataDone.forEach {
+                    listSelesai.add(it.levelId)
+                }
             }
             job.await()
 
             val ct = dataLevel.map { it.id }
-
-            if (isNext) {
+            if (isNext == true) {
                 for (i in ct) {
-                    if (!selesai.contains(i)) {
+                    if (i !in listSelesai) {
                         currentLevel = i
                         break
                     }
                 }
             }
+            Progress().updateUserAnswer(AnswerStatus.PROGRESS, applicationContext, lifecycle)
 
             //GET DATA from New currentLevel
             boardSet = BoardSet.PLAY_KATEGORI
@@ -1209,8 +1209,10 @@ class BoardActivity : AppCompatActivity() {
             listPartial.clear()
 
             val jobGetDB = async {
+                listLevel.clear()
                 listLevel =
                     DB.getInstance(applicationContext).level().getLevel(currentLevel)
+                listQuestion.clear()
                 listQuestion =
                     DB.getInstance(applicationContext).question()
                         .getQuestion(currentLevel)
@@ -1268,10 +1270,6 @@ class BoardActivity : AppCompatActivity() {
             setInputAnswerDirection()
             setOnSelectedColor()
             setOnRangeStyle()
-
-            //init progress to progress
-            Progress().updateUserAnswer(Const.AnswerStatus.PROGRESS, this@BoardActivity, lifecycle)
-            progress = Progress().getUserProgress(this@BoardActivity, lifecycle)
         }
     }
 
