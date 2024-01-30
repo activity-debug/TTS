@@ -32,7 +32,6 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.rendrapcx.tts.R
-import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.AnswerStatus
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
@@ -194,6 +193,10 @@ class BoardActivity : AppCompatActivity() {
         /* HEADER ACTIONS*/
         binding.includeHeader.apply {
             btnBack.setOnClickListener {
+                if (boardSet == BoardSet.PLAY_RANDOM) {
+                    helperCounter(Counter.DELETE)
+                    deleteUserSlotDone()
+                }
                 val intent =
                     if (boardSet == BoardSet.PLAY_KATEGORI || boardSet == BoardSet.PLAY_RANDOM)
                         Intent(this@BoardActivity, MainActivity::class.java)
@@ -530,7 +533,6 @@ class BoardActivity : AppCompatActivity() {
             when (counter) {
                 Counter.DELETE -> {
                     DB.getInstance(applicationContext).helperCounter().deleteById(currentLevel)
-                    Toast.makeText(this@BoardActivity, "deleted", Toast.LENGTH_SHORT).show()
                 }
 
                 Counter.SAVE -> {
@@ -1017,8 +1019,10 @@ class BoardActivity : AppCompatActivity() {
                 Sound().soundWinning(this@BoardActivity)
                 winDialog(this@BoardActivity)
             } else {
-                Sound().soundWinning(this)
-                winDialog(this)
+                helperCounter(Counter.DELETE)
+                deleteUserSlotDone()
+                Sound().soundWinning(this@BoardActivity)
+                winDialog(this@BoardActivity)
             }
         }
     }
@@ -1052,7 +1056,8 @@ class BoardActivity : AppCompatActivity() {
                 dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
                     currentCategory
                 ).filter { it.status == FilterStatus.POST }.toMutableList()
-                val dataDone = DB.getInstance(applicationContext).userAnswerTTS().getStatus(AnswerStatus.DONE.name)
+                val dataDone = DB.getInstance(applicationContext).userAnswerTTS()
+                    .getStatus(AnswerStatus.DONE.name)
                 listSelesai.clear()
                 dataDone.forEach {
                     listSelesai.add(it.levelId)
@@ -1062,11 +1067,11 @@ class BoardActivity : AppCompatActivity() {
 
             if (boardSet != BoardSet.PLAY_RANDOM) {
                 val ct = dataLevel.map { it.id }
-                    if (listSelesai.containsAll(ct)) {
-                        bind.tvSelamat.text = "Selamat \nanda sudah menyelesaikan\n" +
-                                "Kategori $currentCategory"
-                        bind.btnNext.visibility = View.GONE
-                    }
+                if (listSelesai.containsAll(ct)) {
+                    bind.tvSelamat.text = "Selamat \nanda sudah menyelesaikan\n" +
+                            "Kategori $currentCategory"
+                    bind.btnNext.visibility = View.GONE
+                }
             }
 
             YoYo.with(Techniques.ZoomIn).duration(1000)
@@ -1130,7 +1135,6 @@ class BoardActivity : AppCompatActivity() {
                     }
                     arr.add(i)
                 }
-                Toast.makeText(this@BoardActivity, "$arr | $acakHolder" , Toast.LENGTH_SHORT).show()
             }
             jobLevel.await()
 
@@ -1182,7 +1186,8 @@ class BoardActivity : AppCompatActivity() {
                 dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
                     currentCategory
                 ).filter { it.status == FilterStatus.POST }.toMutableList()
-                dataDone = DB.getInstance(applicationContext).userAnswerTTS().getStatus(AnswerStatus.DONE.name)
+                dataDone = DB.getInstance(applicationContext).userAnswerTTS()
+                    .getStatus(AnswerStatus.DONE.name)
                 listSelesai.clear()
                 dataDone.forEach {
                     listSelesai.add(it.levelId)

@@ -131,6 +131,7 @@ class MainActivity : AppCompatActivity() {
             btnGoListQuestion.setOnClickListener {
                 val i = Intent(this@MainActivity, QuestionActivity::class.java)
                 startActivity(i)
+                finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
@@ -165,12 +166,14 @@ class MainActivity : AppCompatActivity() {
                 boardSet = BoardSet.PLAY_RANDOM
                 val intent = Intent(this@MainActivity, BoardActivity::class.java)
                 startActivity(intent)
+                finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
             btnGoScan.setOnClickListener {
                 val intent = Intent(this@MainActivity, BarcodeActivity::class.java)
                 startActivity(intent)
+                finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
         }
@@ -251,6 +254,7 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             val i = Intent(this@MainActivity, BoardActivity::class.java)
                             startActivity(i)
+                            finish()
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                             dialog.dismiss()
                         }
