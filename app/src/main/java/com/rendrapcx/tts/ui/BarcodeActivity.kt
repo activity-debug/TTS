@@ -31,6 +31,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
+import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.RequestCode
 import com.rendrapcx.tts.databinding.ActivityBarcodeBinding
 import com.rendrapcx.tts.helper.Helper
@@ -75,8 +76,6 @@ class BarcodeActivity : AppCompatActivity() {
         qrShare.clear()
         qrListLevel.clear()
         qrListQuestion.clear()
-
-
 
         binding.includeHeader.apply {
             tvLabelTop.text = "Scan Data Questioner"
@@ -125,28 +124,12 @@ class BarcodeActivity : AppCompatActivity() {
             }
 
             btnSaveSoal.setOnClickListener {
-                lifecycleScope.launch {
-                    val levelId = qrListLevel[0].id
-                    val data = DB.getInstance(applicationContext).level().getAllLevel()
-                    val ids = data.map { it.id }
-
-                    if (levelId in ids) {
-                        Toast.makeText(this@BarcodeActivity,
-                            "Sudah ada data dengan ID yang sama",
-                            Toast.LENGTH_SHORT).show()
-                        return@launch
-                    } else {
-                        saveQRToDB()
-                        Toast.makeText(this@BarcodeActivity,
-                            "Soal tersimpan",
-                            Toast.LENGTH_SHORT).show()
-
-                        val i = Intent(this@BarcodeActivity, MainActivity::class.java)
-                        startActivity(i)
-                        finish()
-                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    }
-                }
+                isEnableClick = false
+                saveQRToDB()
+                val i = Intent(this@BarcodeActivity, MainActivity::class.java)
+                startActivity(i)
+                finish()
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
 
             btnPasteSoal.setOnClickListener {
@@ -194,10 +177,28 @@ class BarcodeActivity : AppCompatActivity() {
 
     private fun saveQRToDB() {
         lifecycleScope.launch {
-            val levelId = qrListLevel[0].id
+            val id = qrListLevel[0].id
+            var levelId = ""
+            val data = DB.getInstance(applicationContext).level().getAllLevel()
+            val ids = data.map { it.id }
+            val newId: Boolean
+
+            if (id in ids) {
+                newId = true
+                levelId = Helper().generateLevelId(ids.size)
+                Toast.makeText(
+                    this@BarcodeActivity,
+                    "Data disimpan dengan ID Baru",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                newId = false
+                levelId = id
+                Toast.makeText(this@BarcodeActivity, "Data disimpan", Toast.LENGTH_SHORT).show()
+            }
 
             val category = if (binding.editInputContent.text.isNotEmpty()) {
-                binding.editInputContent.text.toString()
+                binding.editInputContent.text.toString().trimEnd().trimStart()
             } else {
                 qrListLevel[0].category
             }
@@ -212,11 +213,11 @@ class BarcodeActivity : AppCompatActivity() {
                 )
             )
             //Add Questioner
-            qrListQuestion.filter { it.levelId == levelId }.map { it }.forEach {
+            qrListQuestion.filter { it.levelId == id }.map { it }.forEach {
                 DB.getInstance(applicationContext).question().insertQuestion(
                     Data.Question(
-                        levelId = it.levelId,
-                        id = it.id,
+                        levelId = if (newId) levelId else it.id,
+                        id = if (newId) "${levelId}-${it.direction}-${Helper().formatQuestionId(it.number + 1)}" else it.id,
                         number = it.number,
                         direction = it.direction,
                         asking = it.asking,
