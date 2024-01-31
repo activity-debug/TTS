@@ -32,16 +32,23 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.database
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
+import com.rendrapcx.tts.constant.Const.Companion.dbApp
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.Const.Companion.listProgress
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
+import com.rendrapcx.tts.databinding.DialogMenuOnlineBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.MyState
@@ -51,10 +58,14 @@ import com.rendrapcx.tts.helper.Progress
 import com.rendrapcx.tts.helper.Sound
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
+import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.model.Data.Companion.listOnLevel
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import java.util.Base64
 
 class MainActivity : AppCompatActivity() {
 
@@ -73,7 +84,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var mAdView: AdView
-
+    var qrShare = mutableListOf<Data.QRShare>()
+    var qrListLevel = mutableListOf<Data.Level>()
+    var qrListQuestion = mutableListOf<Data.Question>()
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
@@ -136,16 +149,18 @@ class MainActivity : AppCompatActivity() {
             animLogo()
 
             initEditorMenu()
+
+            loadOnlineSoal()
+
         }
 
         binding.apply {
 
             btnOnline.setOnClickListener {
-                Toast.makeText(
-                    this@MainActivity,
-                    "\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7\nsedang dalam perbaikan",
-                    Toast.LENGTH_SHORT
-                ).show()
+                if (isEnableClick) {
+                    onlineMenu()
+                    isEnableClick = false
+                }
             }
 
             btnTrophy.setOnClickListener {
@@ -172,6 +187,7 @@ class MainActivity : AppCompatActivity() {
 
             btnGoTTS.setOnClickListener {
                 if (isEnableClick) {
+                    getDataLevel()
                     playMenuTTSDialog()
                     isEnableClick = false
                 }
@@ -244,6 +260,129 @@ class MainActivity : AppCompatActivity() {
             .playOn(binding.imgLogo)
     }
 
+
+    private fun loadOnlineSoal() {
+        lifecycleScope.launch {
+            val database = Firebase.database(dbApp)
+            val myRef = database.getReference("level")
+            myRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    listOnLevel.clear()
+                    for (item in dataSnapshot.children) {
+                        item.getValue(Data.OnlineLevel::class.java)
+                            ?.let { it -> listOnLevel.add(it) }
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Toast.makeText(
+                        applicationContext,
+                        databaseError.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+        }
+    }
+
+
+    private fun downloadSoal() {
+        lifecycleScope.launch {
+            val id = qrListLevel[0].id
+            var levelId = ""
+            val data = DB.getInstance(applicationContext).level().getAllLevel()
+            val ids = data.map { it.id }
+            val newId: Boolean
+
+            if (id in ids) {
+                newId = true
+                levelId = Helper().generateLevelId(ids.size)
+                Toast.makeText(
+                    this@MainActivity,
+                    "Soal disimpan dengan ID Baru",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                newId = false
+                levelId = id
+                Toast.makeText(this@MainActivity, "Soal disimpan", Toast.LENGTH_SHORT).show()
+            }
+
+            DB.getInstance(applicationContext).level().insertLevel(
+                Data.Level(
+                    id = levelId,
+                    category = qrListLevel[0].category,
+                    title = qrListLevel[0].title,
+                    userId = qrListLevel[0].userId,
+                    status = Const.FilterStatus.POST
+                )
+            )
+            //Add Questioner
+            qrListQuestion.filter { it.levelId == id }.map { it }.forEach {
+                DB.getInstance(applicationContext).question().insertQuestion(
+                    Data.Question(
+                        levelId = levelId,
+                        id = if (newId) "${levelId}-${it.direction}-${Helper().formatQuestionId(it.number + 1)}" else it.id,
+                        number = it.number,
+                        direction = it.direction,
+                        asking = it.asking,
+                        answer = it.answer,
+                        slot = it.slot
+                    )
+                )
+            }
+
+            getDataLevel()
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun onlineMenu() {
+        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val binding = DialogMenuOnlineBinding.inflate(inflater)
+        val builder = AlertDialog.Builder(this).setView(binding.root)
+        val dialog = builder.create()
+
+        extracted(dialog)
+
+        dialog.window!!.attributes.windowAnimations = R.style.DialogBottomAnim
+        dialog.window!!.attributes.gravity = Gravity.BOTTOM
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(true)
+
+        YoYo.with(Techniques.FlipInY)
+            .onEnd { isEnableClick = true }
+            .playOn(binding.editCariKategori)
+
+        fun showOnlineList() {
+            binding.apply {
+                val adapter = OnlineAdapter()
+                rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
+                rcViewOnline.adapter = adapter
+                adapter.setListItem(listOnLevel)
+
+                adapter.setOnClickDownload() {
+                    val decodeString = String(Base64.getDecoder().decode(it.encodeString))
+
+                    qrShare.clear()
+                    qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
+
+                    qrListLevel = qrShare[0].level
+                    qrListQuestion = qrShare[0].question
+
+                    downloadSoal()
+
+                    dialog.dismiss()
+                }
+            }
+        }
+
+        showOnlineList()
+
+        dialog.show()
+    }
+
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun playMenuTTSDialog() {
@@ -266,12 +405,12 @@ class MainActivity : AppCompatActivity() {
                     .filter { it.category == category && it.status == Const.FilterStatus.POST }
                     .toMutableList()
 
-                val adapter = PlayMenuTitleAdapter()
+                val pmtAdapter = PlayMenuTitleAdapter()
                 myRecView.layoutManager = GridLayoutManager(this@MainActivity, 3)
-                myRecView.adapter = adapter
-                adapter.setListItem(filteredListLevel)
+                myRecView.adapter = pmtAdapter
+                pmtAdapter.setListItem(filteredListLevel)
 
-                adapter.setOnClickView {
+                pmtAdapter.setOnClickView {
                     lifecycle.coroutineScope.launch {
                         boardSet = BoardSet.PLAY_KATEGORI
                         currentLevel = it.id
@@ -300,13 +439,13 @@ class MainActivity : AppCompatActivity() {
 
         fun showListByCategory() {
             binding.apply {
-                val adapter = PlayMenuAdapter()
+                val pmAdapter = PlayMenuAdapter()
                 myRecView.layoutManager = LinearLayoutManager(this@MainActivity)
-                myRecView.adapter = adapter
-                adapter.setListItem(listLevel.distinctBy { it.category }.sortedBy { it.category }
+                myRecView.adapter = pmAdapter
+                pmAdapter.setListItem(listLevel.distinctBy { it.category }.sortedBy { it.category }
                     .toMutableList())
 
-                adapter.setOnClickView {
+                pmAdapter.setOnClickView {
                     changeListFiltered(it.category)
                     binding.tvPlayMenuHeader.text = it.category
                     Const.currentCategory = it.category

@@ -82,8 +82,6 @@ class QuestionAdapter : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>
         holder.binding.tvItemCreator.text = level.userId
         holder.binding.swPublish.text = level.status.name
 
-        holder.binding.btnCloudUp.visibility = View.INVISIBLE
-
         holder.binding.swPublish.isChecked = holder.binding.swPublish.text == Const.FilterStatus.POST.name
 
         holder.binding.btnItemEdit.setOnClickListener {
@@ -94,7 +92,7 @@ class QuestionAdapter : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>
             onClickDelete?.invoke(level)
         }
 
-        holder.binding.btnCloudUp.setOnClickListener {
+        holder.binding.btnUpload.setOnClickListener {
             onClickUpload?.invoke(level)
         }
 

@@ -135,13 +135,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:icon="@drawable/square_share_nodes_solid"
-            app:layout_constraintEnd_toStartOf="@+id/btnCloudUp"
+            app:layout_constraintEnd_toStartOf="@+id/btnUpload"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btnItemDelete"
             app:layout_constraintTop_toTopOf="@+id/btnItemDelete" />
 
         <Button
-            android:id="@+id/btnCloudUp"
+            android:id="@+id/btnUpload"
             style="@style/Widget.Material3.Button.IconButton.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -160,11 +160,11 @@
             android:gravity="center"
             android:paddingHorizontal="5dp"
             android:text="Switch"
-            app:layout_constraintBottom_toBottomOf="@+id/btnCloudUp"
+            app:layout_constraintBottom_toBottomOf="@+id/btnUpload"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnCloudUp"
-            app:layout_constraintTop_toTopOf="@+id/btnCloudUp"
+            app:layout_constraintStart_toEndOf="@+id/btnUpload"
+            app:layout_constraintTop_toTopOf="@+id/btnUpload"
             tools:ignore="UseSwitchCompatOrMaterialXml" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

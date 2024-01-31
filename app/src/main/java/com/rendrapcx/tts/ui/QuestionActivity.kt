@@ -28,12 +28,15 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Firebase
+import com.google.firebase.database.database
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
+import com.rendrapcx.tts.constant.Const.Companion.dbApp
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
@@ -410,10 +413,50 @@ class QuestionActivity : AppCompatActivity() {
                     //myClipboard?.setPrimaryClip(myClip);
                     shareQRDialog(this@QuestionActivity, encodeString)
                 }
+            }
 
+            questionAdapter.setOnClickUpload {lvl->
+                lifecycleScope.launch {
+                    val job = async {
+                        qrShare.clear()
+                        val level = listLevel.filter { it.id == lvl.id }.toMutableList()
+                        val question =
+                            DB.getInstance(applicationContext).question().getQuestion(lvl.id)
+                        qrShare.add(
+                            Data.QRShare(level, question)
+                        )
+                        levelShareIndexId = listLevel.indexOfFirst { it.id == lvl.id }
+                    }
+                    job.await()
+                    var encodeString = ""
+                    val job2 = async {
+                        val json = Json.encodeToString(qrShare)
+                        encodeString = Base64.getEncoder().encodeToString(json.toByteArray())
+                    }
+                    job2.await()
+
+
+                    val database = Firebase.database(dbApp)
+                    val myRef = database.getReference("level")
+                    val data = Data.OnlineLevel(
+                        lvl.id,
+                        lvl.category,
+                        encodeString
+                    )
+                    myRef.child(lvl.id).setValue(data)
+                        .addOnCompleteListener() {
+                            Toast.makeText(this@QuestionActivity, "Completed", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                        .addOnFailureListener() {
+                            Toast.makeText(this@QuestionActivity, "Failed", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                }
             }
 
         }
     }
+
 }
 

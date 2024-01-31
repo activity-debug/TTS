@@ -63,7 +63,7 @@ class Data {
     @Entity(tableName = "helper_counter")
     data class HelperCounter(
         @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id :String,
+        @ColumnInfo(name = "id") var id: String,
         @ColumnInfo(name = "hint_one") var hintOne: Int,
         @ColumnInfo(name = "hint_two") var hintTwo: Int,
     )
@@ -85,8 +85,26 @@ class Data {
         var question: MutableList<Question>
     )
 
+    data class OnlineLevel(
+        val id: String? = "",
+        val category: String?="",
+        val encodeString: String?="",
+    ){}
+
+    data class OnlineQuestion(
+        var id: String,
+        var number: Int,
+        var direction: String,
+        var asking: String,
+        var answer: String,
+        var slot: ArrayList<Int>,
+        var levelId: String,
+    )
+
+
     companion object {
         var listLevel = mutableListOf<Level>()
+        var listOnLevel = mutableListOf<OnlineLevel>()
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
         var userAnswerTTS = mutableListOf<UserAnswerTTS>()

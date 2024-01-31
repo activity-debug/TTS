@@ -32,6 +32,9 @@ class Const {
         var bannerCaAppId = "ca-app-pub-5609246517650629/2803623664"
         var intersCaAppId = "ca-app-pub-5609246517650629/9483231011"
 
+        //FireBase DB
+        var dbApp = "https://terka-tts-default-rtdb.asia-southeast1.firebasedatabase.app"
+
         var boardSet = BoardSet.EDITOR_NEW
         var isEditor = false
         var listSelesai = arrayListOf<String>()

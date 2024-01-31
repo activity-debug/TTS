@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.rendrapcx.tts" />
+                  <option name="mobileSdkAppId" value="1:523419981637:android:64a11932270d0a21b0d02c" />
+                  <option name="projectId" value="terka-tts" />
+                  <option name="projectNumber" value="523419981637" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

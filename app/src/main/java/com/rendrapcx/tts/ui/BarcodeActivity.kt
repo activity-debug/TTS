@@ -216,7 +216,7 @@ class BarcodeActivity : AppCompatActivity() {
             qrListQuestion.filter { it.levelId == id }.map { it }.forEach {
                 DB.getInstance(applicationContext).question().insertQuestion(
                     Data.Question(
-                        levelId = if (newId) levelId else it.id,
+                        levelId = levelId, //if (newId) levelId else it.id,
                         id = if (newId) "${levelId}-${it.direction}-${Helper().formatQuestionId(it.number + 1)}" else it.id,
                         number = it.number,
                         direction = it.direction,
