@@ -54,8 +54,9 @@ import com.rendrapcx.tts.databinding.DialogInputSoalBinding
 import com.rendrapcx.tts.databinding.DialogWinBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.Keypad
+import com.rendrapcx.tts.helper.MPlayer
 import com.rendrapcx.tts.helper.Progress
-import com.rendrapcx.tts.helper.Sound
+import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
@@ -145,7 +146,7 @@ class BoardActivity : AppCompatActivity() {
                 box[position].text = ""
                 upsertUserSlot(position, box[position].text.toString())
                 onPressBackSpace()
-                Sound().soundTyping(applicationContext, lifecycle)
+                MPlayer().sound(applicationContext, Sora.TYPING)
                 YoYo.with(Techniques.Landing)
                     .duration(500)
                     .playOn(btnBackSpace)
@@ -162,7 +163,7 @@ class BoardActivity : AppCompatActivity() {
                         delay(50)
                     }
                 }
-                Sound().soundShuffle(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.SHUFFLE)
                 YoYo.with(Techniques.Landing)
                     .duration(500)
                     .playOn(btnShuffle)
@@ -174,13 +175,14 @@ class BoardActivity : AppCompatActivity() {
                     when (motionEvent.action) {
                         MotionEvent.ACTION_DOWN -> {
                             if (isEnableClick == false) return@OnTouchListener true
-                            Sound().soundTyping(applicationContext, lifecycle)
+                            MPlayer().sound(applicationContext, Sora.TYPING)
                             upsertUserSlot(position, intKey[i].text.toString())
                             box[position].text = intKey[i].text
                             onPressAbjabMove()
                             checkWinCondition(false)
                             YoYo.with(Techniques.Landing)
-                                .duration(1000)
+                                .duration(2000)
+                                .onEnd { isEnableClick == true }
                                 .playOn(box[position])
                         }
 
@@ -221,7 +223,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeBoard.boardTen.setOnClickListener {
             for (i in 0 until box.size) {
                 box[i].setOnClickListener {
-                    Sound().soundOnClickBox(this)
+                    MPlayer().sound(applicationContext, Sora.BOXES)
                     pickByArrow = false
                     position = i
                     setInputAnswerDirection()
@@ -245,7 +247,7 @@ class BoardActivity : AppCompatActivity() {
             /*ARROW NEXT QUESTION*/
             btnNextQuestion.setOnClickListener {
                 if (listPartial.isEmpty()) return@setOnClickListener
-                Sound().soundNextQuestion(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.ARROW)
                 getRequestQuestions(SelectRequest.NEXT)
                 moveToRequestedQuestion()
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(btnNextQuestion)
@@ -260,7 +262,7 @@ class BoardActivity : AppCompatActivity() {
             /*ARROR PREV QUESTION*/
             btnPrevQuestion.setOnClickListener {
                 if (listPartial.isEmpty()) return@setOnClickListener
-                Sound().soundNextQuestion(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.ARROW)
                 getRequestQuestions(SelectRequest.PREV)
                 moveToRequestedQuestion()
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(btnPrevQuestion)
@@ -273,7 +275,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             tvSpanQuestion.setOnClickListener {
-                Sound().soundOnClickBox(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.BOXES)
                 YoYo.with(Techniques.RubberBand).duration(1300).playOn(tvSpanQuestion)
                 for (i in currentRange.indices) {
                     if (box[currentRange[i]].text.isEmpty()) {
@@ -297,9 +299,8 @@ class BoardActivity : AppCompatActivity() {
             btnNinja.setOnClickListener {
                 lifecycleScope.launch {
                     skipActions(0)
-                    //btnNinja.isEnabled = true
                     val job = async {
-                        Sound().soundCheckBoxPass(this@BoardActivity)
+                        MPlayer().sound(applicationContext, Sora.NINJA)
                         checkWinCondition(color = true)
                         YoYo.with(Techniques.Shake).duration(1000)
                             .onEnd {
@@ -317,7 +318,7 @@ class BoardActivity : AppCompatActivity() {
             btnCursor.setOnClickListener {
                 cursorFirstOrLast()
                 YoYo.with(Techniques.RotateIn).playOn(btnCursor)
-                Sound().soundShuffle(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.SHUFFLE)
             }
             /*ISI SOAL*/
             btnRobot.setOnClickListener {
@@ -333,7 +334,7 @@ class BoardActivity : AppCompatActivity() {
                 }
 
                 helperCounter(Counter.SAVE)
-                Sound().soundOnRandomFill(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.ROBOT)
                 YoYo.with(Techniques.Wave).duration(1000)
                     .onEnd {
                         randomFillAText()
@@ -357,7 +358,7 @@ class BoardActivity : AppCompatActivity() {
 
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
-                Sound().soundDingDong(this@BoardActivity)
+                MPlayer().sound(applicationContext,Sora.HINT)
                 YoYo.with(Techniques.Wave)
                     .onEnd {
                         randomFillAQuestion()
@@ -603,7 +604,7 @@ class BoardActivity : AppCompatActivity() {
             val job = async {
                 for (i in currentRange.indices) {
                     val x = currentRange[i]
-                    Sound().soundTyping(applicationContext, lifecycle)
+                    MPlayer().sound(applicationContext, Sora.TYPING)
                     if (inputAnswerDirection == InputAnswerDirection.ROW) {
                         YoYo.with(Techniques.Hinge)
                             .onEnd {
@@ -642,7 +643,7 @@ class BoardActivity : AppCompatActivity() {
 
             YoYo.with(Techniques.Wave).repeat(1).duration(300)
                 .onEnd {
-                    Sound().soundOnFinger(applicationContext)
+                    MPlayer().sound(applicationContext, Sora.BONUS)
                     YoYo.with(Techniques.RubberBand)
                         .onEnd {
                             pickByArrow = false
@@ -664,7 +665,7 @@ class BoardActivity : AppCompatActivity() {
             val lastPos = position
             val arr = arrayListOf<Int>()
             val job = async {
-                Sound().soundOnRandom(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.ROBOT_RANDOM)
                 for (i in tag.indices) {
                     resetBoxStyle()
                     position = tag[i]
@@ -676,7 +677,7 @@ class BoardActivity : AppCompatActivity() {
             }
             job.await()
 
-            Sound().soundOnGetRandomValue(this@BoardActivity)
+            MPlayer().sound(applicationContext, Sora.HINT_RANDOM)
 
             var x: Int
             if (arr.isNotEmpty()) {
@@ -697,7 +698,7 @@ class BoardActivity : AppCompatActivity() {
 
             YoYo.with(Techniques.Wave).repeat(1).duration(300)
                 .onEnd {
-                    Sound().soundSuccess(this@BoardActivity)
+                    MPlayer().sound(applicationContext, Sora.SUCCESS)
                     position = x
                     box[x].text = box[x].tag.toString()
                     upsertUserSlot(x, box[x].tag.toString())
@@ -1024,12 +1025,12 @@ class BoardActivity : AppCompatActivity() {
                 Progress().updateUserAnswer(AnswerStatus.DONE, applicationContext, lifecycle)
                 helperCounter(Counter.DELETE)
                 deleteUserSlotDone()
-                Sound().soundWinning(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
             } else {
                 helperCounter(Counter.DELETE)
                 deleteUserSlotDone()
-                Sound().soundWinning(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
             }
         }
@@ -1158,7 +1159,8 @@ class BoardActivity : AppCompatActivity() {
             val jobPart = async { listPartial = getPartialData() }
             jobPart.await()
 
-            Sound().soundStartGame(this@BoardActivity)
+            MPlayer().sound(applicationContext, Sora.INIT_GAME_2)
+
             binding.apply {
                 includeEditor.mainContainer.visibility = View.GONE
                 val index = listLevel.indexOfFirst { it.id == currentLevel }
@@ -1256,7 +1258,7 @@ class BoardActivity : AppCompatActivity() {
                     btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
                 }
 
-                Sound().soundFirstLaunch(this@BoardActivity)
+                MPlayer().sound(applicationContext, Sora.INIT_GAME_1)
                 /*/DI PLAYNEXT*/
                 for (i in 0 until box.size) {
                     box[i].visibility = View.VISIBLE
@@ -1524,7 +1526,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             BoardSet.PLAY_KATEGORI, BoardSet.PLAY_RANDOM -> {
-                Sound().soundStartGame(this)
+                MPlayer().sound(applicationContext, Sora.INIT_GAME_2)
                 tag.clear()
                 listPartial.filter { it.levelId == currentLevel }.forEach {
                     for (i in 0 until box.size) {

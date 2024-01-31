@@ -58,8 +58,9 @@ import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.MyState
 import com.rendrapcx.tts.helper.NetworkStatusTracker
 import com.rendrapcx.tts.helper.NetworkStatusViewModel
+import com.rendrapcx.tts.helper.MPlayer
 import com.rendrapcx.tts.helper.Progress
-import com.rendrapcx.tts.helper.Sound
+import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
@@ -259,7 +260,7 @@ class MainActivity : AppCompatActivity() {
     private fun animLogo() {
         YoYo.with(Techniques.Tada).duration(1000)
             .onEnd {
-                Sound().soundOpeningApp(this@MainActivity)
+                MPlayer().sound(this, Sora.START_APP)
                 YoYo.with(Techniques.RubberBand).duration(2000).playOn(binding.imgLogo)
             }
             .playOn(binding.imgLogo)

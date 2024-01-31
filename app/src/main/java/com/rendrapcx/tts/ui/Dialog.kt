@@ -27,7 +27,8 @@ import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogYesNoBinding
-import com.rendrapcx.tts.helper.Sound
+import com.rendrapcx.tts.helper.MPlayer
+import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
@@ -137,14 +138,14 @@ open class Dialog {
                     UserRef().setIsSound(true, context, lifecycle)
                 }
                 isSound = UserRef().getIsSound()
-                Sound().soundClickSetting(context)
+                MPlayer().sound(context.applicationContext, Sora.SETTING)
                 YoYo.with(Techniques.Bounce).playOn(it)
             }
 
             binding.swSettingKeyboard.isChecked = UserRef().getIntKey()
             binding.swSettingKeyboard.setOnClickListener {
                 UserRef().setIntKey("0", binding.swSettingKeyboard.isChecked, context, lifecycle)
-                Sound().soundClickSetting(context)
+                MPlayer().sound(context.applicationContext, Sora.SETTING)
                 YoYo.with(Techniques.Wave).playOn(it)
             }
 

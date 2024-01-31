@@ -35,7 +35,8 @@ import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.RequestCode
 import com.rendrapcx.tts.databinding.ActivityBarcodeBinding
 import com.rendrapcx.tts.helper.Helper
-import com.rendrapcx.tts.helper.Sound
+import com.rendrapcx.tts.helper.MPlayer
+import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
@@ -98,7 +99,7 @@ class BarcodeActivity : AppCompatActivity() {
                         "Editor Aktif",
                         Toast.LENGTH_SHORT
                     ).show()
-                    Sound().soundSuccess(this@BarcodeActivity)
+                    MPlayer().sound(applicationContext, Sora.SUCCESS)
                 }
             }
 
@@ -107,7 +108,7 @@ class BarcodeActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     isEditor = false
                     UserRef().setIsEditor(isEditor, applicationContext, lifecycle)
-                    Sound().soundSuccess(this@BarcodeActivity)
+                    MPlayer().sound(applicationContext, Sora.SUCCESS)
                 }
                 return@setOnLongClickListener true
             }
