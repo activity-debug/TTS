@@ -80,7 +80,8 @@
                 app:layout_constraintEnd_toStartOf="@+id/btnDecodeGallery"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editInputContent" />
+                app:layout_constraintTop_toBottomOf="@+id/editInputContent"
+                tools:ignore="HardcodedText" />
 
             <TextView
                 android:id="@+id/textResultContent"
@@ -89,7 +90,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="44dp"
                 android:layout_marginEnd="8dp"
-                android:text="asdasdasd"
+                android:text="result"
                 app:layout_constraintEnd_toStartOf="@+id/btnSaveSoal"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btnDecodeFromCamera"
@@ -103,7 +104,8 @@
                 app:layout_constraintEnd_toStartOf="@+id/btnPasteSoal"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/btnDecodeFromCamera"
-                app:layout_constraintTop_toTopOf="@+id/btnDecodeFromCamera" />
+                app:layout_constraintTop_toTopOf="@+id/btnDecodeFromCamera"
+                tools:ignore="HardcodedText" />
 
             <EditText
                 android:id="@+id/editInputContent"
@@ -127,7 +129,8 @@
                 android:layout_marginEnd="24dp"
                 android:text="Save"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textResultContent" />
+                app:layout_constraintTop_toTopOf="@+id/textResultContent"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/btnPasteSoal"
@@ -137,7 +140,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/btnDecodeGallery"
-                app:layout_constraintTop_toTopOf="@+id/btnDecodeGallery" />
+                app:layout_constraintTop_toTopOf="@+id/btnDecodeGallery"
+                tools:ignore="HardcodedText" />
 
             <EditText
                 android:id="@+id/editPaste"
@@ -152,5 +156,14 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+    <FrameLayout
+        android:id="@+id/ad_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        app:layout_constraintBottom_toTopOf="@+id/headerPanel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>

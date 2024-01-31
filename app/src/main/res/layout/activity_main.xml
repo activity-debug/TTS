@@ -4,9 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity"
     android:background="@drawable/background_gradient_teen_notebook"
-    >
+    tools:context=".ui.MainActivity">
 
     <Button
         android:id="@+id/btnGoListQuestion"
@@ -22,7 +21,8 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgLogo" />
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo"
+        tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/btnGoTTS"
@@ -37,7 +37,8 @@
         app:layout_constraintEnd_toEndOf="@+id/btnGoListQuestion"
         app:layout_constraintHorizontal_bias="0.225"
         app:layout_constraintStart_toStartOf="@+id/btnGoListQuestion"
-        app:layout_constraintTop_toBottomOf="@+id/btnGoListQuestion" />
+        app:layout_constraintTop_toBottomOf="@+id/btnGoListQuestion"
+        tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/btnGoAcak"
@@ -51,7 +52,8 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="@+id/btnGoTTS"
         app:layout_constraintStart_toStartOf="@+id/btnGoListQuestion"
-        app:layout_constraintTop_toBottomOf="@+id/btnGoTTS" />
+        app:layout_constraintTop_toBottomOf="@+id/btnGoTTS"
+        tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/btnGoScan"
@@ -115,7 +117,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/terka_banner" />
+        app:srcCompat="@drawable/terka_banner"
+        tools:ignore="ContentDescription" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"

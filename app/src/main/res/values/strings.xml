@@ -1,4 +1,8 @@
 <resources>
-    <string name="app_name">TTS</string>
+    <string name="app_name" translatable="false">TTS</string>
     <string name="banner">ca-app-pub-5609246517650629/2803623664</string>
+    <string name="action_settings" translatable="false">Settings</string>
+    <string name="hello_world" translatable="false">Hello world!</string>
+    <string name="more_menu" translatable="false">More</string>
+    <string name="privacy_settings" translatable="false">Privacy Settings</string>
 </resources>
