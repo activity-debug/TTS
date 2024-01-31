@@ -88,23 +88,20 @@ class Data {
     data class OnlineLevel(
         val id: String? = "",
         val category: String?="",
+        val editor: String?="",
         val encodeString: String?="",
     ){}
 
-    data class OnlineQuestion(
-        var id: String,
-        var number: Int,
-        var direction: String,
-        var asking: String,
-        var answer: String,
-        var slot: ArrayList<Int>,
-        var levelId: String,
-    )
-
+    data class OnlineLevelList(
+        val id: String? = "",
+        val category: String?="",
+        val editor: String?="",
+    ){}
 
     companion object {
         var listLevel = mutableListOf<Level>()
         var listOnLevel = mutableListOf<OnlineLevel>()
+        var listOnlineList = mutableListOf<OnlineLevelList>()
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
         var userAnswerTTS = mutableListOf<UserAnswerTTS>()

@@ -7,6 +7,8 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -37,12 +39,14 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
+import com.google.firebase.database.getValue
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.dbApp
+import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.Const.Companion.listProgress
@@ -60,8 +64,9 @@ import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
-import com.rendrapcx.tts.model.Data.Companion.listOnLevel
+import com.rendrapcx.tts.model.Data.Companion.listOnlineList
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -150,7 +155,7 @@ class MainActivity : AppCompatActivity() {
 
             initEditorMenu()
 
-            loadOnlineSoal()
+            loadOnlineList()
 
         }
 
@@ -260,17 +265,16 @@ class MainActivity : AppCompatActivity() {
             .playOn(binding.imgLogo)
     }
 
-
-    private fun loadOnlineSoal() {
+    private fun loadOnlineList() {
         lifecycleScope.launch {
             val database = Firebase.database(dbApp)
-            val myRef = database.getReference("level")
+            val myRef = database.getReference(dbRefQuestions)
             myRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    listOnLevel.clear()
+                    listOnlineList.clear()
                     for (item in dataSnapshot.children) {
-                        item.getValue(Data.OnlineLevel::class.java)
-                            ?.let { it -> listOnLevel.add(it) }
+                        item.getValue(Data.OnlineLevelList::class.java)
+                            ?.let { it -> listOnlineList.add(it) }
                     }
                 }
 
@@ -285,8 +289,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun downloadSoal() {
+    private fun saveOnlineData() {
         lifecycleScope.launch {
             val id = qrListLevel[0].id
             var levelId = ""
@@ -355,30 +358,86 @@ class MainActivity : AppCompatActivity() {
             .onEnd { isEnableClick = true }
             .playOn(binding.editCariKategori)
 
-        fun showOnlineList() {
-            binding.apply {
-                val adapter = OnlineAdapter()
-                rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
-                rcViewOnline.adapter = adapter
-                adapter.setListItem(listOnLevel)
+        val adapter = OnlineAdapter()
 
-                adapter.setOnClickDownload() {
-                    val decodeString = String(Base64.getDecoder().decode(it.encodeString))
+        fun filter(str: String) {
+            if (listOnlineList.isEmpty()) return
+            val listLevelFilter = listOnlineList
+            val result = listLevelFilter.filter {
+                it.category!!.lowercase().contains(str.lowercase()) ||
+                        it.id!!.lowercase().contains(str.lowercase()) ||
+                        it.editor!!.lowercase().contains(str.lowercase())
+            }.toMutableList()
 
-                    qrShare.clear()
-                    qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
 
-                    qrListLevel = qrShare[0].level
-                    qrListQuestion = qrShare[0].question
-
-                    downloadSoal()
-
-                    dialog.dismiss()
+            if (result.isEmpty()) {
+                binding.apply {
+                    rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
+                    rcViewOnline.adapter = adapter
+                    adapter.setListItem(listOnlineList)
+                }
+            } else {
+                binding.apply {
+                    rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
+                    rcViewOnline.adapter = adapter
+                    adapter.setListItem(result)
                 }
             }
         }
 
-        showOnlineList()
+
+        binding.apply {
+            rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
+            rcViewOnline.adapter = adapter
+            adapter.setListItem(listOnlineList)
+
+            binding.editCariKategori.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    filter(s.toString())
+                }
+            })
+
+            adapter.setOnClickDownload {
+                Toast.makeText(this@MainActivity, "sedang mengunduh level ${it.id}", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val database = Firebase.database(dbApp)
+                    val refQuestion = database.getReference(dbRefQuestions)
+                        .child(it.id.toString()).child("encodeString")
+
+                    refQuestion.addValueEventListener(object : ValueEventListener {
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            val value = dataSnapshot.getValue<String>().toString()
+                            val data = String(Base64.getDecoder().decode(value))
+                            qrShare.clear()
+                            qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(data)
+                            qrListLevel = qrShare[0].level
+                            qrListQuestion = qrShare[0].question
+
+                            saveOnlineData()
+
+                            dialog.dismiss()
+                        }
+
+                        override fun onCancelled(databaseError: DatabaseError) {
+                            Toast.makeText(
+                                applicationContext, databaseError.message, Toast.LENGTH_SHORT
+                            ).show()
+
+                            dialog.dismiss()
+                        }
+                    })
+                }
+            }
+        }
 
         dialog.show()
     }

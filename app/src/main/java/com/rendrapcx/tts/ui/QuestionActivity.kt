@@ -37,6 +37,7 @@ import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.dbApp
+import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
@@ -289,8 +290,15 @@ class QuestionActivity : AppCompatActivity() {
     private fun filter(str: String) {
         if (listLevel.isEmpty()) return
         val listLevelFilter = listLevel
-        val result = listLevelFilter.filter { it.category.lowercase().contains(str.lowercase()) }
+        val result = listLevelFilter.filter {
+            it.category.lowercase().contains(str.lowercase()) ||
+                    it.id.lowercase().contains(str.lowercase()) ||
+                    it.userId.lowercase().contains(str.lowercase()) ||
+                    it.status.name.lowercase().contains(str.lowercase()) ||
+                    it.title.lowercase().contains(str.lowercase())
+        }
             .toMutableList()
+
 
         if (result.isEmpty()) {
             questionAdapter.setListItem(listLevel)
@@ -415,7 +423,7 @@ class QuestionActivity : AppCompatActivity() {
                 }
             }
 
-            questionAdapter.setOnClickUpload {lvl->
+            questionAdapter.setOnClickUpload { lvl ->
                 lifecycleScope.launch {
                     val job = async {
                         qrShare.clear()
@@ -437,10 +445,11 @@ class QuestionActivity : AppCompatActivity() {
 
 
                     val database = Firebase.database(dbApp)
-                    val myRef = database.getReference("level")
+                    val myRef = database.getReference(dbRefQuestions)
                     val data = Data.OnlineLevel(
                         lvl.id,
                         lvl.category,
+                        lvl.userId,
                         encodeString
                     )
                     myRef.child(lvl.id).setValue(data)

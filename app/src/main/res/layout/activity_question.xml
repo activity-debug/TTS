@@ -49,7 +49,7 @@
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btnNewLevel"
-            app:layout_constraintStart_toEndOf="@+id/btnSelectFilter"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
             tools:ignore="HardcodedText" />
@@ -64,21 +64,6 @@
             app:icon="@drawable/plus_solid"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/btnSelectFilter"
-            android:layout_width="80sp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textColor="@color/button_text"
-            android:background="@drawable/tabs_disable_shape"
-            android:gravity="center"
-            android:text="Category"
-            android:textSize="14sp"
-            android:textStyle="italic"
-            app:layout_constraintBottom_toBottomOf="@+id/etSearch"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/etSearch" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

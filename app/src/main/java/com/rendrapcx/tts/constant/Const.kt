@@ -34,6 +34,7 @@ class Const {
 
         //FireBase DB
         var dbApp = "https://terka-tts-default-rtdb.asia-southeast1.firebasedatabase.app"
+        var dbRefQuestions = "questions"
 
         var boardSet = BoardSet.EDITOR_NEW
         var isEditor = false
