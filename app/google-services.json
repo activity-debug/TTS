@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "523419981637",
+    "project_id": "terka-tts",
+    "storage_bucket": "terka-tts.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523419981637:android:64a11932270d0a21b0d02c",
+        "android_client_info": {
+          "package_name": "com.rendrapcx.tts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbSiuNwel1PR3Mo_CV4iotgJHcuOuyOBs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
