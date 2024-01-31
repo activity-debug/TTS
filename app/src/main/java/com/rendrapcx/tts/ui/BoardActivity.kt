@@ -1048,6 +1048,7 @@ class BoardActivity : AppCompatActivity() {
         extracted(dialog)
 
         dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(false)
 
