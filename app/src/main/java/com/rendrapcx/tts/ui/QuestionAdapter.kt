@@ -13,6 +13,7 @@ import java.util.Locale
 
 class QuestionAdapter : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>() {
     private var listLevel = mutableListOf<Data.Level>()
+    private var onClickView : ((Data.Level) -> Unit)? = null
     private var onClickEdit: ((Data.Level) -> Unit)? = null
     private var onClickDelete: ((Data.Level) -> Unit)? = null
     private var onClickStatus: ((Data.Level) -> Unit)? = null
@@ -22,6 +23,12 @@ class QuestionAdapter : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>
     @SuppressLint("NotifyDataSetChanged")
     fun setListItem(level: MutableList<Data.Level>) {
         this.listLevel = level
+        this.notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setOnClickView(callback: (Data.Level) -> Unit ){
+        this.onClickView = callback
         this.notifyDataSetChanged()
     }
 
@@ -83,6 +90,11 @@ class QuestionAdapter : RecyclerView.Adapter<QuestionAdapter.QuestionViewHolder>
         holder.binding.swPublish.text = level.status.name
 
         holder.binding.swPublish.isChecked = holder.binding.swPublish.text == Const.FilterStatus.POST.name
+
+        holder.binding.root.setOnLongClickListener(){
+            onClickView?.invoke(level)
+            return@setOnLongClickListener true
+        }
 
         holder.binding.btnItemEdit.setOnClickListener {
             onClickEdit?.invoke(level)

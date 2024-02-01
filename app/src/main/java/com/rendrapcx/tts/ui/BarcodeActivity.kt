@@ -152,11 +152,11 @@ class BarcodeActivity : AppCompatActivity() {
 
 
 
-
+        binding.includeHeader.include.componentKoin.visibility = View.GONE
         binding.textResultContent.text = ""
         binding.editPaste.setText("")
         binding.editPaste.visibility = View.INVISIBLE
-        binding.btnSaveSoal.visibility = View.INVISIBLE
+        binding.resultPanel.visibility = View.INVISIBLE
         qrShare.clear()
         qrListLevel.clear()
         qrListQuestion.clear()
@@ -245,7 +245,7 @@ class BarcodeActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-                        binding.btnSaveSoal.visibility = View.VISIBLE
+                        binding.resultPanel.visibility = View.VISIBLE
                         binding.textResultContent.text =
                             "ID: ${qrListLevel[0].id} \n" +
                                     "Category: ${qrListLevel[0].category} \n" +
@@ -412,7 +412,7 @@ class BarcodeActivity : AppCompatActivity() {
                         "Title: ${qrListLevel[0].title} \n" +
                         "Creator: ${qrListLevel[0].userId}"
 
-                binding.btnSaveSoal.visibility = View.VISIBLE
+                binding.resultPanel.visibility = View.VISIBLE
             } else {
                 Toast.makeText(this@BarcodeActivity, "Result Not Found", Toast.LENGTH_LONG).show()
             }
@@ -461,8 +461,7 @@ class BarcodeActivity : AppCompatActivity() {
                         "Title: ${qrListLevel[0].title} \n" +
                         "Creator: ${qrListLevel[0].userId}"
 
-                binding.btnSaveSoal.visibility = View.VISIBLE
-
+                binding.resultPanel.visibility = View.VISIBLE
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)

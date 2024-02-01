@@ -2,17 +2,20 @@ package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputFilter
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -290,6 +293,26 @@ class BoardActivity : AppCompatActivity() {
                     }
                 }
                 setColorizeRange(position, currentRange)
+
+                if (boardSet == BoardSet.EDITOR_EDIT || boardSet == BoardSet.EDITOR_NEW) {
+                    val builder: AlertDialog.Builder = AlertDialog.Builder(this@BoardActivity)
+                    val input = EditText(this@BoardActivity)
+                    builder
+                        .setTitle("Update Soal")
+                        .setMessage("${currentQuestId} : ${tvSpanQuestion.text}")
+                        .setView(input)
+                        .setPositiveButton("Update",
+                            DialogInterface.OnClickListener { dialog, whichButton ->
+                                val value: Editable = input.text
+                                listQuestion.filter { it.id == currentQuestId }.map { it.asking = value.toString() }
+                                onClickBox()
+                                dialog.dismiss()
+                            }).setNegativeButton("Batal",
+                            DialogInterface.OnClickListener { dialog, whichButton ->
+                                dialog.dismiss()
+                            }).show()
+                }
+
             }
         }
 
@@ -335,13 +358,10 @@ class BoardActivity : AppCompatActivity() {
 
                 helperCounter(Counter.SAVE)
                 MPlayer().sound(applicationContext, Sora.ROBOT)
-                YoYo.with(Techniques.Wave).duration(1000)
+                YoYo.with(Techniques.Wave).repeat(2).duration(1000)
                     .onEnd {
                         randomFillAText()
-                        YoYo.with(Techniques.Bounce)
-                            .onEnd {
-
-                            }
+                        YoYo.with(Techniques.RotateIn)
                             .playOn(btnRobot)
                     }
                     .playOn(btnRobot)
@@ -358,7 +378,7 @@ class BoardActivity : AppCompatActivity() {
 
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
-                MPlayer().sound(applicationContext,Sora.HINT)
+                MPlayer().sound(applicationContext, Sora.HINT)
                 YoYo.with(Techniques.Wave)
                     .onEnd {
                         randomFillAQuestion()
@@ -451,6 +471,7 @@ class BoardActivity : AppCompatActivity() {
                 includeKeyboard.integratedKeyboard.visibility = View.GONE
                 includeQuestionSpan.tvSpanQuestion.text = ""
                 includeGameHelperBottom.bottomHelper.visibility = View.GONE
+                includeHeader.include.componentKoin.visibility = View.GONE
                 includeHeader.tvLabelTop.text =
                     listLevel.first { it.id == currentLevel }.title
             }
@@ -482,6 +503,7 @@ class BoardActivity : AppCompatActivity() {
                 includeKeyboard.integratedKeyboard.visibility = View.GONE
                 includeQuestionSpan.tvSpanQuestion.text = ""
                 includeGameHelperBottom.bottomHelper.visibility = View.GONE
+                includeHeader.include.componentKoin.visibility = View.GONE
                 includeHeader.tvLabelTop.text =
                     listLevel.first { it.id == currentLevel }.title
             }
@@ -641,7 +663,7 @@ class BoardActivity : AppCompatActivity() {
             }
             job.await()
 
-            YoYo.with(Techniques.Wave).repeat(1).duration(300)
+            YoYo.with(Techniques.Pulse).repeat(1).duration(300)
                 .onEnd {
                     MPlayer().sound(applicationContext, Sora.BONUS)
                     YoYo.with(Techniques.RubberBand)
@@ -653,7 +675,7 @@ class BoardActivity : AppCompatActivity() {
                         }
                         .playOn(box[position])
                 }
-                .playOn(binding.includeGameHelperBottom.btnRobot)
+                .playOn(binding.includeGameHelperBottom.btnGetHint)
             skipActions(1)
         }
     }
@@ -696,7 +718,7 @@ class BoardActivity : AppCompatActivity() {
                 x = lastPos
             }
 
-            YoYo.with(Techniques.Wave).repeat(1).duration(300)
+            YoYo.with(Techniques.Pulse).repeat(1).duration(300)
                 .onEnd {
                     MPlayer().sound(applicationContext, Sora.SUCCESS)
                     position = x
@@ -1101,6 +1123,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             bind.btnBack.setOnClickListener {
+                listSelesai = Progress().getUserSelesai(applicationContext, lifecycle)
                 val i = Intent(context.applicationContext, MainActivity::class.java)
                 startActivity(i)
                 finish()
@@ -1114,6 +1137,7 @@ class BoardActivity : AppCompatActivity() {
 
     private fun playRandom() {
         lifecycleScope.launch {
+            skipActions(0)
             boardSet = BoardSet.PLAY_RANDOM
 
             for (i in 0 until box.size) {
@@ -1122,17 +1146,30 @@ class BoardActivity : AppCompatActivity() {
                 box[i].visibility = View.VISIBLE
             }
 
+            listLevel.clear()
+
             val jobLevel = async {
+                val dataDone = DB.getInstance(applicationContext).userAnswerTTS()
+                    .getStatus(AnswerStatus.DONE.name)
+                listSelesai.clear()
+                dataDone.forEach {
+                    listSelesai.add(it.levelId)
+                }
+
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
                 val count = listLevel.size
-
                 if (acakHolder.size >= listSelesai.size) {
                     acakHolder.clear()
                 }
 
-                var arr = arrayListOf<Int>()
                 for (i in 0 until count) {
-                    val x = (0 until count).random()
+                    val x = (1 until count).random()
+
+                    if (acakHolder.isEmpty()) {
+                        acakHolder.add(listLevel[x].id)
+                        currentLevel = listLevel[x].id
+                        break
+                    }
 
                     if (acakHolder.contains(listLevel[x].id)) {
                         continue
@@ -1143,7 +1180,6 @@ class BoardActivity : AppCompatActivity() {
                         currentLevel = listLevel[x].id
                         break
                     }
-                    arr.add(i)
                 }
             }
             jobLevel.await()
@@ -1165,8 +1201,8 @@ class BoardActivity : AppCompatActivity() {
                 includeEditor.mainContainer.visibility = View.GONE
                 val index = listLevel.indexOfFirst { it.id == currentLevel }
                 val category = listLevel[index].category
-                val msg = "Level:  ${Helper().formatLevelId(index + 1)} \n" +
-                        "Category: ${category}"
+                val msg = "Level ke:  ${Helper().formatLevelId(index + 1)} \n" +
+                        "Kategori: ${category}"
                 includeHeader.tvLabelTop.text = msg
             }
 
@@ -1184,6 +1220,7 @@ class BoardActivity : AppCompatActivity() {
             pickByArrow = false
             setInputAnswerDirection()
             onClickBox()
+            skipActions(1)
         }
     }
 
@@ -1193,12 +1230,12 @@ class BoardActivity : AppCompatActivity() {
 
             //Initial cari LevelId
             var dataLevel = mutableListOf<Data.Level>()
-            var dataDone = mutableListOf<Data.UserAnswerTTS>()
+            //var dataDone = mutableListOf<Data.UserAnswerTTS>()
             val job = async {
                 dataLevel = DB.getInstance(applicationContext).level().getAllByCategory(
                     currentCategory
                 ).filter { it.status == FilterStatus.POST }.toMutableList()
-                dataDone = DB.getInstance(applicationContext).userAnswerTTS()
+                val dataDone = DB.getInstance(applicationContext).userAnswerTTS()
                     .getStatus(AnswerStatus.DONE.name)
                 listSelesai.clear()
                 dataDone.forEach {
@@ -1248,7 +1285,7 @@ class BoardActivity : AppCompatActivity() {
                 val category = currentCategory
                 val msg =
                     "Level ke: ${indexOfCategory} \n" +
-                            "Category: ${category}"
+                            "Kategori: ${category}"
                 includeHeader.tvLabelTop.text = msg
 
                 includeGameHelperBottom.apply {

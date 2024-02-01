@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -14,14 +15,17 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.isDigitsOnly
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -33,6 +37,7 @@ import com.google.firebase.database.database
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
@@ -48,6 +53,7 @@ import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -78,6 +84,7 @@ class QuestionActivity : AppCompatActivity() {
         myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
 
         binding.headerPanel.tvLabelTop.text = "Editor"
+        binding.headerPanel.include.componentKoin.visibility = View.GONE
 
         lifecycleScope.launch {
             val job1 = async {
@@ -462,6 +469,92 @@ class QuestionActivity : AppCompatActivity() {
                                 .show()
                         }
                 }
+            }
+
+            questionAdapter.setOnClickView { lvl ->
+                val builder: AlertDialog.Builder = AlertDialog.Builder(this@QuestionActivity)
+                val input = EditText(this@QuestionActivity)
+                input.inputType = InputType.TYPE_CLASS_NUMBER
+                builder
+                    .setTitle("Update ID")
+                    .setMessage("Current ID: ${lvl.id}")
+                    .setView(input)
+                    .setPositiveButton("Update",
+                        DialogInterface.OnClickListener { dialog, whichButton ->
+                            lifecycleScope.launch {
+                                val value: Editable = input.text
+                                if (value.isEmpty()) {
+                                    Toast.makeText(this@QuestionActivity, "Isi Dulu", Toast.LENGTH_SHORT)
+                                        .show()
+                                    return@launch
+                                }
+                                //NEW ID MANUAL
+                                val copy = async {
+                                    val newId = Helper().formatLevelId(value.toString().toInt())
+
+                                    DB.getInstance(applicationContext).level().insertLevel(
+                                        Data.Level(
+                                            id = newId,
+                                            category = lvl.category,
+                                            title = lvl.title,
+                                            userId = lvl.userId,
+                                            status = FilterStatus.DRAFT
+                                        )
+                                    )
+
+                                    listQuestion.clear()
+                                    listQuestion =
+                                        DB.getInstance(applicationContext).question().getQuestion(lvl.id)
+
+                                    listQuestion.filter { it.levelId == lvl.id }.map { it }.forEach {
+                                        DB.getInstance(applicationContext).question().insertQuestion(
+                                            Data.Question(
+                                                levelId = newId,
+                                                id = "${newId}-${it.direction}-${Helper().formatQuestionId(it.number + 1)}",
+                                                number = it.number,
+                                                direction = it.direction,
+                                                asking = it.asking,
+                                                answer = it.answer,
+                                                slot = it.slot
+                                            )
+                                        )
+                                    }
+                                }
+                                copy.await()
+
+                                //DELETE OLD DATA ID LEVEL,QUESTION AND ALL
+                                val oldId = lvl.id
+                                val job1 = async {
+                                    DB.getInstance(applicationContext).level().deleteLevelById(oldId)
+                                }
+                                job1.await()
+                                val job2 = async {
+                                    DB.getInstance(applicationContext).question()
+                                        .deleteQuestionByLevelId(oldId)
+                                }
+                                job2.await()
+                                val job4 = async {
+                                    DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(oldId)
+                                    DB.getInstance(applicationContext).userAnswerTTS().deleteByLevelId(oldId)
+                                    DB.getInstance(applicationContext).helperCounter().deleteById(oldId)
+                                }
+                                job4.await()
+
+                                //REGET DATA
+                                val reGet = async {
+                                listLevel.clear()
+                                listLevel =
+                                    DB.getInstance(applicationContext).level().getAllLevel()
+                                questionAdapter.setListItem(listLevel)
+                                }
+                                reGet.await()
+
+                                dialog.dismiss()
+                            }
+                        }).setNegativeButton("Batal",
+                        DialogInterface.OnClickListener { dialog, whichButton ->
+                            dialog.dismiss()
+                        }).show()
             }
 
         }

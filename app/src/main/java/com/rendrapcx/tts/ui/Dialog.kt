@@ -13,6 +13,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -143,7 +144,23 @@ open class Dialog {
             }
 
             binding.swSettingKeyboard.isChecked = UserRef().getIntKey()
+            if (binding.swSettingKeyboard.isChecked) {
+                binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_enable)
+                binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.white))
+            }
+            else {
+                binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_disable)
+                binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.button))
+            }
             binding.swSettingKeyboard.setOnClickListener {
+                if (binding.swSettingKeyboard.isChecked){
+                    binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_enable)
+                    binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.white))
+                }
+                else {
+                    binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_disable)
+                    binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.button))
+                }
                 UserRef().setIntKey("0", binding.swSettingKeyboard.isChecked, context, lifecycle)
                 MPlayer().sound(context.applicationContext, Sora.SETTING)
                 YoYo.with(Techniques.Wave).playOn(it)

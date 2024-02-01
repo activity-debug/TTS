@@ -35,4 +35,9 @@ interface ILevel {
             "   SET status =:status " +
             "       WHERE id = :id;")
     suspend fun updateStatus(id: String, status: String)
+
+    @Query(value =  "UPDATE level " +
+            "   SET id =:newId " +
+            "       WHERE id = :id;")
+    suspend fun updateIdManual(id: String, newId:String)
 }
