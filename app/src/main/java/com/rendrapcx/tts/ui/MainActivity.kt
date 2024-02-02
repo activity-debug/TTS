@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
@@ -49,17 +50,18 @@ import com.rendrapcx.tts.constant.Const.Companion.dbApp
 import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
-import com.rendrapcx.tts.constant.Const.Companion.isInetConnect
+import com.rendrapcx.tts.constant.Const.Companion.isPlay
 import com.rendrapcx.tts.constant.Const.Companion.listProgress
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
 import com.rendrapcx.tts.databinding.DialogMenuOnlineBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.helper.Helper
+import com.rendrapcx.tts.helper.MPlayer
+import com.rendrapcx.tts.helper.MPlayer.Companion.player
 import com.rendrapcx.tts.helper.MyState
 import com.rendrapcx.tts.helper.NetworkStatusTracker
 import com.rendrapcx.tts.helper.NetworkStatusViewModel
-import com.rendrapcx.tts.helper.MPlayer
 import com.rendrapcx.tts.helper.Progress
 import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.helper.UserRef
@@ -74,8 +76,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.Base64
 
-class MainActivity : AppCompatActivity() {
 
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModelNet: NetworkStatusViewModel by lazy {
         ViewModelProvider(
@@ -110,6 +112,7 @@ class MainActivity : AppCompatActivity() {
                 MyState.Fetched -> {
                     binding.btnOnline.visibility = View.VISIBLE
                 }
+
                 MyState.Error -> {
                     binding.btnOnline.visibility = View.INVISIBLE
                 }
@@ -164,6 +167,7 @@ class MainActivity : AppCompatActivity() {
             loadOnlineList()
 
         }
+
 
         binding.apply {
 
@@ -238,7 +242,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     /* ADMOB BANNER*/
     private fun loadBannerAds() {
@@ -413,7 +416,11 @@ class MainActivity : AppCompatActivity() {
             })
 
             adapter.setOnClickDownload {
-                Toast.makeText(this@MainActivity, "sedang mengunduh level ${it.id}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    "sedang mengunduh level ${it.id}",
+                    Toast.LENGTH_SHORT
+                ).show()
                 lifecycleScope.launch(Dispatchers.IO) {
                     val database = Firebase.database(dbApp)
                     val refQuestion = database.getReference(dbRefQuestions)

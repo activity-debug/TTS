@@ -53,8 +53,9 @@ class Const {
 
         var playTitle = ""
         var currentTrack = 0
-        var player= MediaPlayer()
+        var indexPlay = -1
         var isPlay = false
+        var isMusic = false
         var isInetConnect = false
     }
 }
