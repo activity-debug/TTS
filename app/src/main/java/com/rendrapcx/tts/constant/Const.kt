@@ -1,6 +1,7 @@
 package com.rendrapcx.tts.constant
 
 import android.content.Context
+import android.media.MediaPlayer
 import android.provider.ContactsContract.Data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -49,5 +50,11 @@ class Const {
         var inputMode = ""
 
         var isEnableClick = true
+
+        var playTitle = ""
+        var currentTrack = 0
+        var player= MediaPlayer()
+        var isPlay = false
+        var isInetConnect = false
     }
 }

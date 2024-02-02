@@ -25,6 +25,9 @@ import androidx.core.content.ContextCompat.getColor
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.daimajia.androidanimations.library.Techniques
@@ -35,6 +38,7 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.AnswerStatus
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
@@ -58,6 +62,9 @@ import com.rendrapcx.tts.databinding.DialogWinBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.Keypad
 import com.rendrapcx.tts.helper.MPlayer
+import com.rendrapcx.tts.helper.MyState
+import com.rendrapcx.tts.helper.NetworkStatusTracker
+import com.rendrapcx.tts.helper.NetworkStatusViewModel
 import com.rendrapcx.tts.helper.Progress
 import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.model.DB
@@ -118,6 +125,7 @@ class BoardActivity : AppCompatActivity() {
         loadBannerAds()
 
         isEnableClick = true
+
 
         binding.includeEditor.mainContainer.visibility = View.GONE
         binding.includeQuestionSpan.tvSpanQuestion.text = ""

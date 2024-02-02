@@ -18,19 +18,14 @@ enum class Sora {
 
 class MPlayer {
 
-
     private val isSound =
         if (Data.userPreferences.isEmpty()) true else Data.userPreferences[0].isSound
+    private val isMusic =
+        if (Data.userPreferences.isEmpty()) true else Data.userPreferences[0].isMusic
 
-    //private val isMusic =
-    //    if (Data.userPreferences.isEmpty()) true else Data.userPreferences[0].isMusic
-
-    //    fun music(context: Context) {
-    //
-    //    }
+    var mp = MediaPlayer()
 
     fun sound(context: Context, sora: Sora) {
-        var mp = MediaPlayer()
 
         if (!isSound) return
         when (sora) {

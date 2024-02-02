@@ -39,6 +39,19 @@ class UserRef {
         }
     }
 
+    fun getIsMusic(): Boolean {
+        return userPreferences[0].isMusic
+    }
+
+    fun setIsMusic(isMusic: Boolean, context: Context, lifecycle: Lifecycle) {
+        lifecycle.coroutineScope.launch {
+            userPreferences[0].isMusic = isMusic
+            DB.getInstance(context.applicationContext).userPreferences().updateIsMusic(
+                isMusic = isMusic
+            )
+        }
+    }
+
     fun getIsSound(): Boolean {
         return userPreferences[0].isSound
     }

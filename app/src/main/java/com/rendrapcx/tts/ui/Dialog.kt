@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.text.InputFilter
@@ -23,6 +24,10 @@ import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.Companion.currentTrack
+import com.rendrapcx.tts.constant.Const.Companion.isPlay
+import com.rendrapcx.tts.constant.Const.Companion.playTitle
+import com.rendrapcx.tts.constant.Const.Companion.player
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
@@ -99,7 +104,7 @@ open class Dialog {
     @RequiresApi(Build.VERSION_CODES.R)
     fun settingDialog(
         context: Context,
-        lifecycle : Lifecycle
+        lifecycle: Lifecycle
     ) {
         val inflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -146,26 +151,121 @@ open class Dialog {
             binding.swSettingKeyboard.isChecked = UserRef().getIntKey()
             if (binding.swSettingKeyboard.isChecked) {
                 binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_enable)
-                binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.white))
-            }
-            else {
+                binding.swSettingKeyboard.setTextColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.white
+                    )
+                )
+            } else {
                 binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_disable)
-                binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.button))
+                binding.swSettingKeyboard.setTextColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.button
+                    )
+                )
             }
             binding.swSettingKeyboard.setOnClickListener {
-                if (binding.swSettingKeyboard.isChecked){
+                if (binding.swSettingKeyboard.isChecked) {
                     binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_enable)
-                    binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.white))
-                }
-                else {
+                    binding.swSettingKeyboard.setTextColor(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.white
+                        )
+                    )
+                } else {
                     binding.swSettingKeyboard.setBackgroundResource(R.drawable.button_image_disable)
-                    binding.swSettingKeyboard.setTextColor(ContextCompat.getColor(context, R.color.button))
+                    binding.swSettingKeyboard.setTextColor(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.button
+                        )
+                    )
                 }
                 UserRef().setIntKey("0", binding.swSettingKeyboard.isChecked, context, lifecycle)
                 MPlayer().sound(context.applicationContext, Sora.SETTING)
                 YoYo.with(Techniques.Wave).playOn(it)
             }
 
+            val listLaguOffline = mutableMapOf<Int, String>(
+                R.raw.andra_komang to "Komang",
+                R.raw.andra_manja to "Manja",
+                R.raw.andra_mahadewi to "Mahadewi",
+                R.raw.andra_kusadari to "Kusadari",
+                R.raw.andra_spirit_carries_on to "Spirit carries on",
+                R.raw.andra_putri_condor_heroes to "Condor Heroes",
+                R.raw.andra_sejak_mengenal_dirimu to "Sejak mengenal dirimu",
+                R.raw.andra_putri_sesa_cinta to "Sesa cinta",
+                R.raw.andra_cici_yang_terbaik to "Yang terbaik",
+                R.raw.andra_manusia_bodoh to "Manusia bodoh"
+            )
+//            val listLaguOnline = mutableMapOf<Int, String>(
+//                0 to "https://rendrapcx.github.io/assets/mp3/andra-putri-condor-heroes.mp3",
+//                1 to "https://rendrapcx.github.io/assets/mp3/andra-dealova.mp3",
+//                2 to "https://rendrapcx.github.io/assets/mp3/andra-aku-lelakimu.mp3",
+//                3 to "https://rendrapcx.github.io/assets/mp3/andra-komang.mp3",
+//                4 to "https://rendrapcx.github.io/assets/mp3/andra-cici-yang-terbaik.mp3",
+//            )
+
+
+            //val isInetConnect = CheckNetwork().isConnected(context)
+
+            binding.tvMusikTitle.text = playTitle
+            if (isPlay) {
+                binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
+            } else {
+                binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+            }
+
+            binding.btnMusikPlay.setOnClickListener() {
+                var value = -1
+                var audioUrl = ""
+
+                if (isPlay) {
+                    //UserRef().setIsMusic(false, context, lifecycle)
+                    isPlay = false
+                    player.stop()
+                    player.reset()
+                    player.release()
+                    binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                } else {
+                    //UserRef().setIsMusic(true, context, lifecycle)
+                    var err = false
+                    try {
+//                        if (isInetConnect) {
+//                            value = listLaguOnline.keys.random()
+//                            audioUrl = listLaguOnline.getValue(value)
+//                            player.setDataSource(audioUrl)
+//                            player.prepare()
+//                            player.start()
+//                            binding.tvMusikTitle.text = "Loading..."
+//                        } else {
+                        currentTrack = listLaguOffline.keys.random()
+                        player = MediaPlayer.create(context.applicationContext, currentTrack)
+                        player.start()
+                        //}
+                    } catch (e: Exception) {
+                        err = true
+                    } finally {
+                        if (err) {
+                            binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                            binding.tvMusikTitle.text = "error"
+                        } else {
+                            binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
+                            isPlay = true
+                            playTitle = listLaguOffline.getValue(currentTrack)
+//                            if (isInetConnect) binding.tvMusikTitle.text = audioUrl
+//                            else
+                            binding.tvMusikTitle.text = listLaguOffline.getValue(currentTrack)
+                        }
+                    }
+                    //isMusic = UserRef().getIsMusic()
+                    MPlayer().sound(context.applicationContext, Sora.SETTING)
+                    YoYo.with(Techniques.Bounce).playOn(it)
+                }
+            }
         }
 
         dialog.show()

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
@@ -25,51 +24,90 @@
             android:paddingTop="5dp"
             android:paddingBottom="10sp">
 
-            <Switch
-                android:id="@+id/swSettingKeyboard"
-                android:layout_width="250dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/top_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:background="@drawable/button_image_disable"
-                android:padding="10dp"
-                android:text="Android Keyboard"
-                android:textColor="@color/button2_color"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginTop="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/imgBtnSound"
-                app:layout_constraintTop_toTopOf="@+id/imgBtnSound"
-                app:layout_constraintVertical_bias="0.0"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
-                android:paddingVertical="10dp"
-                android:text="Quick Setting"
-                android:textColor="@color/button"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/imgBtnSound"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="28dp"
-                android:background="@drawable/button_image_enable"
-                app:layout_constraintEnd_toStartOf="@+id/swSettingKeyboard"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView3"
-                app:srcCompat="@drawable/volume_high_solid" />
+                <Switch
+                    android:id="@+id/swSettingKeyboard"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/button_image_disable"
+                    android:fontFamily="@font/audiowide"
+                    android:padding="10dp"
+                    android:text="Android Keyboard"
+                    android:textColor="@color/button2_color"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/imgBtnSound"
+                    app:layout_constraintTop_toBottomOf="@+id/textView3"
+                    tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/audiowide"
+                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="10dp"
+                    android:text="Quick Setting"
+                    android:textColor="@color/button"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/imgBtnSound"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/button_image_enable"
+                    app:layout_constraintEnd_toStartOf="@+id/swSettingKeyboard"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView3"
+                    app:srcCompat="@drawable/volume_high_solid" />
+
+                <TextView
+                    android:id="@+id/tvMusikTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/shape_koin"
+                    android:fontFamily="@font/audiowide"
+                    android:gravity="center"
+                    android:paddingHorizontal="10sp"
+                    android:text="^_^"
+                    android:textColor="@color/button"
+                    app:layout_constraintBottom_toBottomOf="@+id/btnMusikPlay"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/btnMusikPlay"
+                    app:layout_constraintTop_toTopOf="@+id/btnMusikPlay" />
+
+                <ImageView
+                    android:id="@+id/btnMusikPlay"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/shape_game_helper_not_active"
+                    android:padding="10sp"
+                    android:tag="0"
+                    app:layout_constraintStart_toStartOf="@+id/imgBtnSound"
+                    app:layout_constraintTop_toBottomOf="@+id/imgBtnSound"
+                    app:srcCompat="@drawable/play_solid" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

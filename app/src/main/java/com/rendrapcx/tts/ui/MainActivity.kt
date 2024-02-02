@@ -49,6 +49,7 @@ import com.rendrapcx.tts.constant.Const.Companion.dbApp
 import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
+import com.rendrapcx.tts.constant.Const.Companion.isInetConnect
 import com.rendrapcx.tts.constant.Const.Companion.listProgress
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
@@ -106,8 +107,12 @@ class MainActivity : AppCompatActivity() {
 
         viewModelNet.state.observe(this, Observer {
             when (it) {
-                MyState.Fetched -> binding.btnOnline.visibility = View.VISIBLE
-                MyState.Error -> binding.btnOnline.visibility = View.INVISIBLE
+                MyState.Fetched -> {
+                    binding.btnOnline.visibility = View.VISIBLE
+                }
+                MyState.Error -> {
+                    binding.btnOnline.visibility = View.INVISIBLE
+                }
             }
         })
 
