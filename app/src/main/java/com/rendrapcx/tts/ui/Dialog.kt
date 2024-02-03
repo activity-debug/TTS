@@ -11,6 +11,7 @@ import android.os.Build
 import android.text.InputFilter
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -23,6 +24,7 @@ import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.Companion.isOnlinePlay
 import com.rendrapcx.tts.constant.Const.Companion.isPlay
 import com.rendrapcx.tts.constant.Const.Companion.playTitle
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
@@ -30,6 +32,7 @@ import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogYesNoBinding
+import com.rendrapcx.tts.helper.CheckNetwork
 import com.rendrapcx.tts.helper.MPlayer
 import com.rendrapcx.tts.helper.MPlayer.Companion.player
 import com.rendrapcx.tts.helper.Sora
@@ -78,7 +81,6 @@ open class Dialog {
             .playOn(binding.textView19)
 
         YoYo.with(Techniques.RubberBand).repeat(5).playOn(binding.btnHireMe)
-
 
         binding.btnHireMe.setOnClickListener {
             val emailIntent = Intent(
@@ -187,47 +189,101 @@ open class Dialog {
                 MPlayer().sound(context.applicationContext, Sora.SETTING)
                 YoYo.with(Techniques.Wave).playOn(it)
             }
+        }
 
-            binding.tvMusikTitle.text = playTitle
-            if (isPlay) {
-                binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
-            } else {
-                binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+        binding.switch1.isChecked = isOnlinePlay
+
+        val isInetConnect = CheckNetwork().isConnected(context.applicationContext)
+        if (!isInetConnect && isOnlinePlay) binding.switch1.isChecked = false
+
+        if (binding.switch1.isChecked) binding.switch1.text = "Online playlist"
+        else binding.switch1.text = "Offline playlist"
+
+        binding.switch1.setOnClickListener() {
+            if (!isInetConnect && binding.switch1.isChecked) {
+                Toast.makeText(
+                    context,
+                    "Kamu Lagi Offline, aktifkan dulu datanya",
+                    Toast.LENGTH_SHORT
+                ).show()
+                binding.switch1.isChecked = false
             }
+            isOnlinePlay = binding.switch1.isChecked
+            if (binding.switch1.isChecked) binding.switch1.text = "Online playlist"
+            else binding.switch1.text = "Offline playlist"
+        }
 
-            binding.btnMusikPlay.setOnClickListener() {
-                if (isPlay) {
-                    if (player.isPlaying) {
+        binding.tvMusikTitle.text = playTitle
+        if (isPlay) {
+            binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
+        } else {
+            binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+        }
+
+        binding.btnMusikPlay.setOnClickListener() {
+            if (isPlay) {
+                if (player.isPlaying) {
+                    isPlay = false
+                    player.stop()
+                    player.reset()
+                    binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                }
+            } else {
+                var err = false
+                try {
+                    if (binding.switch1.isChecked) MPlayer().playNextOnline(context.applicationContext)
+                    else MPlayer().playNext(context.applicationContext)
+                } catch (e: Exception) {
+                    err = true
+                } finally {
+                    if (err) {
                         isPlay = false
-                        player.stop()
-                        player.reset()
                         binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                        binding.tvMusikTitle.text = "error"
+                    } else {
+                        isPlay = true
+                        binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
+                        binding.tvMusikTitle.text = "loading.."
                     }
+                }
+                MPlayer().sound(context.applicationContext, Sora.SETTING)
+                YoYo.with(Techniques.Bounce).playOn(it)
+            }
+        }
+
+
+
+        binding.btnMusikNext.setOnClickListener() {
+            var err = false
+            try {
+                if (player.isPlaying) {
+                    player.stop()
+                    player.reset()
+                    binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                }
+                if (binding.switch1.isChecked) MPlayer().playNextOnline(context.applicationContext)
+                else MPlayer().playNext(context.applicationContext)
+            } catch (e: Exception) {
+                err = true
+            } finally {
+                if (err) {
+                    isPlay = false
+                    binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                    binding.tvMusikTitle.text = "error"
                 } else {
-                    var err = false
-                    try {
-                        MPlayer().playNext(context.applicationContext)
-                    } catch (e: Exception) {
-                        err = true
-                    } finally {
-                        if (err) {
-                            isPlay = false
-                            binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
-                            binding.tvMusikTitle.text = "error"
-                        } else {
-                            isPlay = true
-                            binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
-                            binding.tvMusikTitle.text = playTitle
-                        }
-                    }
-                    MPlayer().sound(context.applicationContext, Sora.SETTING)
-                    YoYo.with(Techniques.Bounce).playOn(it)
+                    isPlay = true
+                    binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
+                    //binding.tvMusikTitle.text = playTitle
+                    binding.tvMusikTitle.text = "loading..."
                 }
             }
+            MPlayer().sound(context.applicationContext, Sora.SETTING)
+            YoYo.with(Techniques.Bounce).playOn(it)
         }
 
         dialog.show()
     }
+
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.R)

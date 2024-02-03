@@ -25,9 +25,6 @@ import androidx.core.content.ContextCompat.getColor
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.daimajia.androidanimations.library.Techniques
@@ -38,7 +35,6 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.rendrapcx.tts.R
-import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.AnswerStatus
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
@@ -47,9 +43,10 @@ import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.inputMode
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
+import com.rendrapcx.tts.constant.Const.Companion.koinPay
+import com.rendrapcx.tts.constant.Const.Companion.koinUser
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.constant.Const.Companion.position
-import com.rendrapcx.tts.constant.Const.Counter
 import com.rendrapcx.tts.constant.Const.Direction
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
@@ -62,18 +59,15 @@ import com.rendrapcx.tts.databinding.DialogWinBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.Keypad
 import com.rendrapcx.tts.helper.MPlayer
-import com.rendrapcx.tts.helper.MyState
-import com.rendrapcx.tts.helper.NetworkStatusTracker
-import com.rendrapcx.tts.helper.NetworkStatusViewModel
 import com.rendrapcx.tts.helper.Progress
 import com.rendrapcx.tts.helper.Sora
+import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 import com.rendrapcx.tts.model.Data.Companion.listPartial
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import com.rendrapcx.tts.model.Data.Companion.userPreferences
-import com.rendrapcx.tts.model.Data.HelperCounter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -103,8 +97,6 @@ class BoardActivity : AppCompatActivity() {
     private var curCharStr = ""
     private var finishedId = arrayListOf<String>() //ganti nanti
     private var salah = arrayListOf<Int>()
-    private var telunjuk = 0
-    private var robot = 0
 
     private var isNext = false
     private var indexOfCategory = ""
@@ -129,6 +121,7 @@ class BoardActivity : AppCompatActivity() {
 
         binding.includeEditor.mainContainer.visibility = View.GONE
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
+        binding.includeHeader.include.tvKoin.text = koinUser.toString()
 
         initBoardChild()
         initIntKeyChild()
@@ -210,10 +203,6 @@ class BoardActivity : AppCompatActivity() {
         /* HEADER ACTIONS*/
         binding.includeHeader.apply {
             btnBack.setOnClickListener {
-                if (boardSet == BoardSet.PLAY_RANDOM) {
-                    helperCounter(Counter.DELETE)
-                    deleteUserSlotDone()
-                }
                 val intent =
                     if (boardSet == BoardSet.PLAY_KATEGORI || boardSet == BoardSet.PLAY_RANDOM)
                         Intent(this@BoardActivity, MainActivity::class.java)
@@ -312,7 +301,8 @@ class BoardActivity : AppCompatActivity() {
                         .setPositiveButton("Update",
                             DialogInterface.OnClickListener { dialog, whichButton ->
                                 val value: Editable = input.text
-                                listQuestion.filter { it.id == currentQuestId }.map { it.asking = value.toString() }
+                                listQuestion.filter { it.id == currentQuestId }
+                                    .map { it.asking = value.toString() }
                                 onClickBox()
                                 dialog.dismiss()
                             }).setNegativeButton("Batal",
@@ -353,20 +343,30 @@ class BoardActivity : AppCompatActivity() {
             }
             /*ISI SOAL*/
             btnRobot.setOnClickListener {
-                robot++
-                if (robot > 3) {
+
+                if (koinUser < koinPay) {
                     YoYo.with(Techniques.Shake).playOn(btnRobot)
                     return@setOnClickListener
                 }
 
-                if (robot > 2) {
-                    btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
-                    btnRobot.setImageResource(R.drawable.robot_solid_not_active)
-                }
+                koinUser = koinUser - koinPay
+                YoYo.with(Techniques.SlideOutDown).repeat(1)
+                    .onEnd {
+                        YoYo.with(Techniques.SlideInDown).playOn(binding.includeHeader.include.imageView)
+                        YoYo.with(Techniques.Bounce).repeat(1).playOn(binding.includeHeader.include.imageView)
+                        YoYo.with(Techniques.Pulse).repeat(1)
+                            .onEnd { binding.includeHeader.include.tvKoin.text = koinUser.toString() }
+                            .playOn(binding.includeHeader.include.tvKoin)
+                    }
+                    .playOn(binding.includeHeader.include.imageView)
 
-                helperCounter(Counter.SAVE)
+                UserRef().setKoin(koinUser, applicationContext, lifecycle)
+
+                btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
+                btnRobot.setImageResource(R.drawable.robot_solid_not_active)
+
                 MPlayer().sound(applicationContext, Sora.ROBOT)
-                YoYo.with(Techniques.Wave).repeat(2).duration(1000)
+                YoYo.with(Techniques.Wave)
                     .onEnd {
                         randomFillAText()
                         YoYo.with(Techniques.RotateIn)
@@ -376,16 +376,27 @@ class BoardActivity : AppCompatActivity() {
             }
             /*Kasih tau jawaban 1 row atau kolom*/
             btnGetHint.setOnClickListener {
-                telunjuk++
-                if (telunjuk > 1) {
+
+                if (koinUser < (koinPay * currentRange.size)) {
                     YoYo.with(Techniques.Shake).playOn(btnGetHint)
                     return@setOnClickListener
                 }
 
-                helperCounter(Counter.SAVE)
+                koinUser = koinUser - (koinPay * currentRange.size)
+                YoYo.with(Techniques.SlideOutDown).repeat(1)
+                    .onEnd {
+                        YoYo.with(Techniques.SlideInDown).playOn(binding.includeHeader.include.imageView)
+                        YoYo.with(Techniques.Bounce).repeat(1).playOn(binding.includeHeader.include.imageView)
+                        YoYo.with(Techniques.Pulse).repeat(1)
+                            .onEnd { binding.includeHeader.include.tvKoin.text = koinUser.toString() }
+                            .playOn(binding.includeHeader.include.tvKoin)
+                    }
+                    .playOn(binding.includeHeader.include.imageView)
+                UserRef().setKoin(koinUser, applicationContext, lifecycle)
 
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
+
                 MPlayer().sound(applicationContext, Sora.HINT)
                 YoYo.with(Techniques.Wave)
                     .onEnd {
@@ -464,9 +475,33 @@ class BoardActivity : AppCompatActivity() {
             }
         }
 
-
     } //onCreate
 
+    private fun robotAndTunjuk(){
+        /*HELPER STYLE BY KOIN CHANGE*/
+        if (koinUser < (koinPay * currentRange.size)) {
+            binding.includeGameHelperBottom.apply {
+                btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
+                btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
+            }
+        } else {
+            binding.includeGameHelperBottom.apply {
+                btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_active)
+                btnGetHint.setImageResource(R.drawable.hand_point_up_solid)
+            }
+        }
+        if (koinUser < koinPay) {
+            binding.includeGameHelperBottom.apply {
+                btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
+                btnRobot.setImageResource(R.drawable.robot_solid_not_active)
+            }
+        } else {
+            binding.includeGameHelperBottom.apply {
+                btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
+                btnRobot.setImageResource(R.drawable.robot_solid)
+            }
+        }
+    }
     private fun editorEdit() {
         lifecycleScope.launch {
             val job1 = async { listPartial = getPartialData() }
@@ -563,48 +598,6 @@ class BoardActivity : AppCompatActivity() {
                     answerSlot = answerSlot,
                 )
             )
-        }
-    }
-
-    private fun helperCounter(counter: Counter) {
-        lifecycleScope.launch {
-            when (counter) {
-                Counter.DELETE -> {
-                    DB.getInstance(applicationContext).helperCounter().deleteById(currentLevel)
-                }
-
-                Counter.SAVE -> {
-                    DB.getInstance(applicationContext).helperCounter().upsert(
-                        HelperCounter(
-                            currentLevel,
-                            telunjuk,
-                            robot
-                        )
-                    )
-                }
-
-                Counter.LOAD -> {
-                    val hpCounter = DB.getInstance(applicationContext)
-                        .helperCounter().getById(currentLevel)
-                        .ifEmpty { return@launch }
-
-                    telunjuk = hpCounter[0].hintOne
-                    robot = hpCounter[0].hintTwo
-
-                    binding.includeGameHelperBottom.apply {
-                        if (telunjuk > 0) {
-                            btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
-                            btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
-                        }
-
-                        if (robot > 2) {
-                            btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
-                            btnRobot.setImageResource(R.drawable.robot_solid_not_active)
-                        }
-                    }
-
-                }
-            }
         }
     }
 
@@ -1051,14 +1044,25 @@ class BoardActivity : AppCompatActivity() {
 
         if (pass) {
             isEnableClick = false
+
+            koinUser += 500
+            UserRef().setKoin(koinUser, applicationContext, lifecycle)
+            YoYo.with(Techniques.SlideOutDown).repeat(1)
+                .onEnd {
+                    YoYo.with(Techniques.SlideInUp).playOn(binding.includeHeader.include.imageView)
+                    YoYo.with(Techniques.Bounce).repeat(1).playOn(binding.includeHeader.include.imageView)
+                    YoYo.with(Techniques.Wobble).duration(1000)
+                        .onEnd { binding.includeHeader.include.tvKoin.text = koinUser.toString() }
+                        .playOn(binding.includeHeader.include.tvKoin)
+                }
+                .playOn(binding.includeHeader.include.imageView)
+
             if (boardSet != BoardSet.PLAY_RANDOM) {
                 Progress().updateUserAnswer(AnswerStatus.DONE, applicationContext, lifecycle)
-                helperCounter(Counter.DELETE)
                 deleteUserSlotDone()
                 MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
             } else {
-                helperCounter(Counter.DELETE)
                 deleteUserSlotDone()
                 MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
@@ -1215,8 +1219,6 @@ class BoardActivity : AppCompatActivity() {
             }
 
             isEnableClick = true
-            telunjuk = 0
-            robot = 0
             binding.includeGameHelperBottom.apply {
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid)
                 btnRobot.setImageResource(R.drawable.robot_solid)
@@ -1288,6 +1290,8 @@ class BoardActivity : AppCompatActivity() {
                 includeEditor.mainContainer.visibility = View.GONE
                 includeQuestionSpan.tvSpanQuestion.text = ""
 
+                binding.includeHeader.include.tvKoin.text = koinUser.toString()
+
                 val index = dataLevel.indexOfFirst { it.id == currentLevel }
                 indexOfCategory = Helper().formatLevelId(index + 1)
                 val category = currentCategory
@@ -1316,10 +1320,6 @@ class BoardActivity : AppCompatActivity() {
             }
 
             isEnableClick = true
-            telunjuk = 0
-            robot = 0
-
-            helperCounter(Counter.LOAD)
 
             position = listPartial.first { it.levelId == currentLevel }.charAt
 
@@ -1660,6 +1660,7 @@ class BoardActivity : AppCompatActivity() {
 
         selectedQuestion = getQuestion()
         pickByArrow = false
+        robotAndTunjuk()
     }
 
     private fun setOnSelectedColor() {
@@ -1690,6 +1691,8 @@ class BoardActivity : AppCompatActivity() {
             box[i].setTextColor(getColor(this, R.color.button))
             box[i].setBackgroundResource(R.drawable.box_shape_active)
         }
+        robotAndTunjuk()
+
     }
 
     private fun initIntKeyChild() {

@@ -346,7 +346,6 @@ class QuestionActivity : AppCompatActivity() {
                     val job4 = async {
                         DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(levelId)
                         DB.getInstance(applicationContext).userAnswerTTS().deleteByLevelId(levelId)
-                        DB.getInstance(applicationContext).helperCounter().deleteById(levelId)
                     }
                     job4.await()
 
@@ -536,7 +535,6 @@ class QuestionActivity : AppCompatActivity() {
                                 val job4 = async {
                                     DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(oldId)
                                     DB.getInstance(applicationContext).userAnswerTTS().deleteByLevelId(oldId)
-                                    DB.getInstance(applicationContext).helperCounter().deleteById(oldId)
                                 }
                                 job4.await()
 

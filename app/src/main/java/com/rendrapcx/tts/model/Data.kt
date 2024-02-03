@@ -60,14 +60,6 @@ class Data {
         @ColumnInfo(name = "answer_slot") var answerSlot: MutableMap<Int, String>,
     )
 
-    @Entity(tableName = "helper_counter")
-    data class HelperCounter(
-        @PrimaryKey(autoGenerate = false)
-        @ColumnInfo(name = "id") var id: String,
-        @ColumnInfo(name = "hint_one") var hintOne: Int,
-        @ColumnInfo(name = "hint_two") var hintTwo: Int,
-    )
-
     @Entity(tableName = "user_preferences")
     data class UserPreferences(
         @PrimaryKey(autoGenerate = false)
@@ -77,6 +69,7 @@ class Data {
         @ColumnInfo(name = "is_music") var isMusic: Boolean,
         @ColumnInfo(name = "is_sound") var isSound: Boolean,
         @ColumnInfo(name = "is_editor") var isEditor: Boolean,
+        @ColumnInfo(name = "koin") var koin: Int
     )
 
     @Serializable

@@ -41,6 +41,7 @@ import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
+import com.rendrapcx.tts.constant.Const.Companion.koinUser
 import com.rendrapcx.tts.constant.RequestCode
 import com.rendrapcx.tts.databinding.ActivityBarcodeBinding
 import com.rendrapcx.tts.helper.GoogleMobileAdsConsentManager
@@ -198,6 +199,14 @@ class BarcodeActivity : AppCompatActivity() {
         }
 
         binding.apply {
+
+            imgCoder.setOnClickListener(){
+                if (isEditor) {
+                    koinUser += 100
+                    UserRef().setKoin(koinUser, applicationContext, lifecycle)
+                    MPlayer().sound(applicationContext, Sora.SUCCESS)
+                }
+            }
 
             btnDecodeGallery.setOnClickListener {
                 openAlbums()

@@ -41,4 +41,9 @@ interface IUserPreferences{
             "   WHERE `id` = 0")
     suspend fun updateIsEditor(isEditor: Boolean)
 
+    @Query("UPDATE user_preferences " +
+            "   SET koin = :koin " +
+            "   WHERE `id` = 0")
+    suspend fun updateKoin(koin: Int)
+
 }

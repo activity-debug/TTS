@@ -1,13 +1,6 @@
 package com.rendrapcx.tts.constant
 
-import android.content.Context
-import android.media.MediaPlayer
-import android.provider.ContactsContract.Data
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
-import com.rendrapcx.tts.helper.Progress
-import com.rendrapcx.tts.model.Data.*
+import androidx.lifecycle.MutableLiveData
 
 class Const {
     enum class BoardSet { PLAY_KATEGORI, PLAY_RANDOM, EDITOR_NEW, EDITOR_EDIT }
@@ -56,6 +49,9 @@ class Const {
         var indexPlay = -1
         var isPlay = false
         var isMusic = false
-        var isInetConnect = false
+        var isOnlinePlay = false
+
+        var koinUser = 0
+        var koinPay = 50
     }
 }

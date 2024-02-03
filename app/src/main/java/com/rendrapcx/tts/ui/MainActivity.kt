@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
@@ -50,7 +49,7 @@ import com.rendrapcx.tts.constant.Const.Companion.dbApp
 import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
-import com.rendrapcx.tts.constant.Const.Companion.isPlay
+import com.rendrapcx.tts.constant.Const.Companion.koinUser
 import com.rendrapcx.tts.constant.Const.Companion.listProgress
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
@@ -58,7 +57,6 @@ import com.rendrapcx.tts.databinding.DialogMenuOnlineBinding
 import com.rendrapcx.tts.databinding.DialogMenuPlayBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.MPlayer
-import com.rendrapcx.tts.helper.MPlayer.Companion.player
 import com.rendrapcx.tts.helper.MyState
 import com.rendrapcx.tts.helper.NetworkStatusTracker
 import com.rendrapcx.tts.helper.NetworkStatusViewModel
@@ -151,11 +149,12 @@ class MainActivity : AppCompatActivity() {
             }
             job.await()
             val job1 = async {
-
-                isEditor = UserRef().getIsEditor()
                 listSelesai = Progress().getUserSelesai(applicationContext, lifecycle)
                 listProgress = Progress().getUserProgress(applicationContext, lifecycle)
+                isEditor = UserRef().getIsEditor()
+                koinUser = UserRef().getKoin()
             }
+
             job1.await()
 
             getDataLevel()
@@ -166,8 +165,9 @@ class MainActivity : AppCompatActivity() {
 
             loadOnlineList()
 
-        }
+            loadKoin()
 
+        }
 
         binding.apply {
 
@@ -243,6 +243,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /*NANTI GANTI LOAD FROM DB*/
+    private fun loadKoin() {
+        binding.componentKoin.tvKoin.text = koinUser.toString()
+    }
+
     /* ADMOB BANNER*/
     private fun loadBannerAds() {
         MobileAds.initialize(this@MainActivity) {}
@@ -283,7 +288,9 @@ class MainActivity : AppCompatActivity() {
                     listOnlineList.clear()
                     for (item in dataSnapshot.children) {
                         item.getValue(Data.OnlineLevelList::class.java)
-                            ?.let { it -> listOnlineList.add(it) }
+                            ?.let { data ->
+                                listOnlineList.add(data)
+                            }
                     }
                 }
 

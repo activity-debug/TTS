@@ -2,11 +2,14 @@ package com.rendrapcx.tts.helper
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.util.Log
+import android.view.LayoutInflater
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const.Companion.currentTrack
 import com.rendrapcx.tts.constant.Const.Companion.indexPlay
 import com.rendrapcx.tts.constant.Const.Companion.isPlay
 import com.rendrapcx.tts.constant.Const.Companion.playTitle
+import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.model.Data
 import java.util.Timer
 import java.util.TimerTask
@@ -43,13 +46,54 @@ class MPlayer {
         R.raw.andra_cici_yang_terbaik to "Yang terbaik",
     )
 
+    val listLaguOnline = mutableMapOf<Int, String>(
+        0 to "https://rendrapcx.github.io/assets/mp3/andra-aku-lelakimu.mp3",
+        1 to "https://rendrapcx.github.io/assets/mp3/andra-cici-aku-mau.mp3",
+        2 to "https://rendrapcx.github.io/assets/mp3/andra-cici-yang-terbaik.mp3",
+        3 to "https://rendrapcx.github.io/assets/mp3/andra-cinta-ini-membunuhku.mp3",
+        4 to "https://rendrapcx.github.io/assets/mp3/andra-cinta-luar-biasa.mp3",
+        5 to "https://rendrapcx.github.io/assets/mp3/andra-dealova.mp3",
+        6 to "https://rendrapcx.github.io/assets/mp3/andra-dia-milikku.mp3",
+        7 to "https://rendrapcx.github.io/assets/mp3/andra-gelora-remix.mp3",
+        8 to "https://rendrapcx.github.io/assets/mp3/andra-high-hopes.mp3",
+        9 to "https://rendrapcx.github.io/assets/mp3/andra-just-for-my-mom.mp3",
+    )
+
     companion object {
         var player = MediaPlayer()
     }
 
-    private var list = arrayListOf<Int>()
-
+    fun playNextOnline(context: Context) {
+        val dur = player.duration
+        var elapsed: Long = 0
+        val INTERVAL: Long = 1000
+        val TIMEOUT: Long = dur.toLong()
+        val task: TimerTask = object : TimerTask() {
+            override fun run() {
+                elapsed += INTERVAL
+                if (elapsed >= TIMEOUT) {
+                    this.cancel()
+                    if (isPlay) {
+                        player.reset()
+                        MPlayer().sourceOnline()
+                        player.prepare()
+                        player.start()
+                        playNextOnline(context.applicationContext)
+                    }
+                    return
+                }
+                if (!isPlay) {
+                    this.cancel()
+                    elapsed = TIMEOUT
+                    return
+                }
+            }
+        }
+        val timer = Timer()
+        timer.scheduleAtFixedRate(task, INTERVAL, INTERVAL)
+    }
     fun playNext(context: Context) {
+
         val dur = player.duration
         var elapsed: Long = 0
         val INTERVAL: Long = 1000
@@ -93,7 +137,7 @@ class MPlayer {
 //    }
 
     fun source(context: Context) {
-        list.clear()
+        val list = arrayListOf<Int>()
         listLaguOffline.map { it.key }.forEach() {
             list.add(it)
         }
@@ -104,6 +148,21 @@ class MPlayer {
         currentTrack = list[indexPlay]
         player = MediaPlayer.create(context.applicationContext, currentTrack)
         playTitle = MPlayer().listLaguOffline.getValue(currentTrack)
+    }
+
+   fun sourceOnline() {
+        val list = arrayListOf<Int>()
+        listLaguOnline.map { it.key }.forEach() {
+            list.add(it)
+        }
+        indexPlay++
+        if (indexPlay >= list.size) {
+            indexPlay = 0
+        }
+        currentTrack = list[indexPlay]
+        player.setDataSource(listLaguOnline.getValue(currentTrack))
+        val s = MPlayer().listLaguOnline.getValue(currentTrack)
+        playTitle = s.substring(39, s.length)
     }
 
     fun sound(context: Context, sora: Sora) {

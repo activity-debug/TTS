@@ -33,6 +33,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
+                <ImageView
+                    android:id="@+id/btnMusikNext"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/shape_game_helper_not_active"
+                    android:padding="10sp"
+                    android:tag="0"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/btnMusikPlay"
+                    app:srcCompat="@drawable/forward_step_solid" />
+
+                <Switch
+                    android:id="@+id/switch1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/acme"
+                    android:text="Online playlist"
+                    android:textColor="@color/button"
+                    app:layout_constraintEnd_toEndOf="@+id/btnMusikNext"
+                    app:layout_constraintStart_toStartOf="@+id/btnMusikPlay"
+                    app:layout_constraintTop_toBottomOf="@+id/tvMusikTitle"
+                    tools:ignore="UseSwitchCompatOrMaterialXml" />
+
                 <Switch
                     android:id="@+id/swSettingKeyboard"
                     android:layout_width="250dp"
@@ -82,8 +107,8 @@
                     android:id="@+id/tvMusikTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:background="@drawable/shape_koin"
                     android:fontFamily="@font/audiowide"
                     android:gravity="center"
@@ -91,22 +116,22 @@
                     android:text="^_^"
                     android:textColor="@color/button"
                     app:layout_constraintBottom_toBottomOf="@+id/btnMusikPlay"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintEnd_toStartOf="@+id/btnMusikNext"
                     app:layout_constraintStart_toEndOf="@+id/btnMusikPlay"
                     app:layout_constraintTop_toTopOf="@+id/btnMusikPlay" />
 
                 <ImageView
                     android:id="@+id/btnMusikPlay"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="12dp"
                     android:background="@drawable/shape_game_helper_not_active"
                     android:padding="10sp"
                     android:tag="0"
                     app:layout_constraintStart_toStartOf="@+id/imgBtnSound"
                     app:layout_constraintTop_toBottomOf="@+id/imgBtnSound"
                     app:srcCompat="@drawable/play_solid" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

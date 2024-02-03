@@ -20,7 +20,8 @@ class UserRef {
                     integratedKeyboard = false,
                     isMusic = true,
                     isSound = true,
-                    isEditor = false
+                    isEditor = false,
+                    koin = 1000
                 )
             )
         }
@@ -33,9 +34,20 @@ class UserRef {
     fun setActiveTabFilter(activeTab: FilterStatus, context: Context, lifecycle: Lifecycle) {
         lifecycle.coroutineScope.launch {
             userPreferences[0].activeFilterTab = activeTab
-            DB.getInstance(context.applicationContext).userPreferences().updateActiveFilterTab(
-                activeTab
-            )
+            DB.getInstance(context.applicationContext).userPreferences()
+                .updateActiveFilterTab(activeTab)
+        }
+    }
+
+
+    fun getKoin():Int{
+        return userPreferences[0].koin
+    }
+
+    fun setKoin(koin: Int, context: Context, lifecycle: Lifecycle){
+        lifecycle.coroutineScope.launch {
+            userPreferences[0].koin = koin
+            DB.getInstance(context.applicationContext).userPreferences().updateKoin(koin)
         }
     }
 
