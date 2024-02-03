@@ -51,6 +51,7 @@ import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.BufferedInputStream
@@ -112,7 +113,8 @@ class BarcodeActivity : AppCompatActivity() {
         // Log the Mobile Ads SDK version.
         Log.d("JACK", "Google Mobile Ads SDK Version: " + MobileAds.getVersion())
 
-        googleMobileAdsConsentManager = GoogleMobileAdsConsentManager.getInstance(applicationContext)
+        googleMobileAdsConsentManager =
+            GoogleMobileAdsConsentManager.getInstance(applicationContext)
         googleMobileAdsConsentManager.gatherConsent(this) { error ->
             if (error != null) {
                 // Consent not obtained in current session.
@@ -200,7 +202,7 @@ class BarcodeActivity : AppCompatActivity() {
 
         binding.apply {
 
-            imgCoder.setOnClickListener(){
+            imgCoder.setOnClickListener() {
                 if (isEditor) {
                     koinUser += 100
                     UserRef().setKoin(koinUser, applicationContext, lifecycle)
@@ -218,11 +220,17 @@ class BarcodeActivity : AppCompatActivity() {
 
             btnSaveSoal.setOnClickListener {
                 isEnableClick = false
-                saveQRToDB()
-                val i = Intent(this@BarcodeActivity, MainActivity::class.java)
-                startActivity(i)
-                finish()
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                lifecycleScope.launch {
+                    val job = async {
+                        saveQRToDB()
+                    }
+                    job.await()
+
+                    val i = Intent(this@BarcodeActivity, MainActivity::class.java)
+                    startActivity(i)
+                    finish()
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                }
             }
 
             btnPasteSoal.setOnClickListener {
@@ -301,11 +309,16 @@ class BarcodeActivity : AppCompatActivity() {
                         // Handle changes to user consent.
                         googleMobileAdsConsentManager.showPrivacyOptionsForm(this@BarcodeActivity) { formError ->
                             if (formError != null) {
-                                Toast.makeText(this@BarcodeActivity, formError.message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@BarcodeActivity,
+                                    formError.message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                         true
                     }
+
                     else -> false
                 }
             }
