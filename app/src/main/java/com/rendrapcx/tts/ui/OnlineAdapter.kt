@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.rendrapcx.tts.R
+import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.databinding.DialogMenuItemOnlineBinding
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
@@ -13,9 +14,14 @@ import com.rendrapcx.tts.model.Data.Companion.listLevel
 class OnlineAdapter : RecyclerView.Adapter<OnlineAdapter.OnlineViewHolder>() {
     private var listOnlineLevel = mutableListOf<Data.OnlineLevelList>()
     private var onClickDownload: ((Data.OnlineLevelList) -> Unit)? = null
+    private var onClickRemove: ((Data.OnlineLevelList) -> Unit)? = null
 
     fun setOnClickDownload(callback: (Data.OnlineLevelList) -> Unit) {
         this.onClickDownload = callback
+    }
+
+    fun setOnClickRemove(callback: (Data.OnlineLevelList) -> Unit) {
+        this.onClickRemove = callback
     }
 
     fun setListItem(list: MutableList<Data.OnlineLevelList>) {
@@ -63,6 +69,13 @@ class OnlineAdapter : RecyclerView.Adapter<OnlineAdapter.OnlineViewHolder>() {
             if (!downloaded) {
                 onClickDownload?.invoke(item)
             }
+        }
+
+        holder.binding.root.setOnLongClickListener(){
+            if (isEditor) {
+                onClickRemove?.invoke(item)
+            }
+            return@setOnLongClickListener true
         }
 
     }

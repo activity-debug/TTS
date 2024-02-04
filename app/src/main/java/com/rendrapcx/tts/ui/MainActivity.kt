@@ -71,6 +71,7 @@ import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.Base64
 
@@ -456,6 +457,25 @@ class MainActivity : AppCompatActivity() {
                         }
                     })
                 }
+            }
+
+            adapter.setOnClickRemove {eta ->
+                val database = Firebase.database(dbApp)
+                val myRef = database.getReference(dbRefQuestions)
+                myRef.child(eta.id.toString()).removeValue() //.setValue(null)
+                    .addOnCompleteListener() {
+                        Toast.makeText(this@MainActivity, "Removed Completed", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                    .addOnFailureListener() {
+                        Toast.makeText(this@MainActivity, "Failed to Remove", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                loadOnlineList()
+                rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
+                rcViewOnline.adapter = adapter
+                adapter.setListItem(listOnlineList)
             }
         }
 
