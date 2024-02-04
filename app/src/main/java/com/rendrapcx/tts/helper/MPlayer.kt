@@ -3,13 +3,19 @@ package com.rendrapcx.tts.helper
 import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
-import android.view.LayoutInflater
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.rendrapcx.tts.R
-import com.rendrapcx.tts.constant.Const.Companion.currentTrack
-import com.rendrapcx.tts.constant.Const.Companion.indexPlay
+import com.rendrapcx.tts.constant.Const.Companion.currentTrackOffline
+import com.rendrapcx.tts.constant.Const.Companion.currentTrackOnline
+import com.rendrapcx.tts.constant.Const.Companion.indexPlayOffline
+import com.rendrapcx.tts.constant.Const.Companion.indexPlayOnline
 import com.rendrapcx.tts.constant.Const.Companion.isPlay
-import com.rendrapcx.tts.constant.Const.Companion.playTitle
-import com.rendrapcx.tts.databinding.DialogSettingBinding
+import com.rendrapcx.tts.constant.Const.Companion.playTitleOffline
+import com.rendrapcx.tts.constant.Const.Companion.playTitleOnline
+import com.rendrapcx.tts.constant.Const.Companion.player
 import com.rendrapcx.tts.model.Data
 import java.util.Timer
 import java.util.TimerTask
@@ -59,10 +65,6 @@ class MPlayer {
         9 to "https://rendrapcx.github.io/assets/mp3/andra-just-for-my-mom.mp3",
     )
 
-    companion object {
-        var player = MediaPlayer()
-    }
-
     fun playNextOnline(context: Context) {
         val dur = player.duration
         var elapsed: Long = 0
@@ -75,7 +77,7 @@ class MPlayer {
                     this.cancel()
                     if (isPlay) {
                         player.reset()
-                        MPlayer().sourceOnline()
+                        sourceOnline()
                         player.prepare()
                         player.start()
                         playNextOnline(context.applicationContext)
@@ -92,8 +94,8 @@ class MPlayer {
         val timer = Timer()
         timer.scheduleAtFixedRate(task, INTERVAL, INTERVAL)
     }
-    fun playNext(context: Context) {
 
+    fun playNext(context: Context) {
         val dur = player.duration
         var elapsed: Long = 0
         val INTERVAL: Long = 1000
@@ -105,7 +107,7 @@ class MPlayer {
                     this.cancel()
                     if (isPlay) {
                         player.reset()
-                        MPlayer().source(context.applicationContext)
+                        sourceOffline(context.applicationContext)
                         player.start()
                         playNext(context.applicationContext)
                     }
@@ -122,7 +124,40 @@ class MPlayer {
         timer.scheduleAtFixedRate(task, INTERVAL, INTERVAL)
     }
 
-//    fun playNext(context: Context) {
+    fun sourceOffline(context: Context) {
+        val list = arrayListOf<Int>()
+        listLaguOffline.map { it.key }.forEach() {
+            list.add(it)
+        }
+        ++indexPlayOffline
+        if (indexPlayOffline >= list.size) {
+            indexPlayOffline = 0
+        }
+        currentTrackOffline = list[indexPlayOffline]
+        //Log.i("JACK", "$currentTrackOffline")
+        playTitleOffline = MPlayer().listLaguOffline.getValue(currentTrackOffline)
+        //Log.i("JACK", playTitleOffline)
+        player = MediaPlayer.create(context.applicationContext, currentTrackOffline)
+    }
+
+    fun sourceOnline() {
+        val list = arrayListOf<Int>()
+        listLaguOnline.map { it.key }.forEach() {
+            list.add(it)
+        }
+        ++indexPlayOnline
+        if (indexPlayOnline >= list.size) {
+            indexPlayOnline = 0
+        }
+        currentTrackOnline = list[indexPlayOnline]
+        //Log.i("JACK", "$currentTrackOnline")
+        val s = MPlayer().listLaguOnline.getValue(currentTrackOnline)
+        playTitleOnline = s.substring(39, s.length)
+        //Log.i("JACK", playTitleOnline)
+        player.setDataSource(listLaguOnline.getValue(currentTrackOnline))
+    }
+
+    //    fun playNext(context: Context) {
 //        val dur = player.duration.toLong()
 //        object : CountDownTimer(dur + 100, 1000) {
 //            override fun onTick(millisUntilFinished: Long) {}
@@ -135,35 +170,6 @@ class MPlayer {
 //            }
 //        }.start()
 //    }
-
-    fun source(context: Context) {
-        val list = arrayListOf<Int>()
-        listLaguOffline.map { it.key }.forEach() {
-            list.add(it)
-        }
-        indexPlay++
-        if (indexPlay >= list.size) {
-            indexPlay = 0
-        }
-        currentTrack = list[indexPlay]
-        player = MediaPlayer.create(context.applicationContext, currentTrack)
-        playTitle = MPlayer().listLaguOffline.getValue(currentTrack)
-    }
-
-   fun sourceOnline() {
-        val list = arrayListOf<Int>()
-        listLaguOnline.map { it.key }.forEach() {
-            list.add(it)
-        }
-        indexPlay++
-        if (indexPlay >= list.size) {
-            indexPlay = 0
-        }
-        currentTrack = list[indexPlay]
-        player.setDataSource(listLaguOnline.getValue(currentTrack))
-        val s = MPlayer().listLaguOnline.getValue(currentTrack)
-        playTitle = s.substring(39, s.length)
-    }
 
     fun sound(context: Context, sora: Sora) {
 

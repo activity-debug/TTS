@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.text.InputFilter
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -24,9 +25,13 @@ import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
+import com.rendrapcx.tts.constant.Const.Companion.currentTrackOffline
+import com.rendrapcx.tts.constant.Const.Companion.currentTrackOnline
 import com.rendrapcx.tts.constant.Const.Companion.isOnlinePlay
 import com.rendrapcx.tts.constant.Const.Companion.isPlay
-import com.rendrapcx.tts.constant.Const.Companion.playTitle
+import com.rendrapcx.tts.constant.Const.Companion.playTitleOffline
+import com.rendrapcx.tts.constant.Const.Companion.playTitleOnline
+import com.rendrapcx.tts.constant.Const.Companion.player
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
@@ -34,7 +39,6 @@ import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogYesNoBinding
 import com.rendrapcx.tts.helper.CheckNetwork
 import com.rendrapcx.tts.helper.MPlayer
-import com.rendrapcx.tts.helper.MPlayer.Companion.player
 import com.rendrapcx.tts.helper.Sora
 import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
@@ -189,53 +193,65 @@ open class Dialog {
                 MPlayer().sound(context.applicationContext, Sora.SETTING)
                 YoYo.with(Techniques.Wave).playOn(it)
             }
-        }
 
-        binding.switch1.isChecked = isOnlinePlay
 
-        val isInetConnect = CheckNetwork().isConnected(context.applicationContext)
-        if (!isInetConnect && isOnlinePlay) binding.switch1.isChecked = false
+            binding.switch1.isChecked = isOnlinePlay
 
-        if (binding.switch1.isChecked) binding.switch1.text = "Online playlist"
-        else binding.switch1.text = "Offline playlist"
+            val isInetConnect = CheckNetwork().isConnected(context.applicationContext)
+            if (!isInetConnect && isOnlinePlay) binding.switch1.isChecked = false
 
-        binding.switch1.setOnClickListener() {
-            if (!isInetConnect && binding.switch1.isChecked) {
-                Toast.makeText(
-                    context,
-                    "Kamu Lagi Offline, aktifkan dulu datanya",
-                    Toast.LENGTH_SHORT
-                ).show()
-                binding.switch1.isChecked = false
-            }
-            isOnlinePlay = binding.switch1.isChecked
             if (binding.switch1.isChecked) binding.switch1.text = "Online playlist"
             else binding.switch1.text = "Offline playlist"
-        }
 
-        binding.tvMusikTitle.text = playTitle
-        if (isPlay) {
-            binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
-        } else {
-            binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
-        }
+            binding.switch1.setOnClickListener() {
+                if (!isInetConnect && binding.switch1.isChecked) {
+                    Toast.makeText(
+                        context,
+                        "Kamu Lagi Offline, aktifkan dulu datanya",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    binding.switch1.isChecked = false
+                }
+                isOnlinePlay = binding.switch1.isChecked
+                if (binding.switch1.isChecked) {
+                    binding.switch1.text = "Online playlist"
+                } else {
+                    binding.switch1.text = "Offline playlist"
+                }
 
-        binding.btnMusikPlay.setOnClickListener() {
-            if (isPlay) {
+                binding.tvMusikTitle.text = ""
+
                 if (player.isPlaying) {
                     isPlay = false
                     player.stop()
                     player.reset()
                     binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
                 }
+            }
+
+            binding.tvMusikTitle.text = if (binding.switch1.isChecked) playTitleOnline else playTitleOffline
+            if (isPlay) {
+                binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
             } else {
-                var err = false
-                try {
-                    if (binding.switch1.isChecked) MPlayer().playNextOnline(context.applicationContext)
-                    else MPlayer().playNext(context.applicationContext)
-                } catch (e: Exception) {
-                    err = true
-                } finally {
+                binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+            }
+
+            binding.btnMusikPlay.setOnClickListener() {
+                if (isPlay) {
+                    if (player.isPlaying) {
+                        isPlay = false
+                        player.stop()
+                        player.reset()
+                        binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                    }
+                } else {
+                    var err = false
+                    try {
+                        if (binding.switch1.isChecked) MPlayer().playNextOnline(context.applicationContext)
+                        else MPlayer().playNext(context.applicationContext)
+                    } catch (e: Exception) {
+                        err = true
+                    }
                     if (err) {
                         isPlay = false
                         binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
@@ -243,29 +259,30 @@ open class Dialog {
                     } else {
                         isPlay = true
                         binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
-                        binding.tvMusikTitle.text = "loading.."
+                        binding.tvMusikTitle.text = if (binding.switch1.isChecked) {
+                            playTitleOnline.ifEmpty { "loading" }
+                        } else {
+                            playTitleOffline.ifEmpty { "loading" }
+                        }
                     }
+                    MPlayer().sound(context.applicationContext, Sora.SETTING)
+                    YoYo.with(Techniques.Bounce).playOn(it)
                 }
-                MPlayer().sound(context.applicationContext, Sora.SETTING)
-                YoYo.with(Techniques.Bounce).playOn(it)
             }
-        }
 
-
-
-        binding.btnMusikNext.setOnClickListener() {
-            var err = false
-            try {
-                if (player.isPlaying) {
-                    player.stop()
-                    player.reset()
-                    binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+            binding.btnMusikNext.setOnClickListener() {
+                var err = false
+                try {
+                    if (player.isPlaying) {
+                        player.stop()
+                        player.reset()
+                        binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
+                    }
+                    if (binding.switch1.isChecked) MPlayer().playNextOnline(context.applicationContext)
+                    else MPlayer().playNext(context.applicationContext)
+                } catch (e: Exception) {
+                    err = true
                 }
-                if (binding.switch1.isChecked) MPlayer().playNextOnline(context.applicationContext)
-                else MPlayer().playNext(context.applicationContext)
-            } catch (e: Exception) {
-                err = true
-            } finally {
                 if (err) {
                     isPlay = false
                     binding.btnMusikPlay.setImageResource(R.drawable.play_solid)
@@ -273,14 +290,17 @@ open class Dialog {
                 } else {
                     isPlay = true
                     binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
-                    //binding.tvMusikTitle.text = playTitle
-                    binding.tvMusikTitle.text = "loading..."
+                    binding.tvMusikTitle.text = if (binding.switch1.isChecked) {
+                        playTitleOnline.ifEmpty { "loading" }
+                    } else {
+                        playTitleOffline.ifEmpty { "loading" }
+                    }
                 }
+                MPlayer().sound(context.applicationContext, Sora.SETTING)
+                YoYo.with(Techniques.Bounce).playOn(it)
             }
-            MPlayer().sound(context.applicationContext, Sora.SETTING)
-            YoYo.with(Techniques.Bounce).playOn(it)
-        }
 
+        }
         dialog.show()
     }
 

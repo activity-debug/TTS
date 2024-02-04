@@ -1,5 +1,6 @@
 package com.rendrapcx.tts.constant
 
+import android.media.MediaPlayer
 import androidx.lifecycle.MutableLiveData
 
 class Const {
@@ -44,9 +45,14 @@ class Const {
 
         var isEnableClick = true
 
-        var playTitle = ""
-        var currentTrack = 0
-        var indexPlay = -1
+
+        var player = MediaPlayer()
+        var playTitleOnline = ""
+        var playTitleOffline = ""
+        var currentTrackOffline = 0
+        var currentTrackOnline = 0
+        var indexPlayOnline = 0
+        var indexPlayOffline = 0
         var isPlay = false
         var isMusic = false
         var isOnlinePlay = false

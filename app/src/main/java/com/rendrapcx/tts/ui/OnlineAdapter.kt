@@ -63,20 +63,17 @@ class OnlineAdapter : RecyclerView.Adapter<OnlineAdapter.OnlineViewHolder>() {
                 "Kategori: ${item.category}\n" +
                 "Editor: ${item.editor}"
 
-        //if onlinelevel in offlinelevel textInfo hide
-
         holder.binding.btnDownload.setOnClickListener() {
             if (!downloaded) {
                 onClickDownload?.invoke(item)
             }
         }
 
-        holder.binding.root.setOnLongClickListener(){
-            if (isEditor) {
-                onClickRemove?.invoke(item)
-            }
-            return@setOnLongClickListener true
-        }
+        if (isEditor) holder.binding.btnHapusItemOnline.visibility = View.VISIBLE
+        else holder.binding.btnHapusItemOnline.visibility = View.INVISIBLE
 
+        holder.binding.btnHapusItemOnline.setOnClickListener() {
+                onClickRemove?.invoke(item)
+        }
     }
 }

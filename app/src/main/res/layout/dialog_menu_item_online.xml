@@ -27,12 +27,24 @@
 
     <ImageView
         android:id="@+id/btnDownload"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_marginEnd="16dp"
         android:padding="5sp"
         app:layout_constraintBottom_toBottomOf="@+id/textInfo"
         app:layout_constraintEnd_toEndOf="@+id/textInfo"
         app:layout_constraintTop_toTopOf="@+id/textInfo"
         app:srcCompat="@drawable/cloud_arrow_down_solid" />
+
+    <ImageView
+        android:id="@+id/btnHapusItemOnline"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/shape_koin"
+        android:padding="8sp"
+        app:layout_constraintBottom_toBottomOf="@+id/textInfo"
+        app:layout_constraintEnd_toStartOf="@+id/btnDownload"
+        app:layout_constraintTop_toTopOf="@+id/textInfo"
+        app:srcCompat="@drawable/trash_can_solid" />
 </androidx.constraintlayout.widget.ConstraintLayout>
