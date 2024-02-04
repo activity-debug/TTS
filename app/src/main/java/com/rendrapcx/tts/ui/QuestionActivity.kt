@@ -25,7 +25,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.text.isDigitsOnly
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -33,11 +32,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.rendrapcx.tts.R
-import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.BoardSet
 import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
@@ -51,9 +52,9 @@ import com.rendrapcx.tts.helper.UserRef
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
+import com.rendrapcx.tts.model.Data.Companion.listOnlineList
 import com.rendrapcx.tts.model.Data.Companion.listQuestion
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -430,44 +431,81 @@ class QuestionActivity : AppCompatActivity() {
             }
 
             questionAdapter.setOnClickUpload { lvl ->
-                lifecycleScope.launch {
-                    val job = async {
-                        qrShare.clear()
-                        val level = listLevel.filter { it.id == lvl.id }.toMutableList()
-                        val question =
-                            DB.getInstance(applicationContext).question().getQuestion(lvl.id)
-                        qrShare.add(
-                            Data.QRShare(level, question)
+
+                fun uploadData() {
+                    lifecycleScope.launch {
+                        val job = async {
+                            qrShare.clear()
+                            val level =
+                                listLevel.filter { it.id == lvl.id }.toMutableList()
+                            val question =
+                                DB.getInstance(applicationContext).question()
+                                    .getQuestion(lvl.id)
+                            qrShare.add(
+                                Data.QRShare(level, question)
+                            )
+                            levelShareIndexId =
+                                listLevel.indexOfFirst { it.id == lvl.id }
+                        }
+                        job.await()
+                        var encodeString = ""
+                        val job2 = async {
+                            val json = Json.encodeToString(qrShare)
+                            encodeString =
+                                Base64.getEncoder().encodeToString(json.toByteArray())
+                        }
+                        job2.await()
+
+
+                        val database = Firebase.database(dbApp)
+                        val myRef = database.getReference(dbRefQuestions)
+                        val data = Data.OnlineLevel(
+                            lvl.id,
+                            lvl.category,
+                            lvl.userId,
+                            encodeString
                         )
-                        levelShareIndexId = listLevel.indexOfFirst { it.id == lvl.id }
+                        myRef.child(lvl.id).setValue(data)
+                            .addOnCompleteListener() {
+                                Toast.makeText(
+                                    this@QuestionActivity,
+                                    "Completed",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                            .addOnFailureListener() {
+                                Toast.makeText(
+                                    this@QuestionActivity,
+                                    "Failed",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
                     }
-                    job.await()
-                    var encodeString = ""
-                    val job2 = async {
-                        val json = Json.encodeToString(qrShare)
-                        encodeString = Base64.getEncoder().encodeToString(json.toByteArray())
-                    }
-                    job2.await()
-
-
-                    val database = Firebase.database(dbApp)
-                    val myRef = database.getReference(dbRefQuestions)
-                    val data = Data.OnlineLevel(
-                        lvl.id,
-                        lvl.category,
-                        lvl.userId,
-                        encodeString
-                    )
-                    myRef.child(lvl.id).setValue(data)
-                        .addOnCompleteListener() {
-                            Toast.makeText(this@QuestionActivity, "Completed", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                        .addOnFailureListener() {
-                            Toast.makeText(this@QuestionActivity, "Failed", Toast.LENGTH_SHORT)
-                                .show()
-                        }
                 }
+
+                loadOnlineList()
+
+                val list = listOnlineList.map { it.id }
+                if (list.contains(lvl.id)) {
+                    val builder: AlertDialog.Builder = AlertDialog.Builder(this@QuestionActivity)
+                    builder
+                        .setTitle("Upload Data")
+                        .setMessage("Sudah ada data dengan ID: ${lvl.id}\n\n" +
+                                "silakan batalkan dan ganti ID dulu, atau update untuk merubah data online")
+                        .setPositiveButton("Update?",
+                            DialogInterface.OnClickListener { dialog, whichButton ->
+                                uploadData()
+                                dialog.dismiss()
+                            }).setNegativeButton("Batal",
+                            DialogInterface.OnClickListener { dialog, whichButton ->
+                                dialog.dismiss()
+                            }).show()
+                } else {
+                    uploadData()
+                }
+
             }
 
             questionAdapter.setOnClickView { lvl ->
@@ -483,7 +521,11 @@ class QuestionActivity : AppCompatActivity() {
                             lifecycleScope.launch {
                                 val value: Editable = input.text
                                 if (value.isEmpty()) {
-                                    Toast.makeText(this@QuestionActivity, "Isi Dulu", Toast.LENGTH_SHORT)
+                                    Toast.makeText(
+                                        this@QuestionActivity,
+                                        "Isi Dulu",
+                                        Toast.LENGTH_SHORT
+                                    )
                                         .show()
                                     return@launch
                                 }
@@ -503,28 +545,36 @@ class QuestionActivity : AppCompatActivity() {
 
                                     listQuestion.clear()
                                     listQuestion =
-                                        DB.getInstance(applicationContext).question().getQuestion(lvl.id)
+                                        DB.getInstance(applicationContext).question()
+                                            .getQuestion(lvl.id)
 
-                                    listQuestion.filter { it.levelId == lvl.id }.map { it }.forEach {
-                                        DB.getInstance(applicationContext).question().insertQuestion(
-                                            Data.Question(
-                                                levelId = newId,
-                                                id = "${newId}-${it.direction}-${Helper().formatQuestionId(it.number + 1)}",
-                                                number = it.number,
-                                                direction = it.direction,
-                                                asking = it.asking,
-                                                answer = it.answer,
-                                                slot = it.slot
-                                            )
-                                        )
-                                    }
+                                    listQuestion.filter { it.levelId == lvl.id }.map { it }
+                                        .forEach {
+                                            DB.getInstance(applicationContext).question()
+                                                .insertQuestion(
+                                                    Data.Question(
+                                                        levelId = newId,
+                                                        id = "${newId}-${it.direction}-${
+                                                            Helper().formatQuestionId(
+                                                                it.number + 1
+                                                            )
+                                                        }",
+                                                        number = it.number,
+                                                        direction = it.direction,
+                                                        asking = it.asking,
+                                                        answer = it.answer,
+                                                        slot = it.slot
+                                                    )
+                                                )
+                                        }
                                 }
                                 copy.await()
 
                                 //DELETE OLD DATA ID LEVEL,QUESTION AND ALL
                                 val oldId = lvl.id
                                 val job1 = async {
-                                    DB.getInstance(applicationContext).level().deleteLevelById(oldId)
+                                    DB.getInstance(applicationContext).level()
+                                        .deleteLevelById(oldId)
                                 }
                                 job1.await()
                                 val job2 = async {
@@ -533,17 +583,19 @@ class QuestionActivity : AppCompatActivity() {
                                 }
                                 job2.await()
                                 val job4 = async {
-                                    DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(oldId)
-                                    DB.getInstance(applicationContext).userAnswerTTS().deleteByLevelId(oldId)
+                                    DB.getInstance(applicationContext).userAnswerSlot()
+                                        .deleteSlotById(oldId)
+                                    DB.getInstance(applicationContext).userAnswerTTS()
+                                        .deleteByLevelId(oldId)
                                 }
                                 job4.await()
 
                                 //REGET DATA
                                 val reGet = async {
-                                listLevel.clear()
-                                listLevel =
-                                    DB.getInstance(applicationContext).level().getAllLevel()
-                                questionAdapter.setListItem(listLevel)
+                                    listLevel.clear()
+                                    listLevel =
+                                        DB.getInstance(applicationContext).level().getAllLevel()
+                                    questionAdapter.setListItem(listLevel)
                                 }
                                 reGet.await()
 
@@ -555,6 +607,32 @@ class QuestionActivity : AppCompatActivity() {
                         }).show()
             }
 
+        }
+    }
+
+    private fun loadOnlineList() {
+        lifecycleScope.launch {
+            val database = Firebase.database(dbApp)
+            val myRef = database.getReference(dbRefQuestions)
+            myRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    Data.listOnlineList.clear()
+                    for (item in dataSnapshot.children) {
+                        item.getValue(Data.OnlineLevelList::class.java)
+                            ?.let { data ->
+                                Data.listOnlineList.add(data)
+                            }
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Toast.makeText(
+                        applicationContext,
+                        databaseError.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
         }
     }
 
