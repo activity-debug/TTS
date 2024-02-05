@@ -1,6 +1,7 @@
 package com.rendrapcx.tts.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.databinding.DialogMenuItemOnlineBinding
+import com.rendrapcx.tts.databinding.DialogMenuOnlineBinding
 import com.rendrapcx.tts.model.Data
 import com.rendrapcx.tts.model.Data.Companion.listLevel
 
@@ -16,12 +18,15 @@ class OnlineAdapter : RecyclerView.Adapter<OnlineAdapter.OnlineViewHolder>() {
     private var onClickDownload: ((Data.OnlineLevelList) -> Unit)? = null
     private var onClickRemove: ((Data.OnlineLevelList) -> Unit)? = null
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setOnClickDownload(callback: (Data.OnlineLevelList) -> Unit) {
         this.onClickDownload = callback
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setOnClickRemove(callback: (Data.OnlineLevelList) -> Unit) {
         this.onClickRemove = callback
+        this.notifyDataSetChanged()
     }
 
     fun setListItem(list: MutableList<Data.OnlineLevelList>) {
@@ -55,7 +60,7 @@ class OnlineAdapter : RecyclerView.Adapter<OnlineAdapter.OnlineViewHolder>() {
             holder.binding.btnDownload.setImageResource(R.drawable.square_check_solid)
             true
         } else {
-            holder.binding.btnDownload.setImageResource(R.drawable.cloud_arrow_down_solid)
+            holder.binding.btnDownload.setImageResource(R.drawable.download_solid)
             false
         }
 
@@ -66,6 +71,7 @@ class OnlineAdapter : RecyclerView.Adapter<OnlineAdapter.OnlineViewHolder>() {
         holder.binding.btnDownload.setOnClickListener() {
             if (!downloaded) {
                 onClickDownload?.invoke(item)
+                holder.binding.btnDownload.setImageResource(R.drawable.square_check_solid)
             }
         }
 

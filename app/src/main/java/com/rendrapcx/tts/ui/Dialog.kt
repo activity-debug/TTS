@@ -23,6 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
+import com.google.firebase.components.Component
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
 import com.rendrapcx.tts.constant.Const.Companion.currentTrackOffline
@@ -33,6 +34,7 @@ import com.rendrapcx.tts.constant.Const.Companion.playTitleOffline
 import com.rendrapcx.tts.constant.Const.Companion.playTitleOnline
 import com.rendrapcx.tts.constant.Const.Companion.player
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
+import com.rendrapcx.tts.databinding.ComponentLoadingBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding

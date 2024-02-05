@@ -34,7 +34,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/textInfo"
         app:layout_constraintEnd_toEndOf="@+id/textInfo"
         app:layout_constraintTop_toTopOf="@+id/textInfo"
-        app:srcCompat="@drawable/cloud_arrow_down_solid" />
+        app:srcCompat="@drawable/download_solid" />
 
     <ImageView
         android:id="@+id/btnHapusItemOnline"

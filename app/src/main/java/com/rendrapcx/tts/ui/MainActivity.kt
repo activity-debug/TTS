@@ -71,7 +71,6 @@ import com.rendrapcx.tts.model.Data.Companion.userPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.Base64
 
@@ -164,9 +163,9 @@ class MainActivity : AppCompatActivity() {
 
             initEditorMenu()
 
-            loadOnlineList()
-
             loadKoin()
+
+            loadOnlineList()
 
         }
 
@@ -377,6 +376,14 @@ class MainActivity : AppCompatActivity() {
 
         val adapter = OnlineAdapter()
 
+        if (listOnlineList.isEmpty()) {
+            binding.loading.root.visibility = View.VISIBLE
+            binding.loading.tvLoadingInfo.text = "Loading..."
+            loadOnlineList()
+        } else {
+            binding.loading.root.visibility = View.INVISIBLE
+        }
+
         fun filter(str: String) {
             if (listOnlineList.isEmpty()) return
             val listLevelFilter = listOnlineList
@@ -402,7 +409,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         binding.apply {
             rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
             rcViewOnline.adapter = adapter
@@ -417,18 +423,22 @@ class MainActivity : AppCompatActivity() {
                 ) {
                 }
 
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                }
+
                 override fun afterTextChanged(s: Editable?) {
                     filter(s.toString())
                 }
             })
 
             adapter.setOnClickDownload {
-                Toast.makeText(
-                    this@MainActivity,
-                    "sedang mengunduh level ${it.id}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                binding.loading.root.visibility = View.VISIBLE
+                binding.loading.tvLoadingInfo.text = "Downloading..."
                 lifecycleScope.launch(Dispatchers.IO) {
                     val database = Firebase.database(dbApp)
                     val refQuestion = database.getReference(dbRefQuestions)
@@ -445,37 +455,59 @@ class MainActivity : AppCompatActivity() {
 
                             saveOnlineData()
 
-                            dialog.dismiss()
+                            binding.loading.root.visibility = View.INVISIBLE
                         }
 
                         override fun onCancelled(databaseError: DatabaseError) {
                             Toast.makeText(
                                 applicationContext, databaseError.message, Toast.LENGTH_SHORT
                             ).show()
-
+                            binding.loading.root.visibility = View.INVISIBLE
                             dialog.dismiss()
                         }
                     })
                 }
             }
 
-            adapter.setOnClickRemove {eta ->
-                val database = Firebase.database(dbApp)
-                val myRef = database.getReference(dbRefQuestions)
-                myRef.child(eta.id.toString()).removeValue() //.setValue(null)
-                    .addOnCompleteListener() {
-                        Toast.makeText(this@MainActivity, "Removed Completed", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                    .addOnFailureListener() {
-                        Toast.makeText(this@MainActivity, "Failed to Remove", Toast.LENGTH_SHORT)
-                            .show()
-                    }
+            adapter.setOnClickRemove { eta ->
+                binding.loading.root.visibility = View.VISIBLE
+                binding.loading.tvLoadingInfo.text = "Erasing..."
 
-                loadOnlineList()
-                rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
-                rcViewOnline.adapter = adapter
-                adapter.setListItem(listOnlineList)
+                lifecycleScope.launch {
+                    val job = async {
+                        val database = Firebase.database(dbApp)
+                        val myRef = database.getReference(dbRefQuestions)
+                        myRef.child(eta.id.toString()).removeValue() //.setValue(null)
+                            .addOnCompleteListener() {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Removed Completed",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                                binding.loading.root.visibility = View.INVISIBLE
+                            }
+                            .addOnFailureListener() {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Failed to Remove",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                                binding.loading.root.visibility = View.INVISIBLE
+                            }
+                    }
+                    job.await()
+
+                    val job1 = async {
+                        loadOnlineList()
+                    }
+                    job1.await()
+
+                    rcViewOnline.layoutManager = LinearLayoutManager(this@MainActivity)
+                    rcViewOnline.adapter = adapter
+                    adapter.setListItem(listOnlineList)
+                }
             }
         }
 

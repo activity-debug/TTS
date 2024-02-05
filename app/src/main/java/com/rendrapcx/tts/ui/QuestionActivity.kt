@@ -30,6 +30,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
@@ -46,6 +48,8 @@ import com.rendrapcx.tts.constant.Const.Companion.dbApp
 import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
+import com.rendrapcx.tts.databinding.ComponentLoadingBinding
+import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.UserRef
@@ -82,6 +86,8 @@ class QuestionActivity : AppCompatActivity() {
 
         Helper().apply { hideSystemUI() }
 
+        binding.loading.root.visibility = View.INVISIBLE
+
         myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
 
         binding.headerPanel.tvLabelTop.text = "Editor"
@@ -97,7 +103,6 @@ class QuestionActivity : AppCompatActivity() {
             activeFilterTab(UserRef().getActiveTabFilter())
             questionAdapterActions()
         }
-
 
         binding.apply {
             rcViewQuestioner.layoutManager = LinearLayoutManager(this@QuestionActivity)
@@ -332,6 +337,8 @@ class QuestionActivity : AppCompatActivity() {
             }
 
             questionAdapter.setOnClickDelete {
+                binding.loading.root.visibility = View.VISIBLE
+                binding.loading.tvLoadingInfo.text = "Erasing..."
                 lifecycleScope.launch {
 
                     val levelId = it.id
@@ -369,6 +376,7 @@ class QuestionActivity : AppCompatActivity() {
                             ).show()
                         })
                         .show()
+                    binding.loading.root.visibility = View.INVISIBLE
                 }
             }
 
@@ -404,6 +412,8 @@ class QuestionActivity : AppCompatActivity() {
             }
 
             questionAdapter.setOnClickShare { lvl ->
+                binding.loading.root.visibility = View.VISIBLE
+                binding.loading.tvLoadingInfo.text = "Converting..."
                 lifecycleScope.launch {
                     val job = async {
                         qrShare.clear()
@@ -427,11 +437,11 @@ class QuestionActivity : AppCompatActivity() {
                     //val myClip = ClipData.newPlainText("encodeString", encodeString);
                     //myClipboard?.setPrimaryClip(myClip);
                     shareQRDialog(this@QuestionActivity, encodeString)
+                    binding.loading.root.visibility = View.INVISIBLE
                 }
             }
 
             questionAdapter.setOnClickUpload { lvl ->
-
                 fun uploadData() {
                     lifecycleScope.launch {
                         val job = async {
@@ -473,6 +483,7 @@ class QuestionActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 )
                                     .show()
+                                binding.loading.root.visibility = View.INVISIBLE
                             }
                             .addOnFailureListener() {
                                 Toast.makeText(
@@ -497,13 +508,17 @@ class QuestionActivity : AppCompatActivity() {
                         .setPositiveButton("Update?",
                             DialogInterface.OnClickListener { dialog, whichButton ->
                                 uploadData()
+                                binding.loading.root.visibility = View.INVISIBLE
                                 dialog.dismiss()
                             }).setNegativeButton("Batal",
                             DialogInterface.OnClickListener { dialog, whichButton ->
                                 dialog.dismiss()
                             }).show()
                 } else {
+                    binding.loading.root.visibility = View.VISIBLE
+                    binding.loading.tvLoadingInfo.text = "Loading..."
                     uploadData()
+                    binding.loading.root.visibility = View.INVISIBLE
                 }
 
             }
