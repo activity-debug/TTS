@@ -24,11 +24,13 @@ import java.util.TimerTask
 enum class Sora {
     START_APP,
     INIT_GAME_1, INIT_GAME_2, WINNING,
-    SETTING,
+    SETTING, DING,
     BOXES, ARROW, SHUFFLE, TYPING,
     SUCCESS, BONUS,
     HINT, HINT_RANDOM, NINJA,
-    ROBOT, ROBOT_RANDOM
+    ROBOT, ROBOT_RANDOM,
+    HAMMER, TOOLBOX,
+    COIN_1, COIN_2, COIN_3
 }
 
 class MPlayer {
@@ -134,9 +136,7 @@ class MPlayer {
             indexPlayOffline = 0
         }
         currentTrackOffline = list[indexPlayOffline]
-        //Log.i("JACK", "$currentTrackOffline")
         playTitleOffline = MPlayer().listLaguOffline.getValue(currentTrackOffline)
-        //Log.i("JACK", playTitleOffline)
         player = MediaPlayer.create(context.applicationContext, currentTrackOffline)
     }
 
@@ -150,10 +150,8 @@ class MPlayer {
             indexPlayOnline = 0
         }
         currentTrackOnline = list[indexPlayOnline]
-        //Log.i("JACK", "$currentTrackOnline")
         val s = MPlayer().listLaguOnline.getValue(currentTrackOnline)
         playTitleOnline = s.substring(39, s.length)
-        //Log.i("JACK", playTitleOnline)
         player.setDataSource(listLaguOnline.getValue(currentTrackOnline))
     }
 
@@ -178,65 +176,68 @@ class MPlayer {
             Sora.START_APP -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.crystal_logo)
             }
-
             Sora.INIT_GAME_1 -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.launch_sequence)
             }
-
             Sora.INIT_GAME_2 -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.vozrobotr)
             }
-
             Sora.WINNING -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.winner_bell)
             }
-
             Sora.SETTING -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.door_opening)
             }
-
             Sora.ARROW -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.door_opening)
             }
-
             Sora.SHUFFLE -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.bit_video_game_points)
             }
-
             Sora.TYPING -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.mech_keyboard)
             }
-
             Sora.HINT -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.doorbell)
             }
-
             Sora.HINT_RANDOM -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.cyber_punk)
             }
-
             Sora.NINJA -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.error_call)
             }
-
             Sora.BOXES -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.door_opening)
             }
-
             Sora.ROBOT -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.robot_voice_let)
             }
-
             Sora.ROBOT_RANDOM -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.computer_beeping)
             }
-
             Sora.SUCCESS -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.success)
             }
-
             Sora.BONUS -> {
                 mp = MediaPlayer.create(context.applicationContext, R.raw.game_bonus)
+            }
+            Sora.TOOLBOX -> {
+                mp = MediaPlayer.create(context.applicationContext, R.raw.toolbox_select)
+            }
+            Sora.HAMMER -> {
+                mp = MediaPlayer.create(context.applicationContext, R.raw.hammer_hit)
+            }
+            Sora.COIN_1 -> {
+                mp = MediaPlayer.create(context.applicationContext, R.raw.coin_drop_1)
+            }
+            Sora.COIN_2 -> {
+                mp = MediaPlayer.create(context.applicationContext, R.raw.coin_drop_2)
+            }
+            Sora.COIN_3 -> {
+                mp = MediaPlayer.create(context.applicationContext, R.raw.coin_drop_3)
+            }
+            Sora.DING -> {
+                mp = MediaPlayer.create(context.applicationContext, R.raw.new_ding)
             }
         }
         mp.start()

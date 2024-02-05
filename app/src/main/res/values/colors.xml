@@ -5,6 +5,7 @@
     <color name="selected">#9575CD</color>
     <color name="selected_range">#D1C4E9</color>
     <color name="button">#6750A3</color>
+    <color name="payed">#EC407A</color>
     <color name="button_text">#FAF8FB</color>
     <color name="button2_color">#5D5EA9</color>
     <color name="button2_text">#EFE1EE</color>

@@ -8,13 +8,13 @@
         android:left="10dp"
         android:right="10dp"/>
 
-    <solid android:color="#66BB6A"/>
+    <solid android:color="@color/button"/>
 
     <size android:height="48dp"
         android:width="48dp"/>
 
     <stroke
-        android:color="#43A047"
+        android:color="@color/white"
         android:dashWidth="10px"
         android:dashGap="0dp"
         android:width="2dp"/>

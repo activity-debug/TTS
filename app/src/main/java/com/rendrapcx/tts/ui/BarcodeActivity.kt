@@ -204,7 +204,7 @@ class BarcodeActivity : AppCompatActivity() {
 
             imgCoder.setOnClickListener() {
                 if (isEditor) {
-                    koinUser += 100
+                    koinUser += 10000
                     UserRef().setKoin(koinUser, applicationContext, lifecycle)
                     MPlayer().sound(applicationContext, Sora.SUCCESS)
                 }

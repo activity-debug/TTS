@@ -21,6 +21,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -41,6 +42,7 @@ import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentCategory
 import com.rendrapcx.tts.constant.Const.Companion.currentIndex
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
+import com.rendrapcx.tts.constant.Const.Companion.hargaPalu
 import com.rendrapcx.tts.constant.Const.Companion.inputMode
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.Const.Companion.koinPay
@@ -97,6 +99,8 @@ class BoardActivity : AppCompatActivity() {
     private var curCharStr = ""
     private var finishedId = arrayListOf<String>() //ganti nanti
     private var salah = arrayListOf<Int>()
+    private var hammerAct = false
+    private val arrPayed = arrayListOf<Int>()
 
     private var isNext = false
     private var indexOfCategory = ""
@@ -122,6 +126,7 @@ class BoardActivity : AppCompatActivity() {
         binding.includeEditor.mainContainer.visibility = View.GONE
         binding.includeQuestionSpan.tvSpanQuestion.text = ""
         binding.includeHeader.include.tvKoin.text = koinUser.toString()
+        binding.imgHammer.visibility = View.INVISIBLE
 
         initBoardChild()
         initIntKeyChild()
@@ -147,8 +152,10 @@ class BoardActivity : AppCompatActivity() {
 
         binding.includeKeyboard.apply {
             btnBackSpace.setOnClickListener {
-                box[position].text = ""
-                upsertUserSlot(position, box[position].text.toString())
+                if (!arrPayed.contains(position)) {
+                    box[position].text = ""
+                    upsertUserSlot(position, box[position].text.toString())
+                }
                 onPressBackSpace()
                 MPlayer().sound(applicationContext, Sora.TYPING)
                 YoYo.with(Techniques.Landing)
@@ -178,10 +185,12 @@ class BoardActivity : AppCompatActivity() {
                 intKey[i].setOnTouchListener(View.OnTouchListener { _, motionEvent ->
                     when (motionEvent.action) {
                         MotionEvent.ACTION_DOWN -> {
-                            if (isEnableClick == false) return@OnTouchListener true
                             MPlayer().sound(applicationContext, Sora.TYPING)
-                            upsertUserSlot(position, intKey[i].text.toString())
-                            box[position].text = intKey[i].text
+                            if (isEnableClick == false) return@OnTouchListener true
+                            if (!arrPayed.contains(position)) {
+                                upsertUserSlot(position, intKey[i].text.toString())
+                                box[position].text = intKey[i].text
+                            }
                             onPressAbjabMove()
                             checkWinCondition(false)
                             YoYo.with(Techniques.Wave)
@@ -223,23 +232,29 @@ class BoardActivity : AppCompatActivity() {
 
         /*  BOX CLICK ACTION*/
         binding.includeBoard.boardTen.setOnClickListener {
-            if (!isEnableClick) return@setOnClickListener
             for (i in 0 until box.size) {
                 box[i].setOnClickListener {
-                    MPlayer().sound(applicationContext, Sora.BOXES)
-                    pickByArrow = false
-                    position = i
-                    setInputAnswerDirection()
-                    onClickBox()
+                    if (isEnableClick) {
+                        if (!hammerAct) MPlayer().sound(applicationContext, Sora.BOXES)
+                        pickByArrow = false
+                        position = i
+                        setInputAnswerDirection()
+                        onClickBox()
 
-                    when (boardSet) {
-                        BoardSet.PLAY_KATEGORI, BoardSet.PLAY_RANDOM -> {
-                            if (userPreferences[0].integratedKeyboard) {
-                                Keypad().showSoftKeyboard(window, it)
+                        when (boardSet) {
+                            BoardSet.PLAY_KATEGORI, BoardSet.PLAY_RANDOM -> {
+                                if (userPreferences[0].integratedKeyboard) {
+                                    Keypad().showSoftKeyboard(window, it)
+                                }
                             }
+
+                            else -> {}
                         }
 
-                        else -> {}
+                        if (hammerAct) {
+                            isEnableClick = false
+                            hammerAction(position)
+                        }
                     }
                 }
             }
@@ -340,6 +355,47 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
 
+            btnHammer.setOnClickListener() {
+                if (koinUser < hargaPalu) {
+                    YoYo.with(Techniques.Shake).playOn(btnHammer)
+                    YoYo.with(Techniques.Shake).playOn(btnHammerLabel)
+                    return@setOnClickListener
+                }
+
+                skipActions(0)
+                coinDrop(2)
+                koinUser = koinUser - hargaPalu
+                UserRef().setKoin(koinUser, applicationContext, lifecycle)
+
+                btnHammer.setBackgroundResource(R.drawable.shape_game_helper_not_active)
+                btnHammer.setImageResource(R.drawable.hammer_solid_not_active)
+                btnHammerLabel.setTextColor(getColor(this@BoardActivity, R.color.button2_text))
+
+                MPlayer().sound(applicationContext, Sora.TOOLBOX)
+                YoYo.with(Techniques.Wave).playOn(btnHammerLabel)
+                YoYo.with(Techniques.Wave)
+                    .onEnd {
+                        YoYo.with(Techniques.Wobble).playOn(btnHammerLabel)
+                        YoYo.with(Techniques.RotateIn)
+                            .onEnd {
+                                for (i in tag) {
+                                    box[i].setTextColor(
+                                        getColor(
+                                            this@BoardActivity,
+                                            R.color.button
+                                        )
+                                    )
+                                    box[i].setBackgroundResource(R.drawable.box_shape_not_pass)
+                                    YoYo.with(Techniques.Pulse).repeat(5).duration(700)
+                                        .playOn(box[i])
+                                }
+                                hammerAct = true
+                            }
+                            .playOn(btnHammer)
+                    }
+                    .playOn(btnHammer)
+            }
+
             /*CURSOR FIRST OR LAST*/
             btnCursor.setOnClickListener {
                 cursorFirstOrLast()
@@ -350,33 +406,26 @@ class BoardActivity : AppCompatActivity() {
             btnRobot.setOnClickListener {
                 if (koinUser < koinPay) {
                     YoYo.with(Techniques.Shake).playOn(btnRobot)
+                    YoYo.with(Techniques.Shake).playOn(btnRobotLabel)
                     return@setOnClickListener
                 }
 
                 skipActions(0)
-
+                coinDrop(2)
                 koinUser = koinUser - koinPay
-                YoYo.with(Techniques.SlideOutDown).repeat(1)
-                    .onEnd {
-                        YoYo.with(Techniques.SlideInDown).playOn(binding.includeHeader.include.imageView)
-                        YoYo.with(Techniques.Bounce).repeat(1).playOn(binding.includeHeader.include.imageView)
-                        YoYo.with(Techniques.Pulse).repeat(1)
-                            .onEnd { binding.includeHeader.include.tvKoin.text = koinUser.toString() }
-                            .playOn(binding.includeHeader.include.tvKoin)
-                    }
-                    .playOn(binding.includeHeader.include.imageView)
-
                 UserRef().setKoin(koinUser, applicationContext, lifecycle)
 
                 btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnRobot.setImageResource(R.drawable.robot_solid_not_active)
+                btnRobotLabel.setTextColor(getColor(this@BoardActivity, R.color.button2_text))
 
                 MPlayer().sound(applicationContext, Sora.ROBOT)
+                YoYo.with(Techniques.Wave).playOn(btnRobotLabel)
                 YoYo.with(Techniques.Wave)
                     .onEnd {
                         randomFillAText()
-                        YoYo.with(Techniques.RotateIn)
-                            .playOn(btnRobot)
+                        YoYo.with(Techniques.RotateIn).playOn(btnRobot)
+                        YoYo.with(Techniques.Wobble).playOn(btnRobotLabel)
                         skipActions(1)
                     }
                     .playOn(btnRobot)
@@ -386,31 +435,30 @@ class BoardActivity : AppCompatActivity() {
             btnGetHint.setOnClickListener {
                 if (koinUser < (koinPay * currentRange.size)) {
                     YoYo.with(Techniques.Shake).playOn(btnGetHint)
+                    YoYo.with(Techniques.Shake).playOn(btnHintLabel)
                     return@setOnClickListener
                 }
 
                 skipActions(0)
-
-                koinUser = koinUser - (koinPay * currentRange.size)
-                YoYo.with(Techniques.SlideOutDown).repeat(1)
-                    .onEnd {
-                        YoYo.with(Techniques.SlideInDown).playOn(binding.includeHeader.include.imageView)
-                        YoYo.with(Techniques.Bounce).repeat(1).playOn(binding.includeHeader.include.imageView)
-                        YoYo.with(Techniques.Pulse).repeat(1)
-                            .onEnd { binding.includeHeader.include.tvKoin.text = koinUser.toString() }
-                            .playOn(binding.includeHeader.include.tvKoin)
-                    }
-                    .playOn(binding.includeHeader.include.imageView)
+                coinDrop(3)
+                var size = currentRange.size
+                for (i in currentRange) {
+                    if (arrPayed.contains(i)) size = size -1
+                }
+                koinUser = koinUser - (koinPay * size)
                 UserRef().setKoin(koinUser, applicationContext, lifecycle)
 
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
+                btnHintLabel.setTextColor(getColor(this@BoardActivity, R.color.button2_text))
 
                 MPlayer().sound(applicationContext, Sora.HINT)
+                YoYo.with(Techniques.Wave).playOn(btnHintLabel)
                 YoYo.with(Techniques.Wave)
                     .onEnd {
                         randomFillAQuestion()
                         YoYo.with(Techniques.RotateIn).playOn(btnGetHint)
+                        YoYo.with(Techniques.Wobble).playOn(btnHintLabel)
                         skipActions(1)
                     }
                     .playOn(btnGetHint)
@@ -487,31 +535,116 @@ class BoardActivity : AppCompatActivity() {
 
     } //onCreate
 
-    private fun robotAndTunjuk(){
+    private fun coinDrop(int: Int) {
+        when (int) {
+            1 -> MPlayer().sound(applicationContext, Sora.COIN_1)
+            2 -> MPlayer().sound(applicationContext, Sora.COIN_2)
+            3 -> MPlayer().sound(applicationContext, Sora.COIN_3)
+        }
+        YoYo.with(Techniques.SlideOutDown).repeat(1)
+            .onEnd {
+                YoYo.with(Techniques.SlideInDown)
+                    .playOn(binding.includeHeader.include.imageView)
+                YoYo.with(Techniques.Bounce).repeat(1)
+                    .playOn(binding.includeHeader.include.imageView)
+                YoYo.with(Techniques.Pulse).repeat(1)
+                    .onEnd {
+                        binding.includeHeader.include.tvKoin.text = koinUser.toString()
+                    }
+                    .playOn(binding.includeHeader.include.tvKoin)
+            }
+            .playOn(binding.includeHeader.include.imageView)
+    }
+
+    private fun hammerAction(position: Int) {
+        isEnableClick = false
+        val i = position
+
+        binding.imgHammer.visibility = View.VISIBLE
+        val hammer = binding.imgHammer
+        val params = hammer.layoutParams as ConstraintLayout.LayoutParams
+        params.leftMargin =
+            box[i].left - (box[i].width / 2) // absolute x position
+        params.topMargin = box[i].top - 20   // absolute y position
+        hammer.requestLayout()
+        MPlayer().sound(applicationContext, Sora.HAMMER)
+        YoYo.with(Techniques.RubberBand).repeat(5).playOn(box[i])
+        YoYo.with(Techniques.Wave).duration(500).repeat(8)
+            .onEnd {
+                MPlayer().sound(applicationContext, Sora.DING)
+                box[i].text = box[i].tag.toString()
+                upsertUserSlot(i, box[i].tag.toString(), i)
+                arrPayed.add(i)
+                binding.imgHammer.visibility = View.INVISIBLE
+                YoYo.with(Techniques.RubberBand).repeat(2).playOn(box[i])
+                YoYo.with(Techniques.Bounce).repeat(2).playOn(box[i])
+                binding.includeGameHelperBottom.btnHammer.setBackgroundResource(R.drawable.shape_game_helper_active)
+                binding.includeGameHelperBottom.btnHammer.setImageResource(R.drawable.hammer_solid)
+                binding.includeGameHelperBottom.btnHammerLabel.setTextColor(
+                    getColor(
+                        this,
+                        R.color.button
+                    )
+                )
+                skipActions(1)
+                hammerAct = false
+                isEnableClick = true
+                checkWinCondition(color = false)
+            }
+            .playOn(hammer)
+    }
+
+    private fun gameHelperStyle() {
         /*HELPER STYLE BY KOIN CHANGE*/
-        if (koinUser < (koinPay * currentRange.size)) {
+        var size = currentRange.size
+        for (i in currentRange) {
+            if (arrPayed.contains(i)) size = size -1
+        }
+
+        if (koinUser < (koinPay * size)) {
             binding.includeGameHelperBottom.apply {
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid_not_active)
+                btnHintLabel.setTextColor(getColor(this@BoardActivity, R.color.button2_text))
+                btnHintLabel.text = "${koinPay * size}"
             }
         } else {
             binding.includeGameHelperBottom.apply {
                 btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_active)
                 btnGetHint.setImageResource(R.drawable.hand_point_up_solid)
+                btnHintLabel.setTextColor(getColor(this@BoardActivity, R.color.button))
+                btnHintLabel.text = "${koinPay * size}"
             }
         }
         if (koinUser < koinPay) {
             binding.includeGameHelperBottom.apply {
                 btnRobot.setBackgroundResource(R.drawable.shape_game_helper_not_active)
                 btnRobot.setImageResource(R.drawable.robot_solid_not_active)
+                btnRobotLabel.setTextColor(getColor(this@BoardActivity, R.color.button2_text))
             }
         } else {
             binding.includeGameHelperBottom.apply {
                 btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
                 btnRobot.setImageResource(R.drawable.robot_solid)
+                btnRobotLabel.setTextColor(getColor(this@BoardActivity, R.color.button))
+            }
+        }
+        if (koinUser < hargaPalu) {
+            binding.includeGameHelperBottom.apply {
+                btnHammer.setBackgroundResource(R.drawable.shape_game_helper_not_active)
+                btnHammer.setImageResource(R.drawable.hammer_solid_not_active)
+                btnHammerLabel.setTextColor(getColor(this@BoardActivity, R.color.button2_text))
+
+            }
+        } else {
+            binding.includeGameHelperBottom.apply {
+                btnHammer.setBackgroundResource(R.drawable.shape_game_helper_active)
+                btnHammer.setImageResource(R.drawable.hammer_solid)
+                btnHammerLabel.setTextColor(getColor(this@BoardActivity, R.color.button))
             }
         }
     }
+
     private fun editorEdit() {
         lifecycleScope.launch {
             val job1 = async { listPartial = getPartialData() }
@@ -591,13 +724,16 @@ class BoardActivity : AppCompatActivity() {
                 for (i in it.keys) {
                     YoYo.with(Techniques.FlipInY).duration(2000).playOn(box[i])
                     box[i].text = it.getValue(i)
-                    delay(100)
+                    delay(50)
                 }
+            }
+            userAnswerSlot.map { it.payed }.forEach() {
+                if (it != -1) arrPayed.add(it)
             }
         }
     }
 
-    private fun upsertUserSlot(charAt: Int, charStr: String) {
+    private fun upsertUserSlot(charAt: Int, charStr: String, payed: Int = -1) {
         lifecycleScope.launch {
             val answerSlot = mutableMapOf<Int, String>()
             answerSlot.put(charAt, charStr)
@@ -606,6 +742,7 @@ class BoardActivity : AppCompatActivity() {
                     id = currentLevel + "-" + charAt.toString(),
                     levelId = currentLevel,
                     answerSlot = answerSlot,
+                    payed = payed
                 )
             )
         }
@@ -643,7 +780,8 @@ class BoardActivity : AppCompatActivity() {
                                 position = x
                                 setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
-                                upsertUserSlot(x, box[x].tag.toString())
+                                upsertUserSlot(x, box[x].tag.toString(), x)
+                                arrPayed.add(x)
                                 YoYo.with(Techniques.RollIn)
                                     .onEnd {
                                         YoYo.with(Techniques.Bounce).playOn(box[x])
@@ -658,7 +796,8 @@ class BoardActivity : AppCompatActivity() {
                                 position = x
                                 setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
-                                upsertUserSlot(x, box[x].tag.toString())
+                                upsertUserSlot(x, box[x].tag.toString(), x)
+                                arrPayed.add(x)
                                 YoYo.with(Techniques.SlideInUp)
                                     .onEnd {
                                         YoYo.with(Techniques.Bounce).playOn(box[x])
@@ -733,7 +872,8 @@ class BoardActivity : AppCompatActivity() {
                     MPlayer().sound(applicationContext, Sora.SUCCESS)
                     position = x
                     box[x].text = box[x].tag.toString()
-                    upsertUserSlot(x, box[x].tag.toString())
+                    upsertUserSlot(x, box[x].tag.toString(), x)
+                    arrPayed.add(x)
                     pickByArrow = false
                     setInputAnswerDirection()
                     onClickBox()
@@ -955,8 +1095,10 @@ class BoardActivity : AppCompatActivity() {
         when (keyCode) {
             in 29..54 -> {
                 val s = event?.displayLabel
-                box[x].text = s.toString()
-                upsertUserSlot(x, s.toString())
+                if (!arrPayed.contains(x)) {
+                    box[x].text = s.toString()
+                    upsertUserSlot(x, s.toString())
+                }
                 onPressAbjabMove()
                 checkWinCondition(false)
                 YoYo.with(Techniques.Landing)
@@ -966,7 +1108,7 @@ class BoardActivity : AppCompatActivity() {
 
             67 -> {
                 if (box[x].isFocused) {
-                    box[x].text = ""
+                    if (!arrPayed.contains(x)) box[x].text = ""
                     onPressBackSpace()
                 }
             }
@@ -1062,7 +1204,8 @@ class BoardActivity : AppCompatActivity() {
             YoYo.with(Techniques.SlideOutDown).repeat(1)
                 .onEnd {
                     YoYo.with(Techniques.SlideInUp).playOn(binding.includeHeader.include.imageView)
-                    YoYo.with(Techniques.Bounce).repeat(1).playOn(binding.includeHeader.include.imageView)
+                    YoYo.with(Techniques.Bounce).repeat(1)
+                        .playOn(binding.includeHeader.include.imageView)
                     YoYo.with(Techniques.Wobble).duration(1000)
                         .onEnd { binding.includeHeader.include.tvKoin.text = koinUser.toString() }
                         .playOn(binding.includeHeader.include.tvKoin)
@@ -1163,7 +1306,7 @@ class BoardActivity : AppCompatActivity() {
         lifecycleScope.launch {
             skipActions(0)
             boardSet = BoardSet.PLAY_RANDOM
-
+            arrPayed.clear()
             for (i in 0 until box.size) {
                 box[i].text = ""
                 box[i].tag = ""
@@ -1171,6 +1314,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             listLevel.clear()
+
 
             val jobLevel = async {
                 val dataDone = DB.getInstance(applicationContext).userAnswerTTS()
@@ -1223,6 +1367,7 @@ class BoardActivity : AppCompatActivity() {
 
             binding.apply {
                 includeEditor.mainContainer.visibility = View.GONE
+
                 val index = listLevel.indexOfFirst { it.id == currentLevel }
                 val category = listLevel[index].category
                 val msg = "Level ke:  ${Helper().formatLevelId(index + 1)} \n" +
@@ -1231,12 +1376,7 @@ class BoardActivity : AppCompatActivity() {
             }
 
             isEnableClick = true
-            binding.includeGameHelperBottom.apply {
-                btnGetHint.setImageResource(R.drawable.hand_point_up_solid)
-                btnRobot.setImageResource(R.drawable.robot_solid)
-                btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_active)
-                btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
-            }
+
             setBoxTagText()
             position = listPartial.first { it.levelId == currentLevel }.charAt
             pickByArrow = false
@@ -1282,6 +1422,7 @@ class BoardActivity : AppCompatActivity() {
             listLevel.clear()
             listQuestion.clear()
             listPartial.clear()
+            arrPayed.clear()
 
             val jobGetDB = async {
                 listLevel.clear()
@@ -1310,13 +1451,6 @@ class BoardActivity : AppCompatActivity() {
                     "Level ke: ${indexOfCategory} \n" +
                             "Kategori: ${category}"
                 includeHeader.tvLabelTop.text = msg
-
-                includeGameHelperBottom.apply {
-                    btnGetHint.setImageResource(R.drawable.hand_point_up_solid)
-                    btnRobot.setImageResource(R.drawable.robot_solid)
-                    btnGetHint.setBackgroundResource(R.drawable.shape_game_helper_active)
-                    btnRobot.setBackgroundResource(R.drawable.shape_game_helper_active)
-                }
 
                 MPlayer().sound(applicationContext, Sora.INIT_GAME_1)
                 /*/DI PLAYNEXT*/
@@ -1609,8 +1743,11 @@ class BoardActivity : AppCompatActivity() {
                     for (i in 0 until intKey.size) {
                         binding.includeGameHelperBottom.apply {
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnGetHint)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnHintLabel)
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnRobot)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnRobotLabel)
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnHammer)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnHammerLabel)
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnCursor)
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnNinja)
                         }
@@ -1672,7 +1809,7 @@ class BoardActivity : AppCompatActivity() {
 
         selectedQuestion = getQuestion()
         pickByArrow = false
-        robotAndTunjuk()
+        gameHelperStyle()
     }
 
     private fun setOnSelectedColor() {
@@ -1700,10 +1837,11 @@ class BoardActivity : AppCompatActivity() {
 
     private fun resetBoxStyle() {
         for (i in 0 until box.size) {
-            box[i].setTextColor(getColor(this, R.color.button))
+            if (arrPayed.contains(i)) box[i].setTextColor(getColor(this, R.color.payed))
+            else box[i].setTextColor(getColor(this, R.color.button))
             box[i].setBackgroundResource(R.drawable.box_shape_active)
         }
-        robotAndTunjuk()
+        gameHelperStyle()
 
     }
 

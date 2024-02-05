@@ -58,6 +58,7 @@ class Data {
         @ColumnInfo(name = "id") var id: String,
         @ColumnInfo(name = "level_id") var levelId: String,
         @ColumnInfo(name = "answer_slot") var answerSlot: MutableMap<Int, String>,
+        @ColumnInfo(name = "payed") var payed: Int
     )
 
     @Entity(tableName = "user_preferences")
@@ -69,7 +70,7 @@ class Data {
         @ColumnInfo(name = "is_music") var isMusic: Boolean,
         @ColumnInfo(name = "is_sound") var isSound: Boolean,
         @ColumnInfo(name = "is_editor") var isEditor: Boolean,
-        @ColumnInfo(name = "koin") var koin: Int
+        @ColumnInfo(name = "koin") var koin: Int,
     )
 
     @Serializable

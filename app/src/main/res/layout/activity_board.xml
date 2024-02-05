@@ -88,6 +88,15 @@
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
 
+                            <ImageView
+                                android:id="@+id/imgHammer"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
+                                app:layout_constraintStart_toStartOf="@+id/include_board"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:srcCompat="@drawable/hammer_act" />
+
+
                         </androidx.constraintlayout.widget.ConstraintLayout>
                     </androidx.core.widget.NestedScrollView>
                 </HorizontalScrollView>

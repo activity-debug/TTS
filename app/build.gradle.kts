@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.rendrapcx.tts"
-        minSdk = 28
+        minSdk = 21
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

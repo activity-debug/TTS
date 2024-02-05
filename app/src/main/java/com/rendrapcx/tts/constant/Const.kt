@@ -59,5 +59,6 @@ class Const {
 
         var koinUser = 0
         var koinPay = 50
+        var hargaPalu = 70
     }
 }
