@@ -184,9 +184,11 @@ class BoardActivity : AppCompatActivity() {
                             box[position].text = intKey[i].text
                             onPressAbjabMove()
                             checkWinCondition(false)
-                            YoYo.with(Techniques.Landing)
+                            YoYo.with(Techniques.Wave)
                                 .duration(2000)
-                                .onEnd { isEnableClick == true }
+                                .onEnd {
+                                    isEnableClick == true
+                                }
                                 .playOn(box[position])
                         }
 
@@ -221,6 +223,7 @@ class BoardActivity : AppCompatActivity() {
 
         /*  BOX CLICK ACTION*/
         binding.includeBoard.boardTen.setOnClickListener {
+            if (!isEnableClick) return@setOnClickListener
             for (i in 0 until box.size) {
                 box[i].setOnClickListener {
                     MPlayer().sound(applicationContext, Sora.BOXES)
@@ -326,7 +329,9 @@ class BoardActivity : AppCompatActivity() {
                         YoYo.with(Techniques.Shake).duration(1000)
                             .onEnd {
                                 YoYo.with(Techniques.RotateIn)
-                                    .onEnd { skipActions(1) }
+                                    .onEnd {
+                                        skipActions(1)
+                                    }
                                     .playOn(btnNinja)
                             }
                             .playOn(btnNinja)
@@ -343,11 +348,12 @@ class BoardActivity : AppCompatActivity() {
             }
             /*ISI SOAL*/
             btnRobot.setOnClickListener {
-
                 if (koinUser < koinPay) {
                     YoYo.with(Techniques.Shake).playOn(btnRobot)
                     return@setOnClickListener
                 }
+
+                skipActions(0)
 
                 koinUser = koinUser - koinPay
                 YoYo.with(Techniques.SlideOutDown).repeat(1)
@@ -371,16 +377,19 @@ class BoardActivity : AppCompatActivity() {
                         randomFillAText()
                         YoYo.with(Techniques.RotateIn)
                             .playOn(btnRobot)
+                        skipActions(1)
                     }
                     .playOn(btnRobot)
             }
+
             /*Kasih tau jawaban 1 row atau kolom*/
             btnGetHint.setOnClickListener {
-
                 if (koinUser < (koinPay * currentRange.size)) {
                     YoYo.with(Techniques.Shake).playOn(btnGetHint)
                     return@setOnClickListener
                 }
+
+                skipActions(0)
 
                 koinUser = koinUser - (koinPay * currentRange.size)
                 YoYo.with(Techniques.SlideOutDown).repeat(1)
@@ -402,6 +411,7 @@ class BoardActivity : AppCompatActivity() {
                     .onEnd {
                         randomFillAQuestion()
                         YoYo.with(Techniques.RotateIn).playOn(btnGetHint)
+                        skipActions(1)
                     }
                     .playOn(btnGetHint)
             }
@@ -622,7 +632,6 @@ class BoardActivity : AppCompatActivity() {
     private fun randomFillAQuestion() {
         lifecycle.coroutineScope.launch {
             skipActions(0)
-
             //kasih jawaban
             val job = async {
                 for (i in currentRange.indices) {
@@ -733,7 +742,6 @@ class BoardActivity : AppCompatActivity() {
                 .playOn(binding.includeGameHelperBottom.btnRobot)
 
             skipActions(1)
-
         }
     }
 
@@ -785,6 +793,7 @@ class BoardActivity : AppCompatActivity() {
                 binding.includeGameHelperBottom.btnNinja.isEnabled = false
                 binding.includeGameHelperBottom.btnCursor.isEnabled = false
                 binding.includeGameHelperBottom.btnRobot.isEnabled = false
+                binding.includeGameHelperBottom.btnHammer.isEnabled = false
                 binding.includeKeyboard.btnBackSpace.isEnabled = false
                 binding.includeKeyboard.btnShuffle.isEnabled = false
                 for (i in 0 until intKey.size) {
@@ -800,6 +809,7 @@ class BoardActivity : AppCompatActivity() {
                 binding.includeGameHelperBottom.btnNinja.isEnabled = true
                 binding.includeGameHelperBottom.btnCursor.isEnabled = true
                 binding.includeGameHelperBottom.btnRobot.isEnabled = true
+                binding.includeGameHelperBottom.btnHammer.isEnabled = true
                 binding.includeKeyboard.btnBackSpace.isEnabled = true
                 binding.includeKeyboard.btnShuffle.isEnabled = true
                 for (i in 0 until intKey.size) {
@@ -940,6 +950,7 @@ class BoardActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (!isEnableClick) return false
         val x = position
         when (keyCode) {
             in 29..54 -> {
@@ -966,6 +977,7 @@ class BoardActivity : AppCompatActivity() {
     }
 
     private fun onPressBackSpace() {
+        if (!isEnableClick) return
         onType = true
         val x = position
         if (inputAnswerDirection == InputAnswerDirection.ROW) {
@@ -1237,7 +1249,6 @@ class BoardActivity : AppCompatActivity() {
     private fun playNext() {
         lifecycleScope.launch {
             skipActions(0)
-
             //Initial cari LevelId
             var dataLevel = mutableListOf<Data.Level>()
             //var dataDone = mutableListOf<Data.UserAnswerTTS>()
@@ -1598,8 +1609,9 @@ class BoardActivity : AppCompatActivity() {
                     for (i in 0 until intKey.size) {
                         binding.includeGameHelperBottom.apply {
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnGetHint)
-                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnCursor)
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnRobot)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnHammer)
+                            YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnCursor)
                             YoYo.with(Techniques.RotateIn).duration(1000).playOn(btnNinja)
                         }
                         YoYo.with(Techniques.RotateIn)

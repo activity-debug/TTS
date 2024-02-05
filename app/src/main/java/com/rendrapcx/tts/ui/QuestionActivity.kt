@@ -381,6 +381,8 @@ class QuestionActivity : AppCompatActivity() {
             }
 
             questionAdapter.setOnClickEdit { it ->
+                binding.loading.root.visibility = View.VISIBLE
+                binding.loading.tvLoadingInfo.text = "Loading..."
                 lifecycleScope.launch {
                     boardSet = BoardSet.EDITOR_EDIT
                     currentLevel = it.id
