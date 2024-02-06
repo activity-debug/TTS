@@ -110,15 +110,16 @@ class BarcodeActivity : AppCompatActivity() {
         adView = AdView(this)
         binding.adViewContainer.addView(adView)
 
+        binding.loading.root.visibility = View.INVISIBLE
         // Log the Mobile Ads SDK version.
-        Log.d("JACK", "Google Mobile Ads SDK Version: " + MobileAds.getVersion())
+        //Log.d("JACK", "Google Mobile Ads SDK Version: " + MobileAds.getVersion())
 
         googleMobileAdsConsentManager =
             GoogleMobileAdsConsentManager.getInstance(applicationContext)
         googleMobileAdsConsentManager.gatherConsent(this) { error ->
             if (error != null) {
                 // Consent not obtained in current session.
-                Log.d("JACK", "${error.errorCode}: ${error.message}")
+                //Log.d("JACK", "${error.errorCode}: ${error.message}")
             }
 
             if (googleMobileAdsConsentManager.canRequestAds) {
@@ -149,8 +150,6 @@ class BarcodeActivity : AppCompatActivity() {
             RequestConfiguration.Builder().setTestDeviceIds(listOf("ABCDEF012345")).build()
         )
 
-
-
         myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
 
 
@@ -167,10 +166,12 @@ class BarcodeActivity : AppCompatActivity() {
         binding.includeHeader.apply {
             tvLabelTop.text = "Scan Data Questioner"
             btnBack.setOnClickListener {
-                val i = Intent(this@BarcodeActivity, MainActivity::class.java)
-                startActivity(i)
-                finish()
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                if (isEnableClick) {
+                    val i = Intent(this@BarcodeActivity, MainActivity::class.java)
+                    startActivity(i)
+                    finish()
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                }
             }
 
             btnSettingPlay.setOnClickListener {
@@ -219,18 +220,30 @@ class BarcodeActivity : AppCompatActivity() {
             }
 
             btnSaveSoal.setOnClickListener {
-                isEnableClick = false
-                lifecycleScope.launch {
-                    val job = async {
-                        saveQRToDB()
+                if (isEnableClick){
+                    isEnableClick = false
+                    loading.tvLoadingInfo.text = "Saving"
+                    loading.root.visibility = View.VISIBLE
+                    lifecycleScope.launch {
+                        val job = async {
+                            saveQRToDB()
+                        }
+                        job.await()
                     }
-                    job.await()
-
-                    val i = Intent(this@BarcodeActivity, MainActivity::class.java)
-                    startActivity(i)
-                    finish()
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    YoYo.with(Techniques.Bounce).repeat(5).duration(1000).playOn(binding.resultPanel)
+                    YoYo.with(Techniques.RubberBand).repeat(5).duration(1000).playOn(binding.resultPanel)
+                    YoYo.with(Techniques.Swing).repeat(5).duration(1000).playOn(loading.tvLoadingInfo)
+                    YoYo.with(Techniques.Wobble).repeat(5).duration(1000).playOn(loading.tvLoadingInfo)
+                    YoYo.with(Techniques.RubberBand).repeat(5).duration(1000)
+                        .onEnd {
+                            MPlayer().sound(applicationContext, Sora.DING)
+                            isEnableClick = false
+                            loading.root.visibility = View.INVISIBLE
+                            resultPanel.visibility = View.INVISIBLE
+                        }
+                        .playOn(loading.tvLoadingInfo)
                 }
+
             }
 
             btnPasteSoal.setOnClickListener {
@@ -352,6 +365,7 @@ class BarcodeActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveQRToDB() {
         lifecycleScope.launch {
             val id = qrListLevel[0].id
@@ -363,15 +377,9 @@ class BarcodeActivity : AppCompatActivity() {
             if (id in ids) {
                 newId = true
                 levelId = Helper().generateLevelId(ids.size)
-                Toast.makeText(
-                    this@BarcodeActivity,
-                    "Data disimpan dengan ID Baru",
-                    Toast.LENGTH_SHORT
-                ).show()
             } else {
                 newId = false
                 levelId = id
-                Toast.makeText(this@BarcodeActivity, "Data disimpan", Toast.LENGTH_SHORT).show()
             }
 
             val category = if (binding.editInputContent.text.isNotEmpty()) {

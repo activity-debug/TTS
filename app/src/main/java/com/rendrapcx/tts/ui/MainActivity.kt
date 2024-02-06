@@ -124,7 +124,6 @@ class MainActivity : AppCompatActivity() {
         binding.btnGoListQuestion.visibility = View.INVISIBLE
         binding.btnOnline.visibility = View.INVISIBLE
 
-
         lifecycleScope.launch {
             /*INIT DATABASE*/
             val job = async {
@@ -209,35 +208,41 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnGoAcak.setOnClickListener {
-                if (listLevel.isEmpty()) {
-                    Dialog().apply {
-                        showDialogYesNo(
-                            title = "Info",
-                            msg = "Belum ada data, silakan scan atau unduh soal terlebih dulu",
-                            "OK",
-                        )
+                if (isEnableClick){
+                    isEnableClick = false
+                    if (listLevel.isEmpty()) {
+                        Dialog().apply {
+                            showDialogYesNo(
+                                title = "Info",
+                                msg = "Belum ada data, silakan scan atau unduh soal terlebih dulu",
+                                "OK",
+                            )
+                        }
+                        isEnableClick = true
+                        return@setOnClickListener
                     }
-                    return@setOnClickListener
+
+                    if (listSelesai.isEmpty()) {
+                        Dialog().apply {
+                            showDialogYesNo(
+                                title = "Info",
+                                msg = "Belum ada soal yang Anda selesaikan,\n" +
+                                        "Silakan bermain dan selesaikan beberapa soal terlebih dahulu, " +
+                                        "untuk bisa memainkan secara acak",
+                                "OK"
+                            )
+                        }
+                        isEnableClick = true
+                        return@setOnClickListener
+                    }
+
+                    boardSet = BoardSet.PLAY_RANDOM
+                    val intent = Intent(this@MainActivity, BoardActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 }
 
-                if (listSelesai.isEmpty()) {
-                    Dialog().apply {
-                        showDialogYesNo(
-                            title = "Info",
-                            msg = "Belum ada soal yang Anda selesaikan,\n" +
-                                    "Silakan bermain dan selesaikan beberapa soal terlebih dahulu, " +
-                                    "untuk bisa memainkan secara acak",
-                            "OK"
-                        )
-                    }
-                    return@setOnClickListener
-                }
-
-                boardSet = BoardSet.PLAY_RANDOM
-                val intent = Intent(this@MainActivity, BoardActivity::class.java)
-                startActivity(intent)
-                finish()
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
 
             btnGoScan.setOnClickListener {
@@ -286,7 +291,14 @@ class MainActivity : AppCompatActivity() {
         YoYo.with(Techniques.Tada).duration(1000)
             .onEnd {
                 MPlayer().sound(this, Sora.START_APP)
-                YoYo.with(Techniques.RubberBand).duration(2000).playOn(binding.imgLogo)
+                binding.apply {
+                    YoYo.with(Techniques.RubberBand).duration(2000).playOn(binding.imgLogo)
+                    YoYo.with(Techniques.RubberBand).duration(2000).playOn(btnGoTTS)
+                    YoYo.with(Techniques.Wobble).duration(2000).playOn(btnGoAcak)
+                    YoYo.with(Techniques.Swing).duration(2000).playOn(btnGoScan)
+                    YoYo.with(Techniques.Wave).duration(2000).playOn(btnOnline)
+                    YoYo.with(Techniques.RubberBand).duration(2000).playOn(btnGoListQuestion)
+                }
             }
             .playOn(binding.imgLogo)
     }
