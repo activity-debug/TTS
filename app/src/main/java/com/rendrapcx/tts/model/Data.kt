@@ -61,6 +61,15 @@ class Data {
         @ColumnInfo(name = "payed") var payed: Int
     )
 
+    @Entity(tableName = "user_answer_random")
+    data class UserAnswerRandom(
+        @PrimaryKey(autoGenerate = false)
+        @ColumnInfo(name = "id") var id: String,
+        @ColumnInfo(name = "level_id") var levelId: String,
+        @ColumnInfo(name = "answer_slot") var answerSlot: MutableMap<Int, String>,
+        @ColumnInfo(name = "payed") var payed: Int
+    )
+
     @Entity(tableName = "user_preferences")
     data class UserPreferences(
         @PrimaryKey(autoGenerate = false)
@@ -100,6 +109,7 @@ class Data {
         var listQuestion = mutableListOf<Question>()
         var listPartial = mutableListOf<Partial>()
         var userAnswerTTS = mutableListOf<UserAnswerTTS>()
+        var userAnswerRandom = mutableListOf<UserAnswerRandom>()
         var userPreferences = mutableListOf<UserPreferences>()
     }
 }

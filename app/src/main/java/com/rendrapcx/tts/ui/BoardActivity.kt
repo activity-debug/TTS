@@ -156,7 +156,11 @@ class BoardActivity : AppCompatActivity() {
             btnBackSpace.setOnClickListener {
                 if (!arrPayed.contains(position)) {
                     box[position].text = ""
-                    upsertUserSlot(position, box[position].text.toString())
+                    if (boardSet == BoardSet.PLAY_KATEGORI) {
+                        upsertUserSlot(position, box[position].text.toString())
+                    } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                        upsertUserRandom(position, box[position].text.toString())
+                    }
                 }
                 onPressBackSpace()
                 MPlayer().sound(applicationContext, Sora.TYPING)
@@ -190,7 +194,11 @@ class BoardActivity : AppCompatActivity() {
                             MPlayer().sound(applicationContext, Sora.TYPING)
                             if (isEnableClick == false) return@OnTouchListener true
                             if (!arrPayed.contains(position)) {
-                                upsertUserSlot(position, intKey[i].text.toString())
+                                if (boardSet == BoardSet.PLAY_KATEGORI) {
+                                    upsertUserSlot(position, intKey[i].text.toString())
+                                } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                                    upsertUserRandom(position, box[position].text.toString())
+                                }
                                 box[position].text = intKey[i].text
                             }
                             onPressAbjabMove()
@@ -575,7 +583,11 @@ class BoardActivity : AppCompatActivity() {
             .onEnd {
                 MPlayer().sound(applicationContext, Sora.DING)
                 box[i].text = box[i].tag.toString()
-                upsertUserSlot(i, box[i].tag.toString(), i)
+                if (boardSet == BoardSet.PLAY_KATEGORI) {
+                    upsertUserSlot(i, box[i].tag.toString(), i)
+                } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                    upsertUserRandom(i, box[i].tag.toString(), i)
+                }
                 arrPayed.add(i)
                 binding.imgHammer.visibility = View.INVISIBLE
                 YoYo.with(Techniques.RubberBand).repeat(2).playOn(box[i])
@@ -717,6 +729,13 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
+    private fun deleteUserRandomDone() {
+        lifecycleScope.launch {
+            DB.getInstance(applicationContext).userAnswerRandom().deleteAnswerById(currentLevel)
+        }
+    }
+
+
     private fun loadUserState() {
         lifecycleScope.launch {
             val userAnswerSlot = DB.getInstance(applicationContext)
@@ -735,6 +754,24 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadUserRandom() {
+        lifecycleScope.launch {
+            val userAnswerRandom = DB.getInstance(applicationContext)
+                .userAnswerRandom().getAnswer(currentLevel)
+                .ifEmpty { return@launch }
+            userAnswerRandom.map { it.answerSlot }.forEach {
+                for (i in it.keys) {
+                    YoYo.with(Techniques.FlipInY).duration(2000).playOn(box[i])
+                    box[i].text = it.getValue(i)
+                    delay(50)
+                }
+            }
+            userAnswerRandom.map { it.payed }.forEach() {
+                if (it != -1) arrPayed.add(it)
+            }
+        }
+    }
+
     private fun upsertUserSlot(charAt: Int, charStr: String, payed: Int = -1) {
         lifecycleScope.launch {
             val answerSlot = mutableMapOf<Int, String>()
@@ -744,6 +781,21 @@ class BoardActivity : AppCompatActivity() {
                     id = currentLevel + "-" + charAt.toString(),
                     levelId = currentLevel,
                     answerSlot = answerSlot,
+                    payed = payed
+                )
+            )
+        }
+    }
+
+    private fun upsertUserRandom(charAt: Int, charStr: String, payed: Int = -1) {
+        lifecycleScope.launch {
+            val answerRandom = mutableMapOf<Int, String>()
+            answerRandom.put(charAt, charStr)
+            DB.getInstance(applicationContext).userAnswerRandom().upsertAnswer(
+                Data.UserAnswerRandom(
+                    id = currentLevel + "-" + charAt.toString(),
+                    levelId = currentLevel,
+                    answerSlot = answerRandom,
                     payed = payed
                 )
             )
@@ -782,7 +834,11 @@ class BoardActivity : AppCompatActivity() {
                                 position = x
                                 setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
-                                upsertUserSlot(x, box[x].tag.toString(), x)
+                                if (boardSet == BoardSet.PLAY_KATEGORI) {
+                                    upsertUserSlot(x, box[x].tag.toString(), x)
+                                } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                                    upsertUserRandom(x, box[x].tag.toString(), x)
+                                }
                                 arrPayed.add(x)
                                 YoYo.with(Techniques.RollIn)
                                     .onEnd {
@@ -798,7 +854,12 @@ class BoardActivity : AppCompatActivity() {
                                 position = x
                                 setOnSelectedColor()
                                 box[x].text = box[x].tag.toString()
-                                upsertUserSlot(x, box[x].tag.toString(), x)
+                                if (boardSet == BoardSet.PLAY_KATEGORI) {
+                                    upsertUserSlot(x, box[x].tag.toString(), x)
+                                } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                                    upsertUserRandom(x, box[x].tag.toString(), x)
+                                }
+
                                 arrPayed.add(x)
                                 YoYo.with(Techniques.SlideInUp)
                                     .onEnd {
@@ -874,7 +935,11 @@ class BoardActivity : AppCompatActivity() {
                     MPlayer().sound(applicationContext, Sora.SUCCESS)
                     position = x
                     box[x].text = box[x].tag.toString()
-                    upsertUserSlot(x, box[x].tag.toString(), x)
+                    if (boardSet == BoardSet.PLAY_KATEGORI) {
+                        upsertUserSlot(x, box[x].tag.toString(), x)
+                    } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                        upsertUserRandom(x, box[x].tag.toString(), x)
+                    }
                     arrPayed.add(x)
                     pickByArrow = false
                     setInputAnswerDirection()
@@ -1099,7 +1164,11 @@ class BoardActivity : AppCompatActivity() {
                 val s = event?.displayLabel
                 if (!arrPayed.contains(x)) {
                     box[x].text = s.toString()
-                    upsertUserSlot(x, s.toString())
+                    if (boardSet == BoardSet.PLAY_KATEGORI) {
+                        upsertUserSlot(x, s.toString())
+                    } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                        upsertUserRandom(x, s.toString())
+                    }
                 }
                 onPressAbjabMove()
                 checkWinCondition(false)
@@ -1216,7 +1285,7 @@ class BoardActivity : AppCompatActivity() {
 
             if (boardSet != BoardSet.PLAY_RANDOM) {
                 Progress().updateUserAnswer(AnswerStatus.DONE, applicationContext, lifecycle)
-                deleteUserSlotDone()
+                deleteUserRandomDone()
                 MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
             } else {
@@ -1776,7 +1845,8 @@ class BoardActivity : AppCompatActivity() {
                         delay(40)
                     }
 
-                    loadUserState()
+                    if (boardSet == BoardSet.PLAY_KATEGORI) loadUserState()
+                    if (boardSet == BoardSet.PLAY_RANDOM) loadUserRandom()
                 }
                 resetBoxStyle()
             }

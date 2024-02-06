@@ -12,6 +12,7 @@ import androidx.room.TypeConverters
         Data.Question::class,
         Data.UserAnswerTTS::class,
         Data.UserAnswerSlot::class,
+        Data.UserAnswerRandom::class,
         Data.UserPreferences::class,
     ],
     version = 2,
@@ -23,6 +24,7 @@ abstract class DB : RoomDatabase() {
     abstract fun question(): Dao.Question
     abstract fun userAnswerTTS(): Dao.UserAnswerTTS
     abstract fun userAnswerSlot(): Dao.UserAnswerSlot
+    abstract fun userAnswerRandom(): Dao.UserAnswerRandom
     abstract fun userPreferences(): Dao.UserPreferences
 
     companion object {
