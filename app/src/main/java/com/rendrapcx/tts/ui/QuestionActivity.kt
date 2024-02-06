@@ -46,6 +46,7 @@ import com.rendrapcx.tts.constant.Const.Companion.boardSet
 import com.rendrapcx.tts.constant.Const.Companion.currentLevel
 import com.rendrapcx.tts.constant.Const.Companion.dbApp
 import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
+import com.rendrapcx.tts.constant.Const.Companion.lastAcak
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
 import com.rendrapcx.tts.databinding.ComponentLoadingBinding
@@ -275,7 +276,6 @@ class QuestionActivity : AppCompatActivity() {
 
         outputStream?.use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            Dialog().showDialog(this, "Captured View and saved to Gallery")
         }
     }
 
@@ -354,6 +354,11 @@ class QuestionActivity : AppCompatActivity() {
                     val job4 = async {
                         DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(levelId)
                         DB.getInstance(applicationContext).userAnswerTTS().deleteByLevelId(levelId)
+                        DB.getInstance(applicationContext).userAnswerRandom().deleteAnswerById(levelId)
+                        if (levelId == lastAcak) {
+                            lastAcak = ""
+                            UserRef().setLastAcak("", applicationContext, lifecycle)
+                        }
                     }
                     job4.await()
 

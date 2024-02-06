@@ -367,6 +367,7 @@ class BoardActivity : AppCompatActivity() {
 
             btnHammer.setOnClickListener() {
                 if (koinUser < hargaPalu) {
+                    MPlayer().sound(applicationContext, Sora.NINJA)
                     YoYo.with(Techniques.Shake).playOn(btnHammer)
                     YoYo.with(Techniques.Shake).playOn(btnHammerLabel)
                     return@setOnClickListener
@@ -415,6 +416,7 @@ class BoardActivity : AppCompatActivity() {
             /*ISI SOAL*/
             btnRobot.setOnClickListener {
                 if (koinUser < koinPay) {
+                    MPlayer().sound(applicationContext, Sora.NINJA)
                     YoYo.with(Techniques.Shake).playOn(btnRobot)
                     YoYo.with(Techniques.Shake).playOn(btnRobotLabel)
                     return@setOnClickListener
@@ -443,7 +445,14 @@ class BoardActivity : AppCompatActivity() {
 
             /*Kasih tau jawaban 1 row atau kolom*/
             btnGetHint.setOnClickListener {
-                if (koinUser < (koinPay * currentRange.size)) {
+
+                var size = currentRange.size
+                for (i in currentRange) {
+                    if (arrPayed.contains(i)) size = size - 1
+                }
+
+                if (koinUser < (koinPay * size) || size == 0 ) {
+                    MPlayer().sound(applicationContext, Sora.NINJA)
                     YoYo.with(Techniques.Shake).playOn(btnGetHint)
                     YoYo.with(Techniques.Shake).playOn(btnHintLabel)
                     return@setOnClickListener
@@ -451,10 +460,7 @@ class BoardActivity : AppCompatActivity() {
 
                 skipActions(0)
                 coinDrop(3)
-                var size = currentRange.size
-                for (i in currentRange) {
-                    if (arrPayed.contains(i)) size = size - 1
-                }
+
                 koinUser = koinUser - (koinPay * size)
                 UserRef().setKoin(koinUser, applicationContext, lifecycle)
 
@@ -1283,15 +1289,15 @@ class BoardActivity : AppCompatActivity() {
                 }
                 .playOn(binding.includeHeader.include.imageView)
 
-            if (boardSet != BoardSet.PLAY_RANDOM) {
+            if (boardSet == BoardSet.PLAY_KATEGORI) {
                 Progress().updateUserAnswer(AnswerStatus.DONE, applicationContext, lifecycle)
-                deleteUserRandomDone()
+                deleteUserSlotDone()
                 MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
-            } else {
+            } else if (boardSet == BoardSet.PLAY_RANDOM) {
                 lastAcak = ""
                 UserRef().setLastAcak("", applicationContext, lifecycle)
-                deleteUserSlotDone()
+                deleteUserRandomDone()
                 MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
             }

@@ -12,6 +12,7 @@ import android.text.InputFilter
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -366,8 +367,9 @@ open class Dialog {
     fun Activity.showDialogYesNo(
         title: String,
         msg: String,
-        btnOneTitle: String = "Tidak",
-        btnTwoTitle: String = "Ya",
+        btnOneTitle: String = "Batal",
+        btnTwoTitle: String = "",
+        action : Int = 0
     ) {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogYesNoBinding.inflate(inflater)
@@ -384,17 +386,23 @@ open class Dialog {
         binding.tvMessage.text = msg
         binding.btnOne.text = btnOneTitle
         binding.btnTwo.text = btnTwoTitle
+        if (btnTwoTitle.isEmpty()) binding.btnTwo.visibility = View.GONE
+        if (btnOneTitle.isEmpty()) binding.btnOne.visibility = View.GONE
 
         binding.btnOne.setOnClickListener {
             dialog.dismiss()
         }
 
         binding.btnTwo.setOnClickListener {
-            val i = Intent(this, BoardActivity::class.java)
-            startActivity(i)
-            finish()
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            dialog.dismiss()
+            when(action) {
+                0 -> {
+                    val i = Intent(this, BoardActivity::class.java)
+                    startActivity(i)
+                    finish()
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    dialog.dismiss()
+                }
+            }
         }
 
         dialog.show()

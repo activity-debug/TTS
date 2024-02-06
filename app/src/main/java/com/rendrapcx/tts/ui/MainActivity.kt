@@ -211,20 +211,26 @@ class MainActivity : AppCompatActivity() {
 
             btnGoAcak.setOnClickListener {
                 if (listLevel.isEmpty()) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Belum ada data, silakan scan soal terlebih dahulu",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Dialog().apply {
+                        showDialogYesNo(
+                            title = "Info",
+                            msg = "Belum ada data, silakan scan atau unduh soal terlebih dulu",
+                            "OK",
+                        )
+                    }
                     return@setOnClickListener
                 }
+
                 if (listSelesai.isEmpty()) {
-                    Dialog().showDialog(
-                        this@MainActivity,
-                        "Belum ada soal yang Anda selesaikan,\n" +
-                                "Silakan bermain dan selesaikan beberapa soal terlebih dahulu, " +
-                                "untuk bisa memainkan secara acak"
-                    )
+                    Dialog().apply {
+                        showDialogYesNo(
+                            title = "Info",
+                            msg = "Belum ada soal yang Anda selesaikan,\n" +
+                                    "Silakan bermain dan selesaikan beberapa soal terlebih dahulu, " +
+                                    "untuk bisa memainkan secara acak",
+                            "OK"
+                        )
+                    }
                     return@setOnClickListener
                 }
 
@@ -549,6 +555,20 @@ class MainActivity : AppCompatActivity() {
                 pmtAdapter.setListItem(filteredListLevel)
 
                 pmtAdapter.setOnClickView {
+                    if (lastAcak.isNotEmpty()) {
+                        Dialog().apply {
+                            showDialogYesNo(
+                                "Info",
+                                "Level ini sedang dimainkan di Mode Acak,\n" +
+                                        "Silakan lanjutkan bermain level ini di mode Acak\n" +
+                                        "atau mengunduh soal yang terbaru",
+                                "OK",
+                                "", //setEmpty to Hide secondary button / yes button
+                            )
+                        }
+                        return@setOnClickView
+                    }
+
                     lifecycle.coroutineScope.launch {
                         boardSet = BoardSet.PLAY_KATEGORI
                         currentLevel = it.id
