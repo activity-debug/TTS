@@ -21,7 +21,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -30,8 +29,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.daimajia.androidanimations.library.Techniques
-import com.daimajia.androidanimations.library.YoYo
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
@@ -49,8 +46,6 @@ import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.Companion.lastAcak
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.databinding.ActivityQuestionBinding
-import com.rendrapcx.tts.databinding.ComponentLoadingBinding
-import com.rendrapcx.tts.databinding.DialogSettingBinding
 import com.rendrapcx.tts.databinding.DialogShareQrcodeBinding
 import com.rendrapcx.tts.helper.Helper
 import com.rendrapcx.tts.helper.UserRef
@@ -208,7 +203,9 @@ class QuestionActivity : AppCompatActivity() {
             binding.tvWarningInfo.text = "Text terlalu panjang (${content.count()}) " +
                     "QR Image tidak bisa di generate. \n" +
                     "kirim soal terinkripsi"
-            Toast.makeText(this, "${e.message}", Toast.LENGTH_SHORT).show()
+            Dialog().apply {
+                showDialogYesNo("Info", e.message.toString(), "OK")
+            }
         } finally {
             if (error) {
                 binding.btnShareQr.text = "Share As Text"
@@ -374,11 +371,9 @@ class QuestionActivity : AppCompatActivity() {
 
                     Snackbar.make(binding.questionLayout, "Deleted", Snackbar.LENGTH_SHORT)
                         .setAction("Undo", View.OnClickListener {
-                            Toast.makeText(
-                                this@QuestionActivity,
-                                "No Code Yet",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Dialog().apply {
+                                showDialogYesNo("Info", "belum tersedia", "OK")
+                            }
                         })
                         .show()
                     binding.loading.root.visibility = View.INVISIBLE
@@ -484,21 +479,15 @@ class QuestionActivity : AppCompatActivity() {
                         )
                         myRef.child(lvl.id).setValue(data)
                             .addOnCompleteListener() {
-                                Toast.makeText(
-                                    this@QuestionActivity,
-                                    "Completed",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                Dialog().apply {
+                                    showDialogYesNo("Info", "Soal diupload", "OK")
+                                }
                                 binding.loading.root.visibility = View.INVISIBLE
                             }
                             .addOnFailureListener() {
-                                Toast.makeText(
-                                    this@QuestionActivity,
-                                    "Failed",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                Dialog().apply {
+                                    showDialogYesNo("Info", "Gagal diupload", "OK")
+                                }
                             }
                     }
                 }
@@ -543,12 +532,9 @@ class QuestionActivity : AppCompatActivity() {
                             lifecycleScope.launch {
                                 val value: Editable = input.text
                                 if (value.isEmpty()) {
-                                    Toast.makeText(
-                                        this@QuestionActivity,
-                                        "Isi Dulu",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
+                                    Dialog().apply {
+                                        showDialogYesNo("Info", "tidak boleh kosong", "OK")
+                                    }
                                     return@launch
                                 }
                                 //NEW ID MANUAL
@@ -647,12 +633,11 @@ class QuestionActivity : AppCompatActivity() {
                     }
                 }
 
+                @RequiresApi(Build.VERSION_CODES.R)
                 override fun onCancelled(databaseError: DatabaseError) {
-                    Toast.makeText(
-                        applicationContext,
-                        databaseError.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Dialog().apply {
+                        showDialogYesNo("Canceled", databaseError.message, "OK")
+                    }
                 }
             })
         }

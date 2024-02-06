@@ -17,7 +17,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -322,17 +321,22 @@ class BoardActivity : AppCompatActivity() {
                 if (boardSet == BoardSet.EDITOR_EDIT || boardSet == BoardSet.EDITOR_NEW) {
                     val builder: AlertDialog.Builder = AlertDialog.Builder(this@BoardActivity)
                     val input = EditText(this@BoardActivity)
+                    input.setText(tvSpanQuestion.text)
+                    input.selectAll()
+                    input.requestFocus()
                     builder
                         .setTitle("Update Soal")
                         .setMessage("${currentQuestId} : ${tvSpanQuestion.text}")
                         .setView(input)
                         .setPositiveButton("Update",
                             DialogInterface.OnClickListener { dialog, whichButton ->
-                                val value: Editable = input.text
-                                listQuestion.filter { it.id == currentQuestId }
-                                    .map { it.asking = value.toString() }
-                                onClickBox()
-                                dialog.dismiss()
+                                if (input.text.isNotEmpty()){
+                                    val value: Editable = input.text
+                                    listQuestion.filter { it.id == currentQuestId }
+                                        .map { it.asking = value.toString() }
+                                    onClickBox()
+                                    dialog.dismiss()
+                                }
                             }).setNegativeButton("Batal",
                             DialogInterface.OnClickListener { dialog, whichButton ->
                                 dialog.dismiss()
@@ -451,7 +455,7 @@ class BoardActivity : AppCompatActivity() {
                     if (arrPayed.contains(i)) size = size - 1
                 }
 
-                if (koinUser < (koinPay * size) || size == 0 ) {
+                if (koinUser < (koinPay * size) || size == 0) {
                     MPlayer().sound(applicationContext, Sora.NINJA)
                     YoYo.with(Techniques.Shake).playOn(btnGetHint)
                     YoYo.with(Techniques.Shake).playOn(btnHintLabel)
@@ -489,7 +493,9 @@ class BoardActivity : AppCompatActivity() {
             /*SAVE QUESTION*/
             btnSave.setOnClickListener {
                 if (listQuestion.isEmpty()) {
-                    Dialog().showDialog(this@BoardActivity, "Data masih kosong")
+                    Dialog().apply {
+                        showDialogYesNo("Error", "Tidak boleh kosong", "OK")
+                    }
                 } else {
                     saveAndApply()
                 }
@@ -1155,8 +1161,9 @@ class BoardActivity : AppCompatActivity() {
                 }
             }
             job2.await()
-
-            Dialog().showDialog(this@BoardActivity, "Data berhasil disimpan")
+            Dialog().apply {
+                showDialogYesNo("Info", "berhasil disimpan", "OK")
+            }
         }
 
     }
@@ -1414,8 +1421,7 @@ class BoardActivity : AppCompatActivity() {
                 } else {
                     if (count > 1) {
                         for (i in 0 until count) {
-                            val x = (1 until count).random()
-
+                            val x = (1 until count).random() -1
                             if (acakHolder.isEmpty()) {
                                 acakHolder.add(listLevel[x].id)
                                 currentLevel = listLevel[x].id
@@ -2001,7 +2007,9 @@ class BoardActivity : AppCompatActivity() {
 
 
         if (row.isNotEmpty() && col.isNotEmpty()) {
-            Toast.makeText(this, "rowId dan colomId sudah terpenuhi", Toast.LENGTH_SHORT).show()
+            Dialog().apply {
+                showDialogYesNo("Info", "Sudah memiliki dua ID", "OK")
+            }
             return
         }
 
@@ -2033,7 +2041,9 @@ class BoardActivity : AppCompatActivity() {
                     bind.tvSlotPreview.text = "${colAvailable}"
                 } else {
                     bind.swDirection.isChecked = false
-                    Toast.makeText(this, "Vertical not allowed", Toast.LENGTH_SHORT).show()
+                    Dialog().apply {
+                        showDialogYesNo("Info", "tidak diperkenankan", "OK")
+                    }
                 }
             } else {
                 if (row.isEmpty()) {
@@ -2044,7 +2054,9 @@ class BoardActivity : AppCompatActivity() {
                     bind.tvSlotPreview.text = "${rowAvailable}"
                 } else {
                     bind.swDirection.isChecked = true
-                    Toast.makeText(this, "Horizontal not allowed", Toast.LENGTH_SHORT).show()
+                    Dialog().apply {
+                        showDialogYesNo("Info", "tidak diperkenankan", "OK")
+                    }
                 }
             }
         }

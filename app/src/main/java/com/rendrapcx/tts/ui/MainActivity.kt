@@ -12,7 +12,6 @@ import android.text.TextWatcher
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -307,17 +306,17 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                @RequiresApi(Build.VERSION_CODES.R)
                 override fun onCancelled(databaseError: DatabaseError) {
-                    Toast.makeText(
-                        applicationContext,
-                        databaseError.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Dialog().apply {
+                        showDialogYesNo("Error", databaseError.message, "OK")
+                    }
                 }
             })
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveOnlineData() {
         lifecycleScope.launch {
             val id = qrListLevel[0].id
@@ -329,15 +328,15 @@ class MainActivity : AppCompatActivity() {
             if (id in ids) {
                 newId = true
                 levelId = Helper().generateLevelId(ids.size)
-                Toast.makeText(
-                    this@MainActivity,
-                    "Soal disimpan dengan ID Baru",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Dialog().apply {
+                    showDialogYesNo("Info", "Soal disimpan dengan ID Baru", "OK")
+                }
             } else {
                 newId = false
                 levelId = id
-                Toast.makeText(this@MainActivity, "Soal disimpan", Toast.LENGTH_SHORT).show()
+                Dialog().apply {
+                    showDialogYesNo("Info", "Soal disimpan", "OK")
+                }
             }
 
             DB.getInstance(applicationContext).level().insertLevel(
@@ -472,9 +471,9 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun onCancelled(databaseError: DatabaseError) {
-                            Toast.makeText(
-                                applicationContext, databaseError.message, Toast.LENGTH_SHORT
-                            ).show()
+                            Dialog().apply {
+                                showDialogYesNo("Error", databaseError.message, "OK")
+                            }
                             binding.loading.root.visibility = View.INVISIBLE
                             dialog.dismiss()
                         }
@@ -492,21 +491,15 @@ class MainActivity : AppCompatActivity() {
                         val myRef = database.getReference(dbRefQuestions)
                         myRef.child(eta.id.toString()).removeValue() //.setValue(null)
                             .addOnCompleteListener() {
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Removed Completed",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                Dialog().apply {
+                                    showDialogYesNo("Info", "Removed Completed", "OK")
+                                }
                                 binding.loading.root.visibility = View.INVISIBLE
                             }
                             .addOnFailureListener() {
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Failed to Remove",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                Dialog().apply {
+                                    showDialogYesNo("Info", "Remove Failed", "OK")
+                                }
                                 binding.loading.root.visibility = View.INVISIBLE
                             }
                     }
@@ -555,13 +548,13 @@ class MainActivity : AppCompatActivity() {
                 pmtAdapter.setListItem(filteredListLevel)
 
                 pmtAdapter.setOnClickView {
-                    if (lastAcak.isNotEmpty()) {
+                    if (lastAcak == it.id) {
+
                         Dialog().apply {
                             showDialogYesNo(
-                                "Info",
-                                "Level ini sedang dimainkan di Mode Acak,\n" +
-                                        "Silakan lanjutkan bermain level ini di mode Acak\n" +
-                                        "atau mengunduh soal yang terbaru",
+                                "Reset Level",
+                                "Sedang dimainkan di Mode Acak, " +
+                                        "Lanjutkan bermain di mode Acak untuk dapat mereset level ini",
                                 "OK",
                                 "", //setEmpty to Hide secondary button / yes button
                             )
@@ -576,7 +569,7 @@ class MainActivity : AppCompatActivity() {
                         if (currentLevel in listSelesai) {
                             Dialog().apply {
                                 showDialogYesNo(
-                                    "Info",
+                                    "Reset Level",
                                     "Anda sudah menyelesaikan level ini. \nMau reset ulang level ini?",
                                     "Tidak",
                                     "Ya",

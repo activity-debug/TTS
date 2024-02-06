@@ -9,11 +9,9 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.text.InputFilter
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -24,18 +22,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
-import com.google.firebase.components.Component
 import com.rendrapcx.tts.R
 import com.rendrapcx.tts.constant.Const
-import com.rendrapcx.tts.constant.Const.Companion.currentTrackOffline
-import com.rendrapcx.tts.constant.Const.Companion.currentTrackOnline
 import com.rendrapcx.tts.constant.Const.Companion.isOnlinePlay
 import com.rendrapcx.tts.constant.Const.Companion.isPlay
 import com.rendrapcx.tts.constant.Const.Companion.playTitleOffline
 import com.rendrapcx.tts.constant.Const.Companion.playTitleOnline
 import com.rendrapcx.tts.constant.Const.Companion.player
 import com.rendrapcx.tts.databinding.ActivityBoardBinding
-import com.rendrapcx.tts.databinding.ComponentLoadingBinding
 import com.rendrapcx.tts.databinding.DialogAboutBinding
 import com.rendrapcx.tts.databinding.DialogInputDescriptionBinding
 import com.rendrapcx.tts.databinding.DialogSettingBinding
@@ -208,11 +202,7 @@ open class Dialog {
 
             binding.switch1.setOnClickListener() {
                 if (!isInetConnect && binding.switch1.isChecked) {
-                    Toast.makeText(
-                        context,
-                        "Kamu Lagi Offline, aktifkan dulu datanya",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    showDialog(context.applicationContext, "Akses Internet tidak tersedia", "Info")
                     binding.switch1.isChecked = false
                 }
                 isOnlinePlay = binding.switch1.isChecked
@@ -377,8 +367,8 @@ open class Dialog {
         val dialog = builder.create()
         extracted(dialog)
 
-        dialog.window!!.attributes.windowAnimations = R.style.DialogFadeAnim
-        dialog.window!!.attributes.gravity = Gravity.NO_GRAVITY
+        dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
+        dialog.window!!.attributes.gravity = Gravity.TOP
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.setCancelable(true)
 
