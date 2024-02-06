@@ -45,6 +45,7 @@ class Const {
 
         var isEnableClick = true
 
+        var lastAcak = ""
 
         var player = MediaPlayer()
         var playTitleOnline = ""
@@ -60,5 +61,6 @@ class Const {
         var koinUser = 0
         var koinPay = 50
         var hargaPalu = 70
+        var rewardCoin = 500
     }
 }

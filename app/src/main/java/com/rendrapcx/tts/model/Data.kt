@@ -70,6 +70,7 @@ class Data {
         @ColumnInfo(name = "is_music") var isMusic: Boolean,
         @ColumnInfo(name = "is_sound") var isSound: Boolean,
         @ColumnInfo(name = "is_editor") var isEditor: Boolean,
+        @ColumnInfo(name = "last_acak") var lastAcak: String,
         @ColumnInfo(name = "koin") var koin: Int,
     )
 

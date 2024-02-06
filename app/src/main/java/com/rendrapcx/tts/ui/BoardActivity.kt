@@ -47,8 +47,10 @@ import com.rendrapcx.tts.constant.Const.Companion.inputMode
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.Const.Companion.koinPay
 import com.rendrapcx.tts.constant.Const.Companion.koinUser
+import com.rendrapcx.tts.constant.Const.Companion.lastAcak
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.constant.Const.Companion.position
+import com.rendrapcx.tts.constant.Const.Companion.rewardCoin
 import com.rendrapcx.tts.constant.Const.Direction
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.constant.Const.InputAnswerDirection
@@ -443,7 +445,7 @@ class BoardActivity : AppCompatActivity() {
                 coinDrop(3)
                 var size = currentRange.size
                 for (i in currentRange) {
-                    if (arrPayed.contains(i)) size = size -1
+                    if (arrPayed.contains(i)) size = size - 1
                 }
                 koinUser = koinUser - (koinPay * size)
                 UserRef().setKoin(koinUser, applicationContext, lifecycle)
@@ -598,7 +600,7 @@ class BoardActivity : AppCompatActivity() {
         /*HELPER STYLE BY KOIN CHANGE*/
         var size = currentRange.size
         for (i in currentRange) {
-            if (arrPayed.contains(i)) size = size -1
+            if (arrPayed.contains(i)) size = size - 1
         }
 
         if (koinUser < (koinPay * size)) {
@@ -1199,7 +1201,7 @@ class BoardActivity : AppCompatActivity() {
         if (pass) {
             isEnableClick = false
 
-            koinUser += 500
+            koinUser += rewardCoin
             UserRef().setKoin(koinUser, applicationContext, lifecycle)
             YoYo.with(Techniques.SlideOutDown).repeat(1)
                 .onEnd {
@@ -1218,6 +1220,8 @@ class BoardActivity : AppCompatActivity() {
                 MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
             } else {
+                lastAcak = ""
+                UserRef().setLastAcak("", applicationContext, lifecycle)
                 deleteUserSlotDone()
                 MPlayer().sound(applicationContext, Sora.WINNING)
                 winDialog(this@BoardActivity)
@@ -1315,7 +1319,6 @@ class BoardActivity : AppCompatActivity() {
 
             listLevel.clear()
 
-
             val jobLevel = async {
                 val dataDone = DB.getInstance(applicationContext).userAnswerTTS()
                     .getStatus(AnswerStatus.DONE.name)
@@ -1330,24 +1333,35 @@ class BoardActivity : AppCompatActivity() {
                     acakHolder.clear()
                 }
 
-                for (i in 0 until count) {
-                    val x = (1 until count).random()
+                if (lastAcak.isNotEmpty()) {
+                    currentLevel = lastAcak
+                    acakHolder.add(lastAcak)
+                } else {
+                    if (count > 1) {
+                        for (i in 0 until count) {
+                            val x = (1 until count).random()
 
-                    if (acakHolder.isEmpty()) {
-                        acakHolder.add(listLevel[x].id)
-                        currentLevel = listLevel[x].id
-                        break
-                    }
+                            if (acakHolder.isEmpty()) {
+                                acakHolder.add(listLevel[x].id)
+                                currentLevel = listLevel[x].id
+                                break
+                            }
 
-                    if (acakHolder.contains(listLevel[x].id)) {
-                        continue
-                    }
+                            if (acakHolder.contains(listLevel[x].id)) {
+                                continue
+                            }
 
-                    if (listSelesai.contains(listLevel[x].id)) {
-                        acakHolder.add(listLevel[x].id)
-                        currentLevel = listLevel[x].id
-                        break
+                            if (listSelesai.contains(listLevel[x].id)) {
+                                acakHolder.add(listLevel[x].id)
+                                currentLevel = listLevel[x].id
+                                break
+                            }
+                        }
+                    } else {
+                        currentLevel = listLevel[0].id
                     }
+                    lastAcak = currentLevel
+                    UserRef().setLastAcak(currentLevel, applicationContext, lifecycle)
                 }
             }
             jobLevel.await()

@@ -46,4 +46,9 @@ interface IUserPreferences{
             "   WHERE `id` = 0")
     suspend fun updateKoin(koin: Int)
 
+    @Query("UPDATE user_preferences " +
+            "   SET last_acak = :last " +
+            "   WHERE `id` = 0")
+    suspend fun updateLastAcak(last: String)
+
 }

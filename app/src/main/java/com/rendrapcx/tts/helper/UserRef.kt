@@ -3,6 +3,7 @@ package com.rendrapcx.tts.helper
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.rendrapcx.tts.constant.Const.Companion.lastAcak
 import com.rendrapcx.tts.constant.Const.FilterStatus
 import com.rendrapcx.tts.model.DB
 import com.rendrapcx.tts.model.Data
@@ -21,12 +22,25 @@ class UserRef {
                     isMusic = true,
                     isSound = true,
                     isEditor = false,
-                    koin = 1000
+                    koin = 1000,
+                    lastAcak = lastAcak
                 )
             )
         }
     }
 
+
+    fun getLastAcak(): String {
+        return userPreferences[0].lastAcak
+    }
+
+    fun setLastAcak(last: String, context: Context, lifecycle: Lifecycle) {
+        lifecycle.coroutineScope.launch {
+            userPreferences[0].lastAcak = last
+            DB.getInstance(context.applicationContext).userPreferences()
+                .updateLastAcak(last)
+        }
+    }
     fun getActiveTabFilter(): FilterStatus {
         return userPreferences[0].activeFilterTab
     }

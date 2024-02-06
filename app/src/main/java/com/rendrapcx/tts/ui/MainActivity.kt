@@ -50,6 +50,7 @@ import com.rendrapcx.tts.constant.Const.Companion.dbRefQuestions
 import com.rendrapcx.tts.constant.Const.Companion.isEditor
 import com.rendrapcx.tts.constant.Const.Companion.isEnableClick
 import com.rendrapcx.tts.constant.Const.Companion.koinUser
+import com.rendrapcx.tts.constant.Const.Companion.lastAcak
 import com.rendrapcx.tts.constant.Const.Companion.listProgress
 import com.rendrapcx.tts.constant.Const.Companion.listSelesai
 import com.rendrapcx.tts.databinding.ActivityMainBinding
@@ -153,6 +154,7 @@ class MainActivity : AppCompatActivity() {
                 listProgress = Progress().getUserProgress(applicationContext, lifecycle)
                 isEditor = UserRef().getIsEditor()
                 koinUser = UserRef().getKoin()
+                lastAcak = UserRef().getLastAcak()
             }
 
             job1.await()
@@ -163,10 +165,9 @@ class MainActivity : AppCompatActivity() {
 
             initEditorMenu()
 
-            loadKoin()
-
             loadOnlineList()
-
+            loadKoin()
+            loadLastAcak()
         }
 
         binding.apply {
@@ -246,6 +247,12 @@ class MainActivity : AppCompatActivity() {
     /*NANTI GANTI LOAD FROM DB*/
     private fun loadKoin() {
         binding.componentKoin.tvKoin.text = koinUser.toString()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun loadLastAcak() {
+        if (lastAcak.isEmpty()) binding.btnGoAcak.text = "Acak"
+        else binding.btnGoAcak.text = "Lanjutkan"
     }
 
     /* ADMOB BANNER*/
