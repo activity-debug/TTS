@@ -237,7 +237,7 @@ class BarcodeActivity : AppCompatActivity() {
                     YoYo.with(Techniques.RubberBand).repeat(5).duration(1000)
                         .onEnd {
                             MPlayer().sound(applicationContext, Sora.DING)
-                            isEnableClick = false
+                            isEnableClick = true
                             loading.root.visibility = View.INVISIBLE
                             resultPanel.visibility = View.INVISIBLE
                         }
