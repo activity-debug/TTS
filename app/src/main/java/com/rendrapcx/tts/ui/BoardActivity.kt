@@ -1419,7 +1419,7 @@ class BoardActivity : AppCompatActivity() {
                     acakHolder.clear()
                 }
 
-                Toast.makeText(this@BoardActivity, "$count", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@BoardActivity, "$count", Toast.LENGTH_SHORT).show()
 
                 if (lastAcak.isNotEmpty()) {
                     currentLevel = lastAcak
@@ -1450,7 +1450,7 @@ class BoardActivity : AppCompatActivity() {
                     lastAcak = currentLevel
                     UserRef().setLastAcak(currentLevel, applicationContext, lifecycle)
                 }
-                Toast.makeText(this@BoardActivity, "$count", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@BoardActivity, "$count", Toast.LENGTH_SHORT).show()
             }
             jobLevel.await()
 
