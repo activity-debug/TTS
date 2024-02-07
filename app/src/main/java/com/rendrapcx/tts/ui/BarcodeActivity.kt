@@ -73,7 +73,6 @@ class BarcodeActivity : AppCompatActivity() {
     private var qrListLevel = mutableListOf<Data.Level>()
     private var qrListQuestion = mutableListOf<Data.Question>()
 
-    @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -188,7 +187,11 @@ class BarcodeActivity : AppCompatActivity() {
                     binding.editPaste.setText(item?.text.toString())
 
                     val decodeString =
-                        String(Base64.getDecoder().decode(binding.editPaste.text.toString()))
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            String(Base64.getDecoder().decode(binding.editPaste.text.toString()))
+                        } else {
+                            android.util.Base64.decode(binding.editPaste.text.toString(), android.util.Base64.DEFAULT).toString()
+                        }
 
                     qrShare.clear()
 
@@ -221,7 +224,6 @@ class BarcodeActivity : AppCompatActivity() {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveQRToDB() {
         lifecycleScope.launch {
             val id = qrListLevel[0].id
@@ -272,7 +274,6 @@ class BarcodeActivity : AppCompatActivity() {
 
 
     /* GET QR RESULT GALLERY */
-    @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("SetTextI18n")
     private val resultLauncherGallery =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -284,7 +285,11 @@ class BarcodeActivity : AppCompatActivity() {
                 val imagePath = convertMediaUriToPath(imageUri)
                 val imgFile = File(imagePath)
                 val dt = getQRContent(imgFile)
-                val decodeString = String(Base64.getDecoder().decode(dt))
+                val decodeString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    String(Base64.getDecoder().decode(dt))
+                } else {
+                    android.util.Base64.decode(dt, android.util.Base64.DEFAULT).toString()
+                }
 
                 qrShare.clear()
                 qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)
@@ -304,7 +309,6 @@ class BarcodeActivity : AppCompatActivity() {
             }
         }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun openAlbums() {
         val galleryIntent = Intent(Intent.ACTION_PICK, Media.INTERNAL_CONTENT_URI)
         resultLauncherGallery.launch(galleryIntent)
@@ -320,9 +324,8 @@ class BarcodeActivity : AppCompatActivity() {
         qrScan.initiateScan()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("SetTextI18n")
     @Deprecated("Deprecated in Java")
+    @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
@@ -334,7 +337,11 @@ class BarcodeActivity : AppCompatActivity() {
                 binding.imgCoder.setImageURI(imagePath.toUri())
 
                 val dt = intentResult.contents //getQRContent(imgFile)
-                val decodeString = String(Base64.getDecoder().decode(dt))
+                val decodeString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    String(Base64.getDecoder().decode(dt))
+                } else {
+                    android.util.Base64.decode(dt, android.util.Base64.DEFAULT).toString()
+                }
 
                 qrShare.clear()
                 qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(decodeString)

@@ -46,7 +46,6 @@ import kotlinx.coroutines.launch
 
 open class Dialog {
 
-    @RequiresApi(Build.VERSION_CODES.R)
     fun aboutDialog(
         context: Context
     ) {
@@ -103,7 +102,6 @@ open class Dialog {
     }
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
     fun settingDialog(
         context: Context,
         lifecycle: Lifecycle
@@ -222,7 +220,8 @@ open class Dialog {
                 }
             }
 
-            binding.tvMusikTitle.text = if (binding.switch1.isChecked) playTitleOnline else playTitleOffline
+            binding.tvMusikTitle.text =
+                if (binding.switch1.isChecked) playTitleOnline else playTitleOffline
             if (isPlay) {
                 binding.btnMusikPlay.setImageResource(R.drawable.pause_solid)
             } else {
@@ -299,12 +298,12 @@ open class Dialog {
 
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
     fun Context.inputDescription(boardBinding: ActivityBoardBinding) {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogInputDescriptionBinding.inflate(inflater)
         val builder = AlertDialog.Builder(this).setView(binding.root)
         val dialog = builder.create()
+
         extracted(dialog)
 
         dialog.window!!.attributes.windowAnimations = R.style.DialogTopAnim
@@ -353,13 +352,12 @@ open class Dialog {
         dialog.show()
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     fun Activity.showDialogYesNo(
         title: String,
         msg: String,
         btnOneTitle: String = "Batal",
         btnTwoTitle: String = "",
-        action : Int = 0
+        action: Int = 0
     ) {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogYesNoBinding.inflate(inflater)
@@ -384,7 +382,7 @@ open class Dialog {
         }
 
         binding.btnTwo.setOnClickListener {
-            when(action) {
+            when (action) {
                 0 -> {
                     val i = Intent(this, BoardActivity::class.java)
                     startActivity(i)
@@ -398,7 +396,6 @@ open class Dialog {
         dialog.show()
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     fun showDialog(context: Context, msg: String, title: String = "Information") {
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
@@ -411,7 +408,6 @@ open class Dialog {
         dialog.show()
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun extracted(dialog: AlertDialog) {
         val window = dialog.window
 
@@ -420,13 +416,15 @@ open class Dialog {
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                    || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                ) {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                }
+                view.onApplyWindowInsets(windowInsets)
             }
-            view.onApplyWindowInsets(windowInsets)
         }
     }
 

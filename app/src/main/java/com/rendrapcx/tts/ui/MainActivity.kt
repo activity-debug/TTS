@@ -97,7 +97,6 @@ class MainActivity : AppCompatActivity() {
     var qrListQuestion = mutableListOf<Data.Question>()
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
@@ -324,7 +323,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                @RequiresApi(Build.VERSION_CODES.R)
                 override fun onCancelled(databaseError: DatabaseError) {
                     Dialog().apply {
                         showDialogYesNo("Error", databaseError.message, "OK")
@@ -334,7 +332,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveOnlineData() {
         lifecycleScope.launch {
             val id = qrListLevel[0].id
@@ -386,7 +383,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun onlineMenu() {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogMenuOnlineBinding.inflate(inflater)
@@ -477,7 +473,11 @@ class MainActivity : AppCompatActivity() {
                     refQuestion.addValueEventListener(object : ValueEventListener {
                         override fun onDataChange(dataSnapshot: DataSnapshot) {
                             val value = dataSnapshot.getValue<String>().toString()
-                            val data = String(Base64.getDecoder().decode(value))
+                            val data = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                String(Base64.getDecoder().decode(value))
+                            } else {
+                                android.util.Base64.decode(value, android.util.Base64.DEFAULT).toString()
+                            }
                             qrShare.clear()
                             qrShare = Json.decodeFromString<MutableList<Data.QRShare>>(data)
                             qrListLevel = qrShare[0].level
@@ -539,7 +539,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun playMenuTTSDialog() {
         val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogMenuPlayBinding.inflate(inflater)
@@ -640,7 +639,6 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun extracted(dialog: AlertDialog) {
         val window = dialog.window
 
@@ -648,14 +646,15 @@ class MainActivity : AppCompatActivity() {
             WindowCompat.getInsetsController(window!!, window.decorView)
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                    || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                ) {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                }
+                view.onApplyWindowInsets(windowInsets)
             }
-            view.onApplyWindowInsets(windowInsets)
         }
     }
 

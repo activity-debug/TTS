@@ -5,7 +5,6 @@ import android.content.Context
 import android.icu.text.DecimalFormat
 import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -33,27 +32,39 @@ class Helper {
     }
 
     fun generateQuestionId(currentLevelId: String, number: Int, subDir: String): String {
-        return currentLevelId + "-" + subDir + "-" + formatQuestionId(number+1)
+        return currentLevelId + "-" + subDir + "-" + formatQuestionId(number + 1)
     }
 
     fun formatLevelId(amount: Int): String {
-        val numberFormat = DecimalFormat("00000")
-        return numberFormat.format(amount)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val numberFormat = DecimalFormat("00000")
+            numberFormat.format(amount)
+        } else {
+            amount.toString()
+        }
     }
 
     fun formatQuestionId(amount: Int): String {
-        val numberFormat = DecimalFormat("00")
-        return numberFormat.format(amount)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val numberFormat = DecimalFormat("00")
+            numberFormat.format(amount)
+        } else {
+            amount.toString()
+        }
     }
 
     fun formatTigaDigit(amount: Int): String {
-        val numberFormat = DecimalFormat("000")
-        return numberFormat.format(amount)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val numberFormat = DecimalFormat("000")
+            numberFormat.format(amount)
+        } else {
+            amount.toString()
+        }
     }
 
     fun abjadKapital(): List<String> {
         var c: Char = 'A'
-        var abjad = arrayListOf<String>()
+        val abjad = arrayListOf<String>()
         while (c <= 'Z') {
             abjad.add(c.toString())
             c++
@@ -61,20 +72,20 @@ class Helper {
         return abjad
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     fun Activity.hideSystemUI() {
         val windowInsetsController =
             WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                    || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                ) {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                }
+                view.onApplyWindowInsets(windowInsets)
             }
-            view.onApplyWindowInsets(windowInsets)
         }
     }
 
