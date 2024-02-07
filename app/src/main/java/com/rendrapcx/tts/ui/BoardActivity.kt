@@ -157,7 +157,8 @@ class BoardActivity : AppCompatActivity() {
                     box[position].text = ""
                     if (boardSet == BoardSet.PLAY_KATEGORI) {
                         upsertUserSlot(position, box[position].text.toString())
-                    } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                    }
+                    if (boardSet == BoardSet.PLAY_RANDOM) {
                         upsertUserRandom(position, box[position].text.toString())
                     }
                 }
@@ -195,8 +196,9 @@ class BoardActivity : AppCompatActivity() {
                             if (!arrPayed.contains(position)) {
                                 if (boardSet == BoardSet.PLAY_KATEGORI) {
                                     upsertUserSlot(position, intKey[i].text.toString())
-                                } else if (boardSet == BoardSet.PLAY_RANDOM) {
-                                    upsertUserRandom(position, box[position].text.toString())
+                                }
+                                if (boardSet == BoardSet.PLAY_RANDOM) {
+                                    upsertUserRandom(position, intKey[i].text.toString())
                                 }
                                 box[position].text = intKey[i].text
                             }
@@ -597,7 +599,8 @@ class BoardActivity : AppCompatActivity() {
                 box[i].text = box[i].tag.toString()
                 if (boardSet == BoardSet.PLAY_KATEGORI) {
                     upsertUserSlot(i, box[i].tag.toString(), i)
-                } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                }
+                if (boardSet == BoardSet.PLAY_RANDOM) {
                     upsertUserRandom(i, box[i].tag.toString(), i)
                 }
                 arrPayed.add(i)
@@ -848,7 +851,8 @@ class BoardActivity : AppCompatActivity() {
                                 box[x].text = box[x].tag.toString()
                                 if (boardSet == BoardSet.PLAY_KATEGORI) {
                                     upsertUserSlot(x, box[x].tag.toString(), x)
-                                } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                                }
+                                if (boardSet == BoardSet.PLAY_RANDOM) {
                                     upsertUserRandom(x, box[x].tag.toString(), x)
                                 }
                                 arrPayed.add(x)
@@ -868,7 +872,8 @@ class BoardActivity : AppCompatActivity() {
                                 box[x].text = box[x].tag.toString()
                                 if (boardSet == BoardSet.PLAY_KATEGORI) {
                                     upsertUserSlot(x, box[x].tag.toString(), x)
-                                } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                                }
+                                if (boardSet == BoardSet.PLAY_RANDOM) {
                                     upsertUserRandom(x, box[x].tag.toString(), x)
                                 }
 
@@ -949,7 +954,8 @@ class BoardActivity : AppCompatActivity() {
                     box[x].text = box[x].tag.toString()
                     if (boardSet == BoardSet.PLAY_KATEGORI) {
                         upsertUserSlot(x, box[x].tag.toString(), x)
-                    } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                    }
+                    if (boardSet == BoardSet.PLAY_RANDOM) {
                         upsertUserRandom(x, box[x].tag.toString(), x)
                     }
                     arrPayed.add(x)
@@ -1179,7 +1185,8 @@ class BoardActivity : AppCompatActivity() {
                     box[x].text = s.toString()
                     if (boardSet == BoardSet.PLAY_KATEGORI) {
                         upsertUserSlot(x, s.toString())
-                    } else if (boardSet == BoardSet.PLAY_RANDOM) {
+                    }
+                    if (boardSet == BoardSet.PLAY_RANDOM) {
                         upsertUserRandom(x, s.toString())
                     }
                 }
