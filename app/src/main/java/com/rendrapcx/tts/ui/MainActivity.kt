@@ -12,6 +12,7 @@ import android.text.TextWatcher
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -166,6 +167,11 @@ class MainActivity : AppCompatActivity() {
             loadOnlineList()
             loadKoin()
             loadLastAcak()
+
+//            if (job1.isCompleted) {
+//                Toast.makeText(this@MainActivity, "PAKE IF $lastAcak", Toast.LENGTH_SHORT).show()
+//            }
+//            Toast.makeText(this@MainActivity, "NO IF $lastAcak", Toast.LENGTH_SHORT).show()
         }
 
         binding.apply {
