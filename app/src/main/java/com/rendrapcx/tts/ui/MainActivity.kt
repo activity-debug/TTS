@@ -465,7 +465,7 @@ class MainActivity : AppCompatActivity() {
             adapter.setOnClickDownload {
                 binding.loading.root.visibility = View.VISIBLE
                 binding.loading.tvLoadingInfo.text = "Downloading..."
-                lifecycleScope.launch(Dispatchers.IO) {
+                lifecycleScope.launch {
                     val database = Firebase.database(dbApp)
                     val refQuestion = database.getReference(dbRefQuestions)
                         .child(it.id.toString()).child("encodeString")

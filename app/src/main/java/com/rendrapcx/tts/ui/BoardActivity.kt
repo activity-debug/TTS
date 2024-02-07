@@ -111,7 +111,6 @@ class BoardActivity : AppCompatActivity() {
     private lateinit var mAdView: AdView
 
     @SuppressLint("ClickableViewAccessibility")
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBoardBinding.inflate(layoutInflater)
@@ -1133,7 +1132,6 @@ class BoardActivity : AppCompatActivity() {
         binding.includeQuestionSpan.tvSpanQuestion.text = selectedQuestion
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveAndApply() {
         lifecycleScope.launch {
             val levelId = currentLevel
@@ -1174,7 +1172,6 @@ class BoardActivity : AppCompatActivity() {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (!isEnableClick) return false
         val x = position
@@ -1259,7 +1256,6 @@ class BoardActivity : AppCompatActivity() {
     }
 
     /* CHECK WIN*/
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun checkWinCondition(color: Boolean = true) {
         if (boardSet == BoardSet.EDITOR_EDIT || boardSet == BoardSet.EDITOR_NEW) return
         var pass = true
@@ -1318,7 +1314,6 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun winDialog(
         context: Context,
     ) {
@@ -1583,7 +1578,6 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun extracted(dialog: AlertDialog) {
         val window = dialog.window
 
@@ -1592,13 +1586,15 @@ class BoardActivity : AppCompatActivity() {
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                    || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                ) {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                }
+                view.onApplyWindowInsets(windowInsets)
             }
-            view.onApplyWindowInsets(windowInsets)
         }
     }
 
@@ -1972,7 +1968,6 @@ class BoardActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun inputDataQuestioner(
         position: Int,
         rowCount: Int,

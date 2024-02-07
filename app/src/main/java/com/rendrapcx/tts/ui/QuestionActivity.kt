@@ -74,7 +74,6 @@ class QuestionActivity : AppCompatActivity() {
     private var qrShare = mutableListOf<Data.QRShare>()
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuestionBinding.inflate(layoutInflater)
@@ -177,7 +176,6 @@ class QuestionActivity : AppCompatActivity() {
 
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun shareQRDialog(context: Context, content: String) {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val binding = DialogShareQrcodeBinding.inflate(inflater)
@@ -233,7 +231,6 @@ class QuestionActivity : AppCompatActivity() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun saveAndShareQRCode(content: String) {
         val barcodeEncoder = BarcodeEncoder()
         val bitmap: Bitmap =
@@ -277,7 +274,6 @@ class QuestionActivity : AppCompatActivity() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun extracted(dialog: AlertDialog) {
         val window = dialog.window
 
@@ -286,13 +282,15 @@ class QuestionActivity : AppCompatActivity() {
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-        window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-            if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-            ) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
+                if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                    || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                ) {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                }
+                view.onApplyWindowInsets(windowInsets)
             }
-            view.onApplyWindowInsets(windowInsets)
         }
     }
 
@@ -317,7 +315,6 @@ class QuestionActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     private fun questionAdapterActions() {
         binding.apply {
@@ -351,7 +348,8 @@ class QuestionActivity : AppCompatActivity() {
                     val job4 = async {
                         DB.getInstance(applicationContext).userAnswerSlot().deleteSlotById(levelId)
                         DB.getInstance(applicationContext).userAnswerTTS().deleteByLevelId(levelId)
-                        DB.getInstance(applicationContext).userAnswerRandom().deleteAnswerById(levelId)
+                        DB.getInstance(applicationContext).userAnswerRandom()
+                            .deleteAnswerById(levelId)
                         if (levelId == lastAcak) {
                             lastAcak = ""
                             UserRef().setLastAcak("", applicationContext, lifecycle)
@@ -499,8 +497,10 @@ class QuestionActivity : AppCompatActivity() {
                     val builder: AlertDialog.Builder = AlertDialog.Builder(this@QuestionActivity)
                     builder
                         .setTitle("Upload Data")
-                        .setMessage("Sudah ada data dengan ID: ${lvl.id}\n\n" +
-                                "silakan batalkan dan ganti ID dulu, atau update untuk merubah data online")
+                        .setMessage(
+                            "Sudah ada data dengan ID: ${lvl.id}\n\n" +
+                                    "silakan batalkan dan ganti ID dulu, atau update untuk merubah data online"
+                        )
                         .setPositiveButton("Update?",
                             DialogInterface.OnClickListener { dialog, whichButton ->
                                 uploadData()
@@ -633,7 +633,6 @@ class QuestionActivity : AppCompatActivity() {
                     }
                 }
 
-                @RequiresApi(Build.VERSION_CODES.R)
                 override fun onCancelled(databaseError: DatabaseError) {
                     Dialog().apply {
                         showDialogYesNo("Canceled", databaseError.message, "OK")
