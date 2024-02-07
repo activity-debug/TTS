@@ -17,6 +17,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -1412,10 +1413,13 @@ class BoardActivity : AppCompatActivity() {
                 }
 
                 listLevel = DB.getInstance(applicationContext).level().getAllLevel()
-                val count = listLevel.size
-                if (acakHolder.size >= listSelesai.size) {
+
+                val count = listSelesai.size
+                if (acakHolder.size >= count) {
                     acakHolder.clear()
                 }
+
+                Toast.makeText(this@BoardActivity, "$count", Toast.LENGTH_SHORT).show()
 
                 if (lastAcak.isNotEmpty()) {
                     currentLevel = lastAcak
@@ -1446,6 +1450,7 @@ class BoardActivity : AppCompatActivity() {
                     lastAcak = currentLevel
                     UserRef().setLastAcak(currentLevel, applicationContext, lifecycle)
                 }
+                Toast.makeText(this@BoardActivity, "$count", Toast.LENGTH_SHORT).show()
             }
             jobLevel.await()
 
