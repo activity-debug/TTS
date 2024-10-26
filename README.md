@@ -1,7 +1,10 @@
 # TTS Project
 > Project Aplikasi Teka Teki Silang
 
-Project ini pengembangan dari project sebelumnya[^tbk] 
+Project ini merupakan pengembangan dari project sebelumnya[^tbk].
+
+## Rilis
+### Beta
 
 
 ---
