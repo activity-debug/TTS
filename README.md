@@ -5,4 +5,4 @@ Project ini pengembangan dari project sebelumnya[^tbk]
 
 
 ---
-[^1]: Tebak kata
+[^tbk]: Tebak kata
